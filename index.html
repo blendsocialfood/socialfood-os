@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Food</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --orange: #EA580C;
+    --orange-light: #fb923c;
+    --bg: #030303;
+    --surface: #0a0a0a;
+    --surface-2: #111111;
+    --border: rgba(255,255,255,0.06);
+    --text: #f5f5f5;
+    --text-muted: #888;
+    --text-dim: #444;
+  }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ============================================
+     INTRO SEQUENCE - CINEMATIC
+     ============================================ */
+
+  /* Black overlay */
+  .intro-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: #000;
+    animation: overlayOut 0.8s ease-in-out 2.4s forwards;
+  }
+  @keyframes overlayOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; pointer-events: none; }
+  }
+
+  /* Centered intro logo */
+  .intro-logo {
+    position: fixed; z-index: 201;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 120px; height: 120px;
+    background: linear-gradient(145deg, #151515, #0d0d0d);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 34px;
+    display: flex; align-items: center; justify-content: center;
+    animation:
+      introLogoIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.3s forwards,
+      introLogoGlow 0.8s ease-out 0.9s forwards,
+      introLogoShrink 0.8s cubic-bezier(0.4,0,0.2,1) 2.2s forwards;
+  }
+  @keyframes introLogoIn {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-20deg); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  }
+  @keyframes introLogoGlow {
+    0% { box-shadow: 0 0 0 rgba(234,88,12,0); }
+    50% { box-shadow: 0 0 150px rgba(234,88,12,0.6), 0 0 300px rgba(234,88,12,0.3), 0 0 500px rgba(234,88,12,0.1); }
+    100% { box-shadow: 0 0 80px rgba(234,88,12,0.3), 0 0 160px rgba(234,88,12,0.1); }
+  }
+  @keyframes introLogoShrink {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  }
+  .intro-logo .il-letters {
+    font-family: 'Inter', sans-serif;
+    font-size: 52px; font-weight: 900; letter-spacing: -2px; color: #fff;
+  }
+  .intro-logo .il-dot {
+    display: inline-block; width: 13px; height: 13px;
+    background: var(--orange); border-radius: 50%;
+    margin-left: 2px; margin-bottom: -1px;
+    box-shadow: 0 0 20px rgba(234,88,12,0.8);
+    vertical-align: baseline;
+    opacity: 0;
+    animation: dotFlash 0.3s ease-out 0.9s forwards;
+  }
+  @keyframes dotFlash {
+    0% { opacity: 0; transform: scale(0); }
+    60% { opacity: 1; transform: scale(1.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Shockwave ring */
+  .intro-ring {
+    position: fixed; z-index: 200;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(234,88,12,0.8);
+    opacity: 0;
+    animation: ringExpand 1s ease-out 1.0s forwards;
+  }
+  .intro-ring-2 {
+    animation: ringExpand 1.2s ease-out 1.15s forwards;
+    border-color: rgba(234,88,12,0.4);
+  }
+  .intro-ring-3 {
+    animation: ringExpand 1.4s ease-out 1.3s forwards;
+    border-color: rgba(234,88,12,0.2);
+  }
+  @keyframes ringExpand {
+    0% { width: 10px; height: 10px; opacity: 1; border-width: 3px; }
+    100% { width: 200vmax; height: 200vmax; opacity: 0; border-width: 1px; }
+  }
+
+  /* Ember particles (CSS only) */
+  .ember {
+    position: fixed; z-index: 200;
+    width: 4px; height: 4px;
+    background: var(--orange);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    opacity: 0;
+    box-shadow: 0 0 6px rgba(234,88,12,0.8), 0 0 12px rgba(234,88,12,0.4);
+  }
+  .ember:nth-child(1) { animation: ember1 1.2s ease-out 1.0s forwards; }
+  .ember:nth-child(2) { animation: ember2 1.1s ease-out 1.05s forwards; }
+  .ember:nth-child(3) { animation: ember3 1.3s ease-out 1.1s forwards; }
+  .ember:nth-child(4) { animation: ember4 1.0s ease-out 1.0s forwards; }
+  .ember:nth-child(5) { animation: ember5 1.2s ease-out 1.08s forwards; }
+  .ember:nth-child(6) { animation: ember6 1.1s ease-out 1.12s forwards; }
+  .ember:nth-child(7) { animation: ember7 1.3s ease-out 1.02s forwards; }
+  .ember:nth-child(8) { animation: ember8 1.0s ease-out 1.15s forwards; }
+  .ember:nth-child(9) { animation: ember9 1.2s ease-out 1.06s forwards; }
+  .ember:nth-child(10) { animation: ember10 1.1s ease-out 1.1s forwards; }
+  .ember:nth-child(11) { animation: ember11 1.3s ease-out 1.03s forwards; }
+  .ember:nth-child(12) { animation: ember12 1.0s ease-out 1.13s forwards; }
+
+  @keyframes ember1  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-180px,-280px) scale(0)} }
+  @keyframes ember2  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(200px,-250px) scale(0)} }
+  @keyframes ember3  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-300px,-100px) scale(0)} }
+  @keyframes ember4  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(280px,50px) scale(0)} }
+  @keyframes ember5  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-120px,300px) scale(0)} }
+  @keyframes ember6  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(150px,270px) scale(0)} }
+  @keyframes ember7  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-250px,180px) scale(0)} }
+  @keyframes ember8  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(320px,-150px) scale(0)} }
+  @keyframes ember9  { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-80px,-350px) scale(0)} }
+  @keyframes ember10 { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(100px,-320px) scale(0)} }
+  @keyframes ember11 { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-350px,-50px) scale(0)} }
+  @keyframes ember12 { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(250px,200px) scale(0)} }
+
+  /* Scan line */
+  .scan-line {
+    position: fixed; z-index: 200;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 10%, rgba(234,88,12,0.6) 50%, transparent 90%);
+    opacity: 0;
+    animation: scanDown 0.8s ease-in-out 1.5s forwards;
+    box-shadow: 0 0 20px rgba(234,88,12,0.4), 0 0 60px rgba(234,88,12,0.2);
+  }
+  @keyframes scanDown {
+    0% { top: 0; opacity: 0.8; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* Horizontal light streaks */
+  .streak {
+    position: fixed; z-index: 200;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(234,88,12,0.5), transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .streak-1 { top: 30%; left: 0; width: 100%; animation: streakFlash 0.6s ease-out 1.1s forwards; }
+  .streak-2 { top: 55%; left: 0; width: 100%; animation: streakFlash 0.6s ease-out 1.2s forwards; }
+  .streak-3 { top: 70%; left: 0; width: 100%; animation: streakFlash 0.6s ease-out 1.35s forwards; }
+  @keyframes streakFlash {
+    0% { opacity: 0.8; transform: scaleX(0); }
+    50% { opacity: 0.6; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(1); }
+  }
+
+  /* Screen shake */
+  .shake-wrapper {
+    animation: screenShake 0.4s ease-out 1.0s;
+  }
+  @keyframes screenShake {
+    0% { transform: translate(0,0); }
+    15% { transform: translate(-4px, 3px); }
+    30% { transform: translate(3px, -4px); }
+    45% { transform: translate(-3px, 2px); }
+    60% { transform: translate(2px, -2px); }
+    75% { transform: translate(-1px, 1px); }
+    100% { transform: translate(0,0); }
+  }
+
+  /* ============================================
+     MAIN PAGE
+     ============================================ */
+
+  #particles {
+    position: fixed; inset: 0; z-index: 0;
+    opacity: 0;
+    animation: fadeIn 2s ease-out 2.8s forwards;
+  }
+
+  .ambient {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    opacity: 0;
+    animation: fadeIn 1.5s ease-out 2.0s forwards;
+  }
+  .orb {
+    position: absolute; border-radius: 50%;
+    animation: drift 18s ease-in-out infinite;
+  }
+  .orb-1 {
+    width: 900px; height: 900px;
+    background: radial-gradient(circle, rgba(234,88,12,0.18) 0%, transparent 65%);
+    top: -350px; left: 50%; transform: translateX(-50%);
+    filter: blur(100px);
+  }
+  .orb-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(234,88,12,0.10) 0%, transparent 70%);
+    bottom: -180px; left: 10%;
+    filter: blur(120px);
+    animation-delay: -7s;
+  }
+  .orb-3 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(251,146,60,0.08) 0%, transparent 70%);
+    bottom: -100px; right: 5%;
+    filter: blur(110px);
+    animation-delay: -13s;
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(25px,-20px) scale(1.06); }
+    66% { transform: translate(-20px,15px) scale(0.95); }
+  }
+
+  .noise {
+    position: fixed; inset: 0; z-index: 2; opacity: 0.02; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .grid-lines {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 70%);
+    opacity: 0;
+    animation: fadeIn 2s ease-out 2.5s forwards;
+  }
+
+  /* === TOP NAV === */
+  .top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    animation: fadeDown 0.8s ease-out 3.2s forwards;
+  }
+  .blend-logo {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+  .blend-logo .bl-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--orange);
+    border-radius: 50%;
+    margin-left: 0px;
+    margin-bottom: -2px;
+    box-shadow: 0 0 8px rgba(234,88,12,0.6);
+    vertical-align: baseline;
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === LAYOUT === */
+  .page {
+    position: relative; z-index: 3;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px 24px;
+  }
+
+  /* === SF LOGO === */
+  .logo-block {
+    text-align: center;
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: logoDrop 0.7s cubic-bezier(0.16,1,0.3,1) 2.6s forwards;
+  }
+  @keyframes logoDrop {
+    0% { opacity: 0; transform: scale(1.3); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  .logo-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(145deg, #151515, #0d0d0d);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow:
+      0 0 60px rgba(234,88,12,0.2),
+      0 0 120px rgba(234,88,12,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    position: relative;
+    animation: logoPulse 4s ease-in-out 4s infinite;
+  }
+  @keyframes logoPulse {
+    0%, 100% { box-shadow: 0 0 60px rgba(234,88,12,0.2), 0 0 120px rgba(234,88,12,0.08); }
+    50% { box-shadow: 0 0 80px rgba(234,88,12,0.3), 0 0 160px rgba(234,88,12,0.12); }
+  }
+  .logo-icon::after {
+    content: '';
+    position: absolute; inset: -1px; border-radius: 24px;
+    background: linear-gradient(145deg, rgba(234,88,12,0.5), transparent 40%, transparent 60%, rgba(234,88,12,0.2));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude; -webkit-mask-composite: xor;
+    padding: 1px;
+  }
+  .logo-letters {
+    font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #fff;
+  }
+  .logo-dot {
+    display: inline-block; width: 9px; height: 9px;
+    background: var(--orange); border-radius: 50%;
+    margin-left: 1px; margin-bottom: -1px;
+    box-shadow: 0 0 20px rgba(234,88,12,0.8), 0 0 40px rgba(234,88,12,0.4);
+    vertical-align: baseline;
+  }
+
+  /* === HERO TEXT === */
+  .hero { text-align: center; margin-bottom: 32px; }
+  .brand-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 5px; text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: textBlurIn 0.7s ease-out 2.85s forwards;
+  }
+  .hero-title {
+    font-size: clamp(32px, 5.5vw, 52px);
+    font-weight: 900; letter-spacing: -2px; line-height: 1.2;
+    margin-bottom: 14px;
+    padding-bottom: 4px;
+    opacity: 0;
+    animation: titleCinematic 1s cubic-bezier(0.16,1,0.3,1) 3.0s forwards;
+  }
+  @keyframes titleCinematic {
+    0% { opacity: 0; transform: translateY(40px) scale(0.92); filter: blur(16px); }
+    60% { filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+  .hero-title .accent {
+    display: block;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 40%, #fbbf24 70%, var(--orange) 100%);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 5s ease-in-out 4s infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 300% center; }
+  }
+  .hero-sub {
+    font-size: 14px; color: var(--text-muted);
+    font-weight: 400; max-width: 380px;
+    margin: 0 auto; line-height: 1.6;
+    opacity: 0;
+    animation: textBlurIn 0.8s ease-out 3.3s forwards;
+  }
+  @keyframes textBlurIn {
+    0% { opacity: 0; transform: translateY(12px); filter: blur(8px); }
+    100% { opacity: 0.7; transform: translateY(0); filter: blur(0); }
+  }
+
+  /* === DIVIDER === */
+  .divider {
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(234,88,12,0.5), transparent);
+    margin: 0 auto 32px;
+    position: relative;
+    transform: scaleX(0);
+    opacity: 0;
+    animation: dividerExpand 0.6s ease-out 3.5s forwards;
+  }
+  @keyframes dividerExpand {
+    0% { opacity: 0; transform: scaleX(0); }
+    100% { opacity: 1; transform: scaleX(1); }
+  }
+  .divider::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 8px;
+    background: var(--orange);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(234,88,12,0.6);
+    opacity: 0.6;
+  }
+
+  /* === SELECTOR CARDS === */
+  .selector {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; max-width: 680px; width: 100%;
+  }
+  @media (max-width: 600px) {
+    .selector { grid-template-columns: 1fr; max-width: 380px; }
+  }
+  .selector .sel-card:nth-child(1) {
+    opacity: 0;
+    animation: cardSlam 0.8s cubic-bezier(0.16,1,0.3,1) 3.6s forwards;
+  }
+  .selector .sel-card:nth-child(2) {
+    opacity: 0;
+    animation: cardSlamDisabled 0.8s cubic-bezier(0.16,1,0.3,1) 3.75s forwards;
+  }
+  @keyframes cardSlam {
+    0% { opacity: 0; transform: translateY(80px) scale(0.85) rotateX(15deg); filter: blur(10px); }
+    60% { transform: translateY(-5px) scale(1.02) rotateX(0deg); filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); filter: blur(0); }
+  }
+  @keyframes cardSlamDisabled {
+    0% { opacity: 0; transform: translateY(80px) scale(0.85) rotateX(15deg); filter: blur(10px); }
+    60% { transform: translateY(-5px) scale(1.02) rotateX(0deg); filter: blur(0); }
+    100% { opacity: 0.3; transform: translateY(0) scale(1) rotateX(0deg); filter: blur(0); }
+  }
+
+  .sel-card {
+    position: relative;
+    background: linear-gradient(170deg, rgba(18,18,18,0.95), rgba(8,8,8,0.95));
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 24px;
+    padding: 40px 36px 36px;
+    text-align: center; cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.2,0,0,1);
+    overflow: hidden; text-decoration: none;
+    color: inherit; display: flex;
+    flex-direction: column; align-items: center;
+    backdrop-filter: blur(20px);
+  }
+  .sel-card::after {
+    content: '';
+    position: absolute; inset: -1px; border-radius: 28px;
+    opacity: 0; transition: opacity 0.5s ease;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude; -webkit-mask-composite: xor;
+    padding: 1px;
+  }
+  .sel-card::before {
+    content: '';
+    position: absolute; inset: 0; border-radius: 28px;
+    opacity: 0; transition: opacity 0.5s ease;
+  }
+
+  /* Admin */
+  .sel-admin {
+    border-color: rgba(234,88,12,0.1);
+    box-shadow: 0 0 40px rgba(234,88,12,0.04);
+  }
+  .sel-admin::before {
+    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.12) 0%, transparent 55%);
+    opacity: 0.5;
+  }
+  .sel-admin::after {
+    background: linear-gradient(170deg, rgba(234,88,12,0.6), transparent 35%, transparent 65%, rgba(234,88,12,0.3));
+    opacity: 0.3;
+  }
+  .sel-admin .sel-icon {
+    border-color: rgba(234,88,12,0.15);
+    background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(234,88,12,0.02));
+    box-shadow: 0 0 20px rgba(234,88,12,0.08);
+  }
+  .sel-admin .sel-icon svg { stroke: rgba(234,88,12,0.6); }
+  .sel-admin:hover {
+    transform: translateY(-12px) scale(1.03);
+    border-color: rgba(234,88,12,0.6);
+    background: linear-gradient(170deg, rgba(30,18,12,0.95), rgba(15,8,4,0.95));
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.7),
+      0 0 100px rgba(234,88,12,0.2),
+      0 0 200px rgba(234,88,12,0.1),
+      inset 0 0 60px rgba(234,88,12,0.03);
+  }
+  .sel-admin:hover::before { opacity: 1; }
+  .sel-admin:hover::after { opacity: 1; }
+  .sel-admin:hover .sel-icon {
+    border-color: rgba(234,88,12,0.6);
+    box-shadow: 0 0 50px rgba(234,88,12,0.35), 0 0 100px rgba(234,88,12,0.15);
+    background: linear-gradient(135deg, rgba(234,88,12,0.2), rgba(234,88,12,0.08));
+    transform: scale(1.1);
+  }
+  .sel-admin:hover .sel-icon svg { stroke: var(--orange-light); filter: drop-shadow(0 0 6px rgba(234,88,12,0.5)); }
+  .sel-admin:hover .sel-title { color: #fff; text-shadow: 0 0 20px rgba(234,88,12,0.3); }
+  .sel-admin:hover .sel-desc { color: var(--text-muted); }
+  .sel-admin:hover .sel-enter {
+    opacity: 1; transform: translateY(0);
+    border-color: rgba(234,88,12,0.4);
+    color: var(--orange-light);
+    background: rgba(234,88,12,0.1);
+    box-shadow: 0 0 20px rgba(234,88,12,0.1);
+  }
+
+  /* Client */
+  .sel-client.disabled {
+    cursor: default;
+    opacity: 0.3;
+    pointer-events: auto;
+  }
+  .sel-client.disabled:hover {
+    opacity: 0.5;
+    transform: translateY(-6px);
+    border-color: rgba(255,255,255,0.15);
+    background: linear-gradient(170deg, rgba(22,22,22,0.95), rgba(12,12,12,0.95));
+    box-shadow:
+      0 30px 80px rgba(0,0,0,0.5),
+      0 0 60px rgba(255,255,255,0.03);
+  }
+  .sel-client.disabled:hover .sel-icon {
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 0 30px rgba(255,255,255,0.06);
+    transform: scale(1.05);
+  }
+  .sel-client.disabled:hover .sel-icon svg { stroke: rgba(255,255,255,0.4); }
+  .sel-client.disabled:hover .sel-title { color: rgba(255,255,255,0.6); }
+
+  .sel-icon {
+    width: 68px; height: 68px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    background: rgba(255,255,255,0.02);
+    transition: all 0.5s cubic-bezier(0.2,0,0,1);
+  }
+  .sel-icon svg {
+    width: 30px; height: 30px;
+    stroke: var(--text-dim); stroke-width: 1.5;
+    fill: none; transition: all 0.4s ease;
+  }
+  .sel-title {
+    font-size: 22px; font-weight: 800;
+    margin-bottom: 10px; color: var(--text-muted);
+    transition: color 0.4s ease; letter-spacing: -0.5px;
+  }
+  .sel-desc {
+    font-size: 12px; color: var(--text-dim);
+    line-height: 1.6; margin-bottom: 22px;
+  }
+  .sel-enter {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: var(--text-dim);
+    opacity: 0; transform: translateY(8px);
+    transition: all 0.4s ease;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .sel-enter svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; stroke-width: 2; fill: none;
+  }
+  .sel-badge {
+    position: absolute; top: 20px; right: 20px;
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 4px 12px; border-radius: 8px;
+  }
+  .badge-active {
+    background: rgba(34,197,94,0.08);
+    color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.15);
+  }
+  .badge-active::before {
+    content: '';
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: #22c55e; border-radius: 50%;
+    margin-right: 6px;
+    box-shadow: 0 0 6px rgba(34,197,94,0.5);
+    animation: pulse 2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .badge-soon {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* === FOOTER === */
+  .foot {
+    position: absolute; bottom: 20px; left: 0; right: 0;
+    text-align: center;
+    font-size: 10px; color: rgba(255,255,255,0.1);
+    letter-spacing: 2.5px; text-transform: uppercase;
+    opacity: 0;
+    animation: fadeIn 1s ease-out 3.8s forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== INTRO SEQUENCE ===== -->
+<div class="intro-overlay"></div>
+<div class="intro-logo">
+  <span class="il-letters">SF<span class="il-dot"></span></span>
+</div>
+<div class="intro-ring"></div>
+<div class="intro-ring intro-ring-2"></div>
+<div class="intro-ring intro-ring-3"></div>
+<div class="ember"></div><div class="ember"></div><div class="ember"></div>
+<div class="ember"></div><div class="ember"></div><div class="ember"></div>
+<div class="ember"></div><div class="ember"></div><div class="ember"></div>
+<div class="ember"></div><div class="ember"></div><div class="ember"></div>
+<div class="streak streak-1"></div>
+<div class="streak streak-2"></div>
+<div class="streak streak-3"></div>
+<div class="scan-line"></div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="shake-wrapper">
+
+<canvas id="particles"></canvas>
+
+<div class="ambient">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="noise"></div>
+<div class="grid-lines"></div>
+
+<div class="top-nav">
+  <span class="blend-logo">Blend<span class="bl-dot"></span></span>
+</div>
+
+<div class="page">
+
+  <div class="logo-block">
+    <div class="logo-icon">
+      <span class="logo-letters">SF<span class="logo-dot"></span></span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="brand-label">Social Food</div>
+    <h1 class="hero-title">
+      El cerebro de tu<br><span class="accent">operación gastronómica</span>
+    </h1>
+    <p class="hero-sub">Todo tu marketing en un solo lugar.<br>Contenido, ads y datos conectados.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="selector">
+    <div class="sel-card sel-client disabled">
+      <span class="sel-badge badge-soon">Pronto</span>
+      <div class="sel-icon">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="sel-title">Cliente</div>
+      <div class="sel-desc">Revisa tu grilla, resultados<br>y avances del mes</div>
+      <div class="sel-enter">
+        Pronto
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </div>
+
+    <a href="/admin" class="sel-card sel-admin">
+      <span class="sel-badge badge-active">Activo</span>
+      <div class="sel-icon">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+      </div>
+      <div class="sel-title">Administrador</div>
+      <div class="sel-desc">Gestiona contenido, ads<br>y operaciones del equipo</div>
+      <div class="sel-enter">
+        Entrar
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+</div><!-- /shake-wrapper -->
+
+<div class="foot">Blend Social Food &mdash; 2026</div>
+
+<script>
+// Particle system
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+const PARTICLE_COUNT = 60;
+const CONNECTION_DIST = 150;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = (Math.random() - 0.5) * 0.4;
+    this.size = Math.random() * 1.5 + 0.5;
+    this.opacity = Math.random() * 0.3 + 0.05;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0) this.x = canvas.width;
+    if (this.x > canvas.width) this.x = 0;
+    if (this.y < 0) this.y = canvas.height;
+    if (this.y > canvas.height) this.y = 0;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(234, 88, 12, ${this.opacity})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push(new Particle());
+}
+
+function drawConnections() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < CONNECTION_DIST) {
+        const opacity = (1 - dist / CONNECTION_DIST) * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(234, 88, 12, ${opacity})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawConnections();
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Clean up intro elements after animation
+setTimeout(() => {
+  document.querySelectorAll('.intro-overlay, .intro-logo, .intro-ring, .ember, .streak, .scan-line').forEach(el => el.remove());
+}, 4000);
+</script>
+
+</body>
+</html>
