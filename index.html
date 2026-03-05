@@ -474,58 +474,59 @@
     opacity: 0; transition: opacity 0.5s ease;
   }
 
-  /* Admin */
+  /* Admin — estado base */
   .sel-admin {
-    border-color: rgba(234,88,12,0.2);
-    box-shadow: 0 0 40px rgba(234,88,12,0.06);
+    border-color: rgba(234,88,12,0.35);
+    box-shadow: 0 0 50px rgba(234,88,12,0.12), 0 0 100px rgba(234,88,12,0.05);
   }
   .sel-admin::before {
-    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.15) 0%, transparent 55%);
-    opacity: 0.6;
+    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.25) 0%, transparent 55%);
+    opacity: 1;
   }
   .sel-admin::after {
-    background: linear-gradient(170deg, rgba(234,88,12,0.8), transparent 35%, transparent 65%, rgba(234,88,12,0.5));
-    opacity: 0.5;
+    background: linear-gradient(170deg, rgba(234,88,12,0.9), transparent 35%, transparent 65%, rgba(234,88,12,0.6));
+    opacity: 0.7;
   }
   .sel-admin .sel-icon {
-    border-color: rgba(234,88,12,0.25);
-    background: linear-gradient(135deg, rgba(234,88,12,0.1), rgba(234,88,12,0.03));
-    box-shadow: 0 0 20px rgba(234,88,12,0.1);
+    border-color: rgba(234,88,12,0.4);
+    background: linear-gradient(135deg, rgba(234,88,12,0.15), rgba(234,88,12,0.05));
+    box-shadow: 0 0 25px rgba(234,88,12,0.15);
   }
-  .sel-admin .sel-icon svg { stroke: rgba(234,88,12,0.7); }
-  .sel-admin .sel-title { color: #ddd; }
-  .sel-admin .sel-desc { color: #777; }
+  .sel-admin .sel-icon svg { stroke: #EA580C; }
+  .sel-admin .sel-title { color: #f0f0f0; }
+  .sel-admin .sel-desc { color: #999; }
+  /* Admin — hover */
   .sel-admin:hover {
     transform: translateY(-12px) scale(1.03);
     border-color: #EA580C;
-    background: linear-gradient(170deg, rgba(60,28,8,0.98), rgba(30,14,4,0.98));
+    background: linear-gradient(170deg, rgba(80,35,10,0.98), rgba(40,18,5,0.98));
     box-shadow:
       0 40px 100px rgba(0,0,0,0.7),
-      0 0 60px rgba(234,88,12,0.6),
-      0 0 120px rgba(234,88,12,0.4),
-      0 0 250px rgba(234,88,12,0.2),
-      inset 0 0 100px rgba(234,88,12,0.1);
+      0 0 80px rgba(234,88,12,0.7),
+      0 0 160px rgba(234,88,12,0.5),
+      0 0 300px rgba(234,88,12,0.25),
+      inset 0 0 120px rgba(234,88,12,0.15);
   }
   .sel-admin:hover::before {
-    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.35) 0%, transparent 55%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.5) 0%, transparent 55%);
     opacity: 1;
   }
   .sel-admin:hover::after { opacity: 1; }
   .sel-admin:hover .sel-icon {
-    border-color: #EA580C;
-    box-shadow: 0 0 40px rgba(234,88,12,0.7), 0 0 80px rgba(234,88,12,0.3);
-    background: linear-gradient(135deg, rgba(234,88,12,0.4), rgba(234,88,12,0.15));
+    border-color: #fb923c;
+    box-shadow: 0 0 50px rgba(234,88,12,0.8), 0 0 100px rgba(234,88,12,0.4);
+    background: linear-gradient(135deg, rgba(234,88,12,0.5), rgba(234,88,12,0.2));
     transform: scale(1.1);
   }
-  .sel-admin:hover .sel-icon svg { stroke: #fb923c; filter: drop-shadow(0 0 8px rgba(234,88,12,0.8)); }
-  .sel-admin:hover .sel-title { color: #fff; text-shadow: 0 0 30px rgba(234,88,12,0.5); }
-  .sel-admin:hover .sel-desc { color: #ccc; }
+  .sel-admin:hover .sel-icon svg { stroke: #fbbf24; filter: drop-shadow(0 0 10px rgba(234,88,12,1)); }
+  .sel-admin:hover .sel-title { color: #fff; text-shadow: 0 0 40px rgba(234,88,12,0.6); }
+  .sel-admin:hover .sel-desc { color: #eee; }
   .sel-admin:hover .sel-enter {
     opacity: 1; transform: translateY(0);
-    border-color: #EA580C;
-    color: #fb923c;
-    background: rgba(234,88,12,0.2);
-    box-shadow: 0 0 30px rgba(234,88,12,0.2);
+    border-color: #fb923c;
+    color: #fbbf24;
+    background: rgba(234,88,12,0.3);
+    box-shadow: 0 0 40px rgba(234,88,12,0.3);
   }
 
   /* Client */
