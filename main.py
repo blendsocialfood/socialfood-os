@@ -7,11 +7,11 @@ app.secret_key = os.environ.get('SECRET_KEY', 'sf-os-secret-2026')
 AUTH_SECRET = 'blendsf-auth-2026'
 
 USERS = {
-    'nico':  {'password': 'losblend2025', 'role': 'admin',   'name': 'Nicolás'},
-    'cris':  {'password': 'losblend2025', 'role': 'admin',   'name': 'Cristóbal'},
-    'paula': {'password': 'losblend2025', 'role': 'unity',   'name': 'Paula'},
-    'juan':  {'password': 'losblend2025', 'role': 'unity',   'name': 'Juan'},
-    'seba':  {'password': 'losblend2025', 'role': 'copilot', 'name': 'Sebastián'},
+    'nico':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Nicolás'},
+    'cris':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Cristóbal'},
+    'paula': {'password': 'Pauliña123',   'role': 'unity',   'name': 'Paula'},
+    'juan':  {'password': 'Juanitomachine123', 'role': 'unity', 'name': 'Juan'},
+    'seba':  {'password': 'Sebads123',    'role': 'copilot', 'name': 'Sebastián'},
 }
 
 def generate_token(username, role):
