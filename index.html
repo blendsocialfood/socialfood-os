@@ -474,63 +474,57 @@
     opacity: 0; transition: opacity 0.5s ease;
   }
 
-  /* Admin — estado base: visible sin hover */
+  /* Admin — estado base: sutil, se distingue del gris */
   .sel-admin {
-    border-color: rgba(234,88,12,0.5);
-    box-shadow: 0 0 60px rgba(234,88,12,0.2), 0 0 120px rgba(234,88,12,0.08);
-    background: linear-gradient(170deg, rgba(40,20,8,0.95), rgba(15,8,3,0.95));
+    border-color: rgba(234,88,12,0.15);
+    background: linear-gradient(170deg, rgba(25,14,6,0.95), rgba(12,8,4,0.95));
   }
   .sel-admin::before {
-    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.3) 0%, transparent 60%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.08) 0%, transparent 60%);
     opacity: 1;
   }
   .sel-admin::after {
-    background: linear-gradient(170deg, rgba(234,88,12,1), transparent 40%, transparent 60%, rgba(234,88,12,0.7));
-    opacity: 0.6;
+    background: linear-gradient(170deg, rgba(234,88,12,0.4), transparent 40%, transparent 60%, rgba(234,88,12,0.2));
+    opacity: 0.3;
   }
   .sel-admin .sel-icon {
-    border-color: rgba(234,88,12,0.5);
-    background: linear-gradient(135deg, rgba(234,88,12,0.2), rgba(234,88,12,0.06));
-    box-shadow: 0 0 30px rgba(234,88,12,0.2);
+    border-color: rgba(234,88,12,0.2);
+    background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(234,88,12,0.02));
   }
   .sel-admin .sel-icon svg { stroke: #fb923c; }
   .sel-admin .sel-title { color: #fff; }
   .sel-admin .sel-desc { color: #aaa; }
-  /* Admin — hover: naranjo al nivel de "operación gastronómica" */
+  /* Admin — hover */
   .sel-admin:hover {
-    transform: translateY(-12px) scale(1.03);
-    border-color: #fb923c;
-    background: linear-gradient(170deg, rgba(100,45,12,0.98), rgba(50,22,6,0.98));
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(234,88,12,0.4);
+    background: linear-gradient(170deg, rgba(40,20,8,0.95), rgba(20,10,4,0.95));
     box-shadow:
-      0 40px 100px rgba(0,0,0,0.7),
-      0 0 80px rgba(251,146,60,0.6),
-      0 0 180px rgba(234,88,12,0.5),
-      0 0 350px rgba(234,88,12,0.2),
-      inset 0 0 150px rgba(234,88,12,0.2);
+      0 30px 80px rgba(0,0,0,0.5),
+      0 0 40px rgba(234,88,12,0.15);
   }
   .sel-admin:hover::before {
-    background: radial-gradient(ellipse at 50% 0%, rgba(251,146,60,0.5) 0%, transparent 60%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(234,88,12,0.15) 0%, transparent 60%);
     opacity: 1;
   }
   .sel-admin:hover::after {
-    background: linear-gradient(170deg, #fb923c, transparent 40%, transparent 60%, #EA580C);
-    opacity: 0.8;
+    background: linear-gradient(170deg, rgba(234,88,12,0.6), transparent 40%, transparent 60%, rgba(234,88,12,0.3));
+    opacity: 0.5;
   }
   .sel-admin:hover .sel-icon {
-    border-color: #fbbf24;
-    box-shadow: 0 0 60px rgba(251,146,60,0.8), 0 0 120px rgba(234,88,12,0.4);
-    background: linear-gradient(135deg, rgba(251,146,60,0.4), rgba(234,88,12,0.15));
-    transform: scale(1.1);
+    border-color: rgba(251,146,60,0.4);
+    box-shadow: 0 0 20px rgba(234,88,12,0.2);
+    background: linear-gradient(135deg, rgba(234,88,12,0.15), rgba(234,88,12,0.05));
+    transform: scale(1.05);
   }
-  .sel-admin:hover .sel-icon svg { stroke: #fbbf24; filter: drop-shadow(0 0 12px #EA580C); }
-  .sel-admin:hover .sel-title { color: #fff; text-shadow: 0 0 50px rgba(251,146,60,0.7); }
-  .sel-admin:hover .sel-desc { color: #f5f5f5; }
+  .sel-admin:hover .sel-icon svg { stroke: #fbbf24; }
+  .sel-admin:hover .sel-title { color: #fff; }
+  .sel-admin:hover .sel-desc { color: #ccc; }
   .sel-admin:hover .sel-enter {
     opacity: 1; transform: translateY(0);
-    border-color: #fb923c;
-    color: #fbbf24;
-    background: rgba(251,146,60,0.25);
-    box-shadow: 0 0 50px rgba(251,146,60,0.3);
+    border-color: rgba(234,88,12,0.3);
+    color: #fb923c;
+    background: rgba(234,88,12,0.1);
   }
 
   /* Client */
