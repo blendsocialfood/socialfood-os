@@ -12,7 +12,185 @@ body{
   font-family:'Inter',-apple-system,sans-serif;
   background:#030303;color:#f5f5f5;
   overflow-x:hidden;cursor:none;
+  overflow-y:hidden;
 }
+body.intro-done{overflow-y:auto;}
+
+/* ============================================
+   INTRO SEQUENCE — CINEMATIC CLIENT
+   ============================================ */
+
+/* Black overlay */
+.intro-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:#000;
+  transition:opacity 0.8s ease-in-out;
+}
+.intro-overlay.out{opacity:0;pointer-events:none;}
+
+/* Centered avatar */
+.intro-avatar{
+  position:fixed;z-index:202;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%) scale(0);
+  width:110px;height:110px;
+  border-radius:50%;
+  border:2px solid rgba(234,88,12,0.4);
+  background:#111 center/cover no-repeat;
+  opacity:0;
+  animation:introAvatarIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.4s forwards;
+  box-shadow:0 0 0 rgba(234,88,12,0);
+}
+@keyframes introAvatarIn{
+  0%{transform:translate(-50%,-60%) scale(0) rotate(-15deg);opacity:0;}
+  100%{transform:translate(-50%,-60%) scale(1) rotate(0deg);opacity:1;}
+}
+
+/* Glow pulse on avatar */
+.intro-avatar.glow{
+  animation:introAvatarGlow 0.8s ease-out forwards;
+}
+@keyframes introAvatarGlow{
+  0%{box-shadow:0 0 0 rgba(234,88,12,0);border-color:rgba(234,88,12,0.4);}
+  50%{box-shadow:0 0 100px rgba(234,88,12,0.5), 0 0 200px rgba(234,88,12,0.2);border-color:rgba(234,88,12,0.8);}
+  100%{box-shadow:0 0 60px rgba(234,88,12,0.3), 0 0 120px rgba(234,88,12,0.1);border-color:rgba(234,88,12,0.6);}
+}
+
+/* Client name — big centered */
+.intro-name{
+  position:fixed;z-index:201;
+  top:50%;left:50%;
+  transform:translate(-50%, 30px);
+  font-size:clamp(36px,8vw,72px);font-weight:900;
+  letter-spacing:-3px;color:#fff;
+  text-align:center;white-space:nowrap;
+  opacity:0;filter:blur(20px);
+  animation:introNameIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s forwards;
+}
+@keyframes introNameIn{
+  0%{opacity:0;filter:blur(20px);transform:translate(-50%, 30px) scale(0.85);}
+  100%{opacity:1;filter:blur(0);transform:translate(-50%, 30px) scale(1);}
+}
+
+/* Subtitle */
+.intro-sub{
+  position:fixed;z-index:201;
+  top:50%;left:50%;
+  transform:translate(-50%, 90px);
+  font-size:12px;font-weight:600;
+  letter-spacing:4px;text-transform:uppercase;
+  color:#EA580C;text-align:center;
+  opacity:0;
+  animation:introSubIn 0.6s ease-out 1.4s forwards;
+}
+@keyframes introSubIn{
+  0%{opacity:0;transform:translate(-50%, 100px);}
+  100%{opacity:0.8;transform:translate(-50%, 90px);}
+}
+
+/* "by Blend." small text */
+.intro-by{
+  position:fixed;z-index:201;
+  top:50%;left:50%;
+  transform:translate(-50%, 120px);
+  font-size:11px;font-weight:500;color:rgba(255,255,255,0.3);
+  text-align:center;opacity:0;
+  animation:introSubIn 0.5s ease-out 1.7s forwards;
+}
+
+/* Shockwave rings */
+.intro-ring{
+  position:fixed;z-index:200;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:10px;height:10px;
+  border-radius:50%;
+  border:2px solid rgba(234,88,12,0.8);
+  opacity:0;pointer-events:none;
+}
+.intro-ring-1{animation:introRing 1s ease-out 2.0s forwards;}
+.intro-ring-2{animation:introRing 1.2s ease-out 2.1s forwards;border-color:rgba(234,88,12,0.4);}
+.intro-ring-3{animation:introRing 1.4s ease-out 2.2s forwards;border-color:rgba(234,88,12,0.2);}
+@keyframes introRing{
+  0%{width:10px;height:10px;opacity:1;border-width:3px;}
+  100%{width:200vmax;height:200vmax;opacity:0;border-width:1px;}
+}
+
+/* Ember particles */
+.intro-ember{
+  position:fixed;z-index:201;
+  width:4px;height:4px;
+  background:#EA580C;border-radius:50%;
+  top:50%;left:50%;opacity:0;pointer-events:none;
+  box-shadow:0 0 6px rgba(234,88,12,0.8), 0 0 12px rgba(234,88,12,0.4);
+}
+.intro-ember:nth-child(1){animation:ie1 1.2s ease-out 2.0s forwards;}
+.intro-ember:nth-child(2){animation:ie2 1.1s ease-out 2.05s forwards;}
+.intro-ember:nth-child(3){animation:ie3 1.3s ease-out 2.1s forwards;}
+.intro-ember:nth-child(4){animation:ie4 1.0s ease-out 2.0s forwards;}
+.intro-ember:nth-child(5){animation:ie5 1.2s ease-out 2.08s forwards;}
+.intro-ember:nth-child(6){animation:ie6 1.1s ease-out 2.12s forwards;}
+.intro-ember:nth-child(7){animation:ie7 1.3s ease-out 2.02s forwards;}
+.intro-ember:nth-child(8){animation:ie8 1.0s ease-out 2.15s forwards;}
+.intro-ember:nth-child(9){animation:ie9 1.2s ease-out 2.06s forwards;}
+.intro-ember:nth-child(10){animation:ie10 1.1s ease-out 2.1s forwards;}
+@keyframes ie1{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-180px,-280px) scale(0)}}
+@keyframes ie2{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(200px,-250px) scale(0)}}
+@keyframes ie3{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-300px,-100px) scale(0)}}
+@keyframes ie4{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(280px,50px) scale(0)}}
+@keyframes ie5{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-120px,300px) scale(0)}}
+@keyframes ie6{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(150px,270px) scale(0)}}
+@keyframes ie7{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-250px,180px) scale(0)}}
+@keyframes ie8{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(320px,-150px) scale(0)}}
+@keyframes ie9{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-80px,-350px) scale(0)}}
+@keyframes ie10{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(100px,-320px) scale(0)}}
+
+/* Scan line */
+.intro-scan{
+  position:fixed;z-index:201;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent 10%,rgba(234,88,12,0.6) 50%,transparent 90%);
+  opacity:0;pointer-events:none;
+  animation:introScan 0.8s ease-in-out 1.8s forwards;
+  box-shadow:0 0 20px rgba(234,88,12,0.4), 0 0 60px rgba(234,88,12,0.2);
+}
+@keyframes introScan{
+  0%{top:0;opacity:0.8;}
+  100%{top:100%;opacity:0;}
+}
+
+/* Light streaks */
+.intro-streak{
+  position:fixed;z-index:201;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(234,88,12,0.5),transparent);
+  opacity:0;pointer-events:none;left:0;width:100%;
+}
+.intro-streak-1{top:25%;animation:introStreak 0.6s ease-out 2.0s forwards;}
+.intro-streak-2{top:50%;animation:introStreak 0.6s ease-out 2.1s forwards;}
+.intro-streak-3{top:75%;animation:introStreak 0.6s ease-out 2.25s forwards;}
+@keyframes introStreak{
+  0%{opacity:0.8;transform:scaleX(0);}
+  50%{opacity:0.6;transform:scaleX(1);}
+  100%{opacity:0;transform:scaleX(1);}
+}
+
+/* Screen shake wrapper */
+.shake-wrapper{
+  animation:introShake 0.4s ease-out 2.0s;
+}
+@keyframes introShake{
+  0%{transform:translate(0,0);}
+  15%{transform:translate(-4px,3px);}
+  30%{transform:translate(3px,-4px);}
+  45%{transform:translate(-3px,2px);}
+  60%{transform:translate(2px,-2px);}
+  75%{transform:translate(-1px,1px);}
+  100%{transform:translate(0,0);}
+}
+
+/* Fade-in for main content after intro */
+.main-hidden{opacity:0;transition:opacity 0.8s ease-out;}
+.main-hidden.show{opacity:1;}
 
 /* === CURSOR SPOTLIGHT === */
 .cursor{
@@ -400,6 +578,28 @@ section{
 </head>
 <body>
 
+<!-- ===== INTRO SEQUENCE ===== -->
+<div class="intro-overlay" id="intro-overlay"></div>
+<div class="intro-avatar" id="intro-avatar-big"></div>
+<div class="intro-name" id="intro-name"></div>
+<div class="intro-sub">Tu ecosistema digital</div>
+<div class="intro-by">by Blend<span style="color:#EA580C;">.</span></div>
+<div class="intro-ring intro-ring-1"></div>
+<div class="intro-ring intro-ring-2"></div>
+<div class="intro-ring intro-ring-3"></div>
+<div class="intro-ember"></div><div class="intro-ember"></div><div class="intro-ember"></div>
+<div class="intro-ember"></div><div class="intro-ember"></div><div class="intro-ember"></div>
+<div class="intro-ember"></div><div class="intro-ember"></div><div class="intro-ember"></div>
+<div class="intro-ember"></div>
+<div class="intro-scan"></div>
+<div class="intro-streak intro-streak-1"></div>
+<div class="intro-streak intro-streak-2"></div>
+<div class="intro-streak intro-streak-3"></div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="shake-wrapper">
+<div class="main-hidden" id="main-content">
+
 <!-- CURSOR -->
 <div class="cursor" id="cursor"></div>
 <div class="cursor-glow" id="cursor-glow"></div>
@@ -521,7 +721,46 @@ section{
   <div class="footer-text">Powered by Social Food OS — 2026</div>
 </div>
 
+</div><!-- /main-hidden -->
+</div><!-- /shake-wrapper -->
+
 <script>
+// =====================================================
+// INTRO SEQUENCE
+// =====================================================
+const introName = document.getElementById('intro-name');
+introName.textContent = SF_USER.name;
+
+// Load avatar for intro (from Copilot IG)
+const COPILOT_URL_INTRO = 'https://web-production-2131c.up.railway.app';
+const introAvatarEl = document.getElementById('intro-avatar-big');
+
+(async () => {
+  try {
+    const params = `token=${SF_USER.token}&client=${encodeURIComponent(SF_USER.client_name || SF_USER.name)}`;
+    const res = await fetch(`${COPILOT_URL_INTRO}/api/client-portal?${params}`);
+    const data = await res.json();
+    if (data && data.ig && data.ig.profile_picture_url) {
+      introAvatarEl.style.backgroundImage = `url(${data.ig.profile_picture_url})`;
+    }
+  } catch(e) {}
+})();
+
+// Avatar glow at 1.3s
+setTimeout(() => { introAvatarEl.classList.add('glow'); }, 1300);
+
+// Fade out intro at 2.8s, reveal main
+setTimeout(() => {
+  document.getElementById('intro-overlay').classList.add('out');
+  document.getElementById('main-content').classList.add('show');
+  document.body.classList.add('intro-done');
+}, 2800);
+
+// Clean up intro elements at 4.5s
+setTimeout(() => {
+  document.querySelectorAll('.intro-overlay,.intro-avatar,.intro-name,.intro-sub,.intro-by,.intro-ring,.intro-ember,.intro-scan,.intro-streak').forEach(el => el.remove());
+}, 4500);
+
 // =====================================================
 // INIT
 // =====================================================
