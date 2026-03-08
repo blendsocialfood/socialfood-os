@@ -430,7 +430,7 @@
   }
   .selector .sel-card:nth-child(1) {
     opacity: 0;
-    animation: cardSlamDisabled 0.8s cubic-bezier(0.16,1,0.3,1) 3.6s forwards;
+    animation: cardSlam 0.8s cubic-bezier(0.16,1,0.3,1) 3.6s forwards;
   }
   .selector .sel-card:nth-child(2) {
     opacity: 0;
@@ -440,11 +440,6 @@
     0% { opacity: 0; transform: translateY(80px) scale(0.85) rotateX(15deg); filter: blur(10px); }
     60% { transform: translateY(-5px) scale(1.02) rotateX(0deg); filter: blur(0); }
     100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); filter: blur(0); }
-  }
-  @keyframes cardSlamDisabled {
-    0% { opacity: 0; transform: translateY(80px) scale(0.85) rotateX(15deg); filter: blur(10px); }
-    60% { transform: translateY(-5px) scale(1.02) rotateX(0deg); filter: blur(0); }
-    100% { opacity: 0.3; transform: translateY(0) scale(1) rotateX(0deg); filter: blur(0); }
   }
 
   .sel-card {
