@@ -46,6 +46,7 @@ section{
   min-height:100vh;padding:120px 60px 80px;
   position:relative;overflow:hidden;
 }
+.hero{overflow:visible;}
 /* --- REVEAL ANIMATIONS --- */
 .reveal{
   opacity:0;transform:translateY(60px);
@@ -83,8 +84,8 @@ section{
 .hero-badge-dot{width:6px;height:6px;background:#EA580C;border-radius:50%;animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}
 .hero-title{
-  font-size:clamp(48px,8vw,96px);font-weight:900;letter-spacing:-3px;
-  line-height:0.95;margin-bottom:24px;
+  font-size:clamp(44px,7vw,88px);font-weight:900;letter-spacing:-3px;
+  line-height:1.15;margin-bottom:24px;padding:8px 0;
   background:linear-gradient(135deg,#fff 0%,#ccc 50%,#999 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
@@ -446,109 +447,97 @@ drawParticles();
 window.addEventListener('resize', initParticles);
 
 // =====================================================
-// DATA LOADING
+// DATA LOADING — REAL DATA FROM UNITY + COPILOT
 // =====================================================
 const UNITY_URL = 'https://positive-appreciation-production.up.railway.app';
 const COPILOT_URL = 'https://web-production-2131c.up.railway.app';
+const TOKEN = SF_USER.token;
 
 async function loadAll() {
-  // Cargar datos en paralelo
-  const [adsData, igData] = await Promise.allSettled([
-    fetch(COPILOT_URL + '/api/data?period=last_7d').then(r => r.json()).catch(() => null),
-    fetch(COPILOT_URL + '/api/ig-metrics').then(r => r.json()).catch(() => null),
+  const params = `token=${TOKEN}&client=${encodeURIComponent(CLIENT)}`;
+  const [unityRes, copilotRes] = await Promise.allSettled([
+    fetch(`${UNITY_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
+    fetch(`${COPILOT_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
   ]);
 
-  const ads = adsData.status === 'fulfilled' ? adsData.value : null;
-  const ig = igData.status === 'fulfilled' ? igData.value : null;
+  const unity = unityRes.status === 'fulfilled' ? unityRes.value : null;
+  const copilot = copilotRes.status === 'fulfilled' ? copilotRes.value : null;
 
-  renderHero(ads, ig);
-  renderAds(ads);
-  renderIG(ig);
-  renderGrilla();
-  renderReviews();
-  renderEvolution(ig);
-  renderNext();
+  // Guardar client ID de Unity para descargar PDF
+  if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
+
+  renderHero(copilot);
+  renderGrilla(unity);
+  renderAds(copilot);
+  renderIG(copilot);
+  renderReviews(unity);
+  renderEvolution(copilot, unity);
+  renderNext(unity);
 }
 
 // =====================================================
 // RENDER HERO
 // =====================================================
-function renderHero(ads, ig) {
-  // Buscar datos del cliente
-  let clientAds = null;
-  if (ads && ads.clients) {
-    clientAds = ads.clients.find(c => c.name.toLowerCase().includes(CLIENT.toLowerCase()));
-  }
-  let igInfo = null;
+function renderHero(copilot) {
+  const ig = copilot && copilot.ig;
   if (ig) {
-    const key = Object.keys(ig).find(k => k.toLowerCase().includes(CLIENT.toLowerCase()));
-    if (key) igInfo = ig[key];
-  }
-
-  const sub = igInfo
-    ? `@${igInfo.username || ''} · ${(igInfo.followers_count || 0).toLocaleString('es-CL')} seguidores`
-    : 'Tu ecosistema digital conectado';
-  document.getElementById('hero-sub').textContent = sub;
-
-  // Set IG profile pic or gradient as hero bg
-  if (igInfo && igInfo.profile_pic_url) {
-    document.getElementById('hero-bg').style.backgroundImage = `url(${igInfo.profile_pic_url})`;
+    const sub = `@${ig.username} · ${(ig.followers_count || 0).toLocaleString('es-CL')} seguidores`;
+    document.getElementById('hero-sub').textContent = sub;
+    if (ig.profile_picture_url) {
+      document.getElementById('hero-bg').style.backgroundImage = `url(${ig.profile_picture_url})`;
+    }
+  } else {
+    document.getElementById('hero-sub').textContent = 'Tu ecosistema digital conectado';
   }
 }
 
 // =====================================================
 // RENDER ADS
 // =====================================================
-function renderAds(data) {
+function renderAds(copilot) {
   const grid = document.getElementById('kpi-grid');
-  if (!data || !data.clients) {
-    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de campanas disponibles</p>';
+  const ads = copilot && copilot.ads;
+  if (!ads) {
+    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de campañas disponibles</p>';
     return;
   }
-  const client = data.clients.find(c => c.name.toLowerCase().includes(CLIENT.toLowerCase()));
-  if (!client) {
-    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin campanas activas</p>';
-    return;
-  }
-  const d = client;
   const kpis = [
-    { label: 'Inversion', value: d.total_gasto || 0, prefix: '$', color: '#EA580C' },
-    { label: 'Alcance', value: d.total_alcance || 0, color: '#63b3ed' },
-    { label: 'Clicks', value: d.total_clicks || 0, color: '#4ade80' },
-    { label: 'Mensajes', value: d.total_mensajes || 0, color: '#fbbf24' },
+    { label: 'Inversión', value: ads.spend || 0, prefix: '$', suffix: '', color: '#EA580C' },
+    { label: 'Alcance', value: ads.reach || 0, color: '#63b3ed' },
+    { label: 'Clicks', value: ads.clicks || 0, color: '#4ade80' },
+    { label: 'Mensajes', value: ads.messages || 0, color: '#fbbf24' },
+    { label: 'CTR', value: ads.ctr || 0, suffix: '%', color: '#c084fc', decimals: 2 },
+    { label: 'CPM', value: ads.cpm || 0, prefix: '$', color: '#fb923c', decimals: 0 },
   ];
   grid.innerHTML = kpis.map(k => `
     <div class="kpi-card" style="--accent:${k.color}">
       <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value counter" data-target="${k.value}" data-prefix="${k.prefix||''}">${k.prefix||''}0</div>
+      <div class="kpi-value counter" data-target="${k.value}" data-prefix="${k.prefix||''}" data-suffix="${k.suffix||''}" data-decimals="${k.decimals||0}">${k.prefix||''}0${k.suffix||''}</div>
     </div>
   `).join('');
+  observeCounters();
+}
 
-  // Animate counters when visible
-  const counterObserver = new IntersectionObserver((entries) => {
+function observeCounters() {
+  const cObs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
         const el = e.target;
-        animateCounter(el, parseFloat(el.dataset.target), el.dataset.prefix || '');
-        counterObserver.unobserve(el);
+        animateCounter(el, parseFloat(el.dataset.target), el.dataset.prefix||'', el.dataset.suffix||'', parseInt(el.dataset.decimals||'0'));
+        cObs.unobserve(el);
       }
     });
   }, { threshold: 0.5 });
-  document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+  document.querySelectorAll('.counter').forEach(el => cObs.observe(el));
 }
 
 // =====================================================
 // RENDER IG
 // =====================================================
-function renderIG(data) {
+function renderIG(copilot) {
   const stats = document.getElementById('ig-stats');
   const grid = document.getElementById('ig-grid');
-  if (!data) {
-    stats.innerHTML = '<p style="color:#555;font-size:14px;">Cargando datos de Instagram...</p>';
-    return;
-  }
-  const key = Object.keys(data).find(k => k.toLowerCase().includes(CLIENT.toLowerCase()));
-  const ig = key ? data[key] : null;
+  const ig = copilot && copilot.ig;
   if (!ig) {
     stats.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de Instagram</p>';
     return;
@@ -563,135 +552,221 @@ function renderIG(data) {
       <div class="kpi-label">Publicaciones</div>
       <div class="kpi-value counter" data-target="${ig.media_count || 0}">0</div>
     </div>
-  `;
-
-  // Animate
-  const cObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        animateCounter(e.target, parseFloat(e.target.dataset.target));
-        cObs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.5 });
-  stats.querySelectorAll('.counter').forEach(el => cObs.observe(el));
-
-  // IG posts grid placeholder
-  grid.innerHTML = Array.from({length: 6}, (_, i) => `
-    <div class="ig-post" style="background:linear-gradient(135deg,#111,#1a1a1a);display:flex;align-items:center;justify-content:center;">
-      <span style="color:#333;font-size:24px;">📷</span>
+    <div class="kpi-card" style="--accent:#E1306C">
+      <div class="kpi-label">Eng. Rate</div>
+      <div class="kpi-value counter" data-target="${ig.engagement_rate || 0}" data-suffix="%" data-decimals="2">0%</div>
     </div>
-  `).join('');
+    <div class="kpi-card" style="--accent:#E1306C">
+      <div class="kpi-label">Likes prom.</div>
+      <div class="kpi-value counter" data-target="${ig.avg_likes || 0}">0</div>
+    </div>
+  `;
+  observeCounters();
+
+  // IG posts reales
+  if (ig.posts && ig.posts.length > 0) {
+    grid.innerHTML = ig.posts.map(p => {
+      const img = p.media_url || '';
+      const isVideo = p.media_type === 'VIDEO';
+      return `
+        <a href="${p.permalink || '#'}" target="_blank" class="ig-post" style="background:${img ? `url(${img}) center/cover` : 'linear-gradient(135deg,#111,#1a1a1a)'};position:relative;">
+          ${isVideo ? '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border-radius:4px;padding:2px 6px;font-size:10px;color:#fff;">▶</div>' : ''}
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:8px 10px;background:linear-gradient(transparent,rgba(0,0,0,0.8));font-size:11px;color:#fff;display:flex;gap:10px;">
+            <span>❤️ ${p.like_count.toLocaleString('es-CL')}</span>
+            <span>💬 ${p.comments_count}</span>
+          </div>
+        </a>`;
+    }).join('');
+  } else {
+    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin publicaciones recientes</p>';
+  }
 }
 
 // =====================================================
-// RENDER GRILLA (placeholder - loads from Unity)
+// RENDER GRILLA (REAL DATA from Unity)
 // =====================================================
-function renderGrilla() {
+function renderGrilla(unity) {
   const timeline = document.getElementById('grilla-timeline');
   const now = new Date();
   const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   document.getElementById('grilla-desc').textContent = `Contenido planificado para ${monthNames[now.getMonth()]} ${now.getFullYear()}.`;
 
-  // Placeholder weeks
-  const weeks = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
-  const estados = ['draft','revision','aprobado','clickup'];
-  const formatos = ['Reel','Carrusel','Imagen','Historia'];
-  const estadoNames = {draft:'Borrador',revision:'En revision',aprobado:'Aprobado',clickup:'Publicado'};
+  const grilla = unity && unity.grilla;
+  if (!grilla || !grilla.piezas || grilla.piezas.length === 0) {
+    timeline.innerHTML = '<p style="color:#555;font-size:14px;padding:20px 0;">Sin piezas programadas este mes</p>';
+    document.getElementById('grilla-bar').style.width = '0%';
+    document.getElementById('grilla-progress-text').textContent = '0 piezas este mes';
+    return;
+  }
 
-  let totalPieces = 0, approvedPieces = 0;
+  const estadoNames = {draft:'Borrador',revision:'En revisión',aprobado:'Aprobado',clickup:'Publicado'};
+  const estadoColors = {draft:'#666',revision:'#fbbf24',aprobado:'#4ade80',clickup:'#63b3ed'};
+
+  // Agrupar por semana
+  const porSemana = {};
+  grilla.piezas.forEach(p => {
+    const s = p.semana || 1;
+    if (!porSemana[s]) porSemana[s] = [];
+    porSemana[s].push(p);
+  });
+
   let html = '';
-  weeks.forEach(w => {
-    const pieces = Math.floor(Math.random() * 2) + 3;
-    html += `<div class="grilla-week"><div class="grilla-week-title">${w}</div>`;
-    for (let i = 0; i < pieces; i++) {
-      const estado = estados[Math.floor(Math.random() * estados.length)];
-      const formato = formatos[Math.floor(Math.random() * formatos.length)];
-      totalPieces++;
-      if (estado === 'aprobado' || estado === 'clickup') approvedPieces++;
+  const maxSem = Math.max(...Object.keys(porSemana).map(Number), 4);
+  for (let s = 1; s <= maxSem; s++) {
+    const piezas = porSemana[s] || [];
+    if (piezas.length === 0) continue;
+    html += `<div class="grilla-week"><div class="grilla-week-title">Semana ${s}</div>`;
+    piezas.forEach(p => {
+      const estado = p.estado || 'draft';
       html += `
         <div class="grilla-piece">
-          <div class="grilla-piece-title">${formato} — Pieza ${i+1}</div>
+          <div class="grilla-piece-title">${p.titulo || p.formato || 'Pieza'}</div>
+          <div style="font-size:11px;color:#888;margin:4px 0;">${p.idea_final ? p.idea_final.substring(0, 80) + (p.idea_final.length > 80 ? '...' : '') : ''}</div>
           <div class="grilla-piece-meta">
-            <span class="estado-dot estado-${estado}"></span>
-            ${estadoNames[estado]}
+            <span class="estado-dot" style="background:${estadoColors[estado]};"></span>
+            ${estadoNames[estado] || estado}
+            ${p.formato ? `<span style="margin-left:8px;color:#555;">· ${p.formato}</span>` : ''}
+            ${p.fecha_publicacion ? `<span style="margin-left:8px;color:#555;">· ${p.fecha_publicacion}</span>` : ''}
           </div>
         </div>`;
-    }
+    });
     html += '</div>';
-  });
+  }
   timeline.innerHTML = html;
-  const pct = totalPieces > 0 ? Math.round((approvedPieces / totalPieces) * 100) : 0;
+
+  const total = grilla.total;
+  const aprobadas = grilla.aprobadas;
+  const pct = total > 0 ? Math.round((aprobadas / total) * 100) : 0;
   document.getElementById('grilla-bar').style.width = pct + '%';
-  document.getElementById('grilla-progress-text').textContent = `${approvedPieces} de ${totalPieces} piezas listas (${pct}%)`;
+  document.getElementById('grilla-progress-text').textContent = `${aprobadas} de ${total} piezas listas (${pct}%)`;
 }
 
 // =====================================================
-// RENDER REVIEWS (placeholder)
+// RENDER REVIEWS (REAL from Unity)
 // =====================================================
-function renderReviews() {
+function renderReviews(unity) {
   const summary = document.getElementById('reviews-summary');
   const grid = document.getElementById('reviews-grid');
-  summary.innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div style="font-size:48px;font-weight:900;color:#fff;">4.6</div>
-      <div>
-        <div class="review-stars">★★★★★</div>
-        <div style="font-size:12px;color:#666;margin-top:2px;">Google Reviews</div>
+  const reviews = unity && unity.reviews;
+
+  if (!reviews) {
+    summary.innerHTML = '<p style="color:#555;font-size:14px;">Cargando reseñas...</p>';
+    return;
+  }
+
+  // Google summary
+  const google = reviews.google;
+  if (google && google.rating) {
+    const stars = '★'.repeat(Math.round(google.rating)) + '☆'.repeat(5 - Math.round(google.rating));
+    summary.innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="font-size:48px;font-weight:900;color:#fff;">${google.rating}</div>
+        <div>
+          <div class="review-stars">${stars}</div>
+          <div style="font-size:12px;color:#666;margin-top:2px;">Google Reviews · ${google.total} reseñas</div>
+        </div>
       </div>
-    </div>
-  `;
-  const sampleReviews = [
-    { text: 'Excelente comida, el mejor thai de Santiago. Los sabores son autenticos y el servicio impecable.', author: 'Maria G.', rating: 5 },
-    { text: 'Ambiente increible, muy buena atencion. El pad thai es espectacular, volveremos seguro.', author: 'Carlos R.', rating: 5 },
-    { text: 'Muy buena experiencia. Los platos son generosos y los precios razonables para la calidad.', author: 'Andrea M.', rating: 4 },
-  ];
-  grid.innerHTML = sampleReviews.map(r => `
-    <div class="review-card">
-      <div class="review-quote">"</div>
-      <div class="review-text">${r.text}</div>
-      <div class="review-author">${r.author}</div>
-      <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
-    </div>
-  `).join('');
+    `;
+  } else {
+    summary.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de Google Reviews</p>';
+  }
+
+  // Combinar reviews de todas las fuentes
+  let allReviews = [];
+  if (google && google.reviews) allReviews.push(...google.reviews);
+  const ta = reviews.tripadvisor;
+  if (ta && ta.reviews) allReviews.push(...ta.reviews);
+
+  if (allReviews.length === 0) {
+    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin reseñas disponibles</p>';
+    return;
+  }
+
+  grid.innerHTML = allReviews.slice(0, 6).map(r => {
+    const rating = r.rating || 0;
+    const stars = rating > 0 ? '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating)) : '';
+    const source = r.source === 'google' ? '🔍 Google' : r.source === 'tripadvisor' ? '🦉 TripAdvisor' : '📸 Instagram';
+    return `
+      <div class="review-card">
+        <div class="review-quote">"</div>
+        <div class="review-text">${(r.text || '').substring(0, 200)}${(r.text || '').length > 200 ? '...' : ''}</div>
+        <div class="review-author">${r.author || 'Anónimo'}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          ${stars ? `<div class="review-stars">${stars}</div>` : '<div></div>'}
+          <span style="font-size:10px;color:#555;">${source}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // =====================================================
-// RENDER EVOLUTION
+// RENDER EVOLUTION (REAL from Copilot ig_growth)
 // =====================================================
-function renderEvolution(igData) {
+function renderEvolution(copilot, unity) {
   const grid = document.getElementById('evo-grid');
+  const ig = copilot && copilot.ig;
+  const growth = copilot && copilot.ig_growth;
+  const grilla = unity && unity.grilla;
+  const clientInfo = unity && unity.client;
+
+  const followersNow = ig ? ig.followers_count : 0;
+  const followersStart = growth ? growth.followers_start : 0;
+  const daysTracked = growth ? growth.days_tracked : 0;
+
+  // Calcular meses desde fecha inicio del cliente
+  let meses = '—';
+  if (clientInfo && clientInfo.fecha_inicio) {
+    const inicio = new Date(clientInfo.fecha_inicio);
+    const now = new Date();
+    const diff = (now.getFullYear() - inicio.getFullYear()) * 12 + (now.getMonth() - inicio.getMonth());
+    meses = diff > 0 ? diff : 1;
+  }
+
+  const totalPiezas = grilla ? grilla.total : 0;
+
   grid.innerHTML = `
     <div class="glass-card evo-card">
       <div class="evo-label">Seguidores al inicio</div>
-      <div class="evo-value evo-before">~50.000</div>
+      <div class="evo-value evo-before">${followersStart > 0 ? followersStart.toLocaleString('es-CL') : '—'}</div>
     </div>
     <div class="glass-card evo-card">
       <div class="evo-label">Seguidores hoy</div>
-      <div class="evo-value evo-after">54.100+</div>
+      <div class="evo-value evo-after">${followersNow > 0 ? followersNow.toLocaleString('es-CL') : '—'}</div>
     </div>
     <div class="glass-card evo-card">
       <div class="evo-label">Meses juntos</div>
-      <div class="evo-value" style="color:#EA580C;">3</div>
+      <div class="evo-value" style="color:#EA580C;">${meses}</div>
     </div>
     <div class="glass-card evo-card">
-      <div class="evo-label">Piezas creadas</div>
-      <div class="evo-value" style="color:#fb923c;">48+</div>
+      <div class="evo-label">Piezas este mes</div>
+      <div class="evo-value" style="color:#fb923c;">${totalPiezas}</div>
     </div>
   `;
 }
 
 // =====================================================
-// RENDER NEXT
+// RENDER NEXT STEPS
 // =====================================================
-function renderNext() {
+function renderNext(unity) {
   const box = document.getElementById('next-items');
-  const items = [
-    { icon: '📸', text: 'Sesion de fotos y video — proxima semana' },
-    { icon: '📊', text: 'Informe mensual de resultados — fin de mes' },
-    { icon: '🎯', text: 'Optimizacion de campanas de ads — en curso' },
-    { icon: '📱', text: 'Nuevas piezas de contenido — en produccion' },
-  ];
+  const grilla = unity && unity.grilla;
+  const items = [];
+
+  // Generar items dinámicos basados en el estado real
+  if (grilla && grilla.piezas) {
+    const enRevision = grilla.piezas.filter(p => p.estado === 'revision').length;
+    const borradores = grilla.piezas.filter(p => p.estado === 'draft').length;
+    const aprobadas = grilla.piezas.filter(p => p.estado === 'aprobado').length;
+
+    if (enRevision > 0) items.push({ icon: '👀', text: `${enRevision} pieza${enRevision > 1 ? 's' : ''} en revisión esperando tu aprobación` });
+    if (borradores > 0) items.push({ icon: '✏️', text: `${borradores} pieza${borradores > 1 ? 's' : ''} en borrador — en desarrollo` });
+    if (aprobadas > 0) items.push({ icon: '✅', text: `${aprobadas} pieza${aprobadas > 1 ? 's' : ''} aprobada${aprobadas > 1 ? 's' : ''} lista${aprobadas > 1 ? 's' : ''} para publicar` });
+  }
+
+  items.push({ icon: '📊', text: 'Informe mensual de resultados — disponible a fin de mes' });
+  items.push({ icon: '🎯', text: 'Optimización continua de campañas de ads' });
+
   box.innerHTML = items.map((item, i) => `
     <div class="glass-card" style="display:flex;align-items:center;gap:16px;margin-bottom:12px;padding:20px 24px;opacity:0;animation:fadeSlideIn 0.6s ${i*0.1}s forwards;">
       <span style="font-size:24px;">${item.icon}</span>
@@ -701,18 +776,24 @@ function renderNext() {
 }
 
 // =====================================================
-// DOWNLOAD GRILLA
+// DOWNLOAD GRILLA PDF (REAL — from Unity)
 // =====================================================
+let UNITY_CLIENT_ID = null;
 function downloadGrilla() {
+  if (!UNITY_CLIENT_ID) {
+    alert('No se encontró el cliente en Unity');
+    return;
+  }
   const btn = document.getElementById('btn-download-grilla');
-  btn.textContent = 'Generando...';
+  btn.textContent = 'Descargando...';
   btn.disabled = true;
-  // TODO: Connect to Unity API
+  const now = new Date();
+  const mes = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  window.open(`${UNITY_URL}/clientes/${UNITY_CLIENT_ID}/grilla/pdf?mes=${mes}`, '_blank');
   setTimeout(() => {
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Grilla PDF';
     btn.disabled = false;
-    alert('Funcion en desarrollo — pronto disponible');
-  }, 1000);
+  }, 2000);
 }
 
 // =====================================================
