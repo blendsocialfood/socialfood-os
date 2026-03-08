@@ -252,7 +252,7 @@ body.intro-done{overflow-y:auto;}
 /* === SECTIONS === */
 section{
   min-height:100vh;padding:120px 60px 80px;
-  position:relative;overflow:hidden;
+  position:relative;overflow:visible;
 }
 
 /* === REVEAL ANIMATIONS === */
@@ -354,10 +354,11 @@ section{
 @keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(234,88,12,0.4);}50%{opacity:0.5;box-shadow:0 0 0 8px rgba(234,88,12,0);}}
 
 .hero-title{
-  font-size:clamp(36px,5.5vw,64px);font-weight:900;letter-spacing:-2px;
-  line-height:1.15;margin-bottom:20px;padding:0;
+  font-size:clamp(36px,5vw,60px);font-weight:900;letter-spacing:-2px;
+  line-height:1.15;margin-bottom:20px;padding:0 20px;
   background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.85) 50%,rgba(255,255,255,0.6) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  width:100%;
 }
 .hero-sub{
   font-size:clamp(16px,2vw,22px);font-weight:300;color:#777;
@@ -751,15 +752,20 @@ setTimeout(() => { introAvatarEl.classList.add('glow'); }, 1300);
 
 // Fade out intro at 2.8s, reveal main
 setTimeout(() => {
+  // Hide all intro text/avatar elements immediately
+  document.querySelectorAll('.intro-avatar,.intro-name,.intro-sub,.intro-by').forEach(el => {
+    el.style.transition = 'opacity 0.6s ease-out';
+    el.style.opacity = '0';
+  });
   document.getElementById('intro-overlay').classList.add('out');
   document.getElementById('main-content').classList.add('show');
   document.body.classList.add('intro-done');
 }, 2800);
 
-// Clean up intro elements at 4.5s
+// Clean up intro elements at 4s
 setTimeout(() => {
   document.querySelectorAll('.intro-overlay,.intro-avatar,.intro-name,.intro-sub,.intro-by,.intro-ring,.intro-ember,.intro-scan,.intro-streak').forEach(el => el.remove());
-}, 4500);
+}, 4000);
 
 // =====================================================
 // INIT
