@@ -869,8 +869,8 @@ document.addEventListener('mousemove', e => {
 });
 
 function updateCursor() {
-  cx += (mx - cx) * 0.15;
-  cy += (my - cy) * 0.15;
+  cx += (mx - cx) * 0.5;
+  cy += (my - cy) * 0.5;
   cursor.style.left = cx + 'px';
   cursor.style.top = cy + 'px';
   requestAnimationFrame(updateCursor);
