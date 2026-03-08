@@ -468,31 +468,48 @@ section{
 
 /* === KPI GRID === */
 .kpi-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:16px;margin-top:48px;
 }
 .kpi-card{
-  background:linear-gradient(170deg,rgba(18,18,18,0.9),rgba(8,8,8,0.9));
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:20px;padding:28px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:24px;padding:28px 28px 24px;
   position:relative;overflow:hidden;
   transform-style:preserve-3d;
-  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+  transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
+  backdrop-filter:blur(40px) saturate(1.5);
+  -webkit-backdrop-filter:blur(40px) saturate(1.5);
 }
 .kpi-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--accent,#EA580C),transparent);
-  opacity:0.5;
+  content:'';position:absolute;inset:-1px;border-radius:24px;
+  background:linear-gradient(170deg,rgba(255,255,255,0.12),transparent 40%,transparent 60%,rgba(255,255,255,0.04));
+  mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite:exclude;-webkit-mask-composite:xor;
+  padding:1px;pointer-events:none;
 }
 .kpi-card::after{
-  content:'';position:absolute;inset:0;border-radius:20px;
-  background:radial-gradient(300px circle at var(--mouse-x,50%) var(--mouse-y,50%),rgba(234,88,12,0.04),transparent 50%);
-  opacity:0;transition:opacity 0.3s;pointer-events:none;
+  content:'';position:absolute;inset:0;border-radius:24px;
+  background:radial-gradient(300px circle at var(--mouse-x,50%) var(--mouse-y,50%),var(--accent-glow,rgba(234,88,12,0.08)),transparent 50%);
+  opacity:0;transition:opacity 0.4s;pointer-events:none;
 }
 .kpi-card:hover::after{opacity:1;}
-.kpi-card:hover{transform:translateY(-4px) scale(1.02);border-color:rgba(255,255,255,0.1);}
-.kpi-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#666;margin-bottom:12px;}
-.kpi-value{font-size:36px;font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;}
+.kpi-card:hover{
+  transform:translateY(-6px) scale(1.03);
+  border-color:rgba(255,255,255,0.15);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4), 0 0 1px rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.07);
+}
+.kpi-icon{
+  width:40px;height:40px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;font-size:18px;
+  background:var(--accent-bg,rgba(234,88,12,0.1));
+  border:1px solid var(--accent-border,rgba(234,88,12,0.15));
+}
+.kpi-label{font-size:12px;font-weight:600;color:#888;margin-bottom:8px;letter-spacing:0.3px;}
+.kpi-value{font-size:38px;font-weight:900;letter-spacing:-1.5px;color:#fff;line-height:1;}
+.kpi-sub{font-size:11px;color:#555;margin-top:8px;font-weight:500;}
 
 /* === GRILLA === */
 .grilla-header{
@@ -1118,23 +1135,29 @@ function renderAds(copilot) {
   const grid = document.getElementById('kpi-grid');
   const ads = copilot && copilot.ads;
   if (!ads) {
-    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de campañas disponibles</p>';
+    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de campanas disponibles</p>';
     return;
   }
   const kpis = [
-    { label: 'Inversión', value: ads.spend || 0, prefix: '$', color: '#EA580C' },
-    { label: 'Alcance', value: ads.reach || 0, color: '#63b3ed' },
-    { label: 'Clicks', value: ads.clicks || 0, color: '#4ade80' },
-    { label: 'Mensajes', value: ads.messages || 0, color: '#fbbf24' },
-    { label: 'CTR', value: ads.ctr || 0, suffix: '%', color: '#c084fc', decimals: 2 },
-    { label: 'CPM', value: ads.cpm || 0, prefix: '$', color: '#fb923c', decimals: 0 },
+    { label: 'Inversion', value: ads.spend || 0, prefix: '$', icon: '💰', color: '#EA580C', sub: 'Ultimos 7 dias' },
+    { label: 'Alcance', value: ads.reach || 0, icon: '👁', color: '#63b3ed', sub: 'Personas alcanzadas' },
+    { label: 'Clicks', value: ads.clicks || 0, icon: '🖱', color: '#4ade80', sub: 'Clicks en anuncios' },
+    { label: 'Mensajes', value: ads.messages || 0, icon: '💬', color: '#fbbf24', sub: 'Conversaciones' },
+    { label: 'CTR', value: ads.ctr || 0, suffix: '%', icon: '📊', color: '#c084fc', decimals: 2, sub: 'Click-through rate' },
+    { label: 'CPM', value: ads.cpm || 0, prefix: '$', icon: '📈', color: '#fb923c', decimals: 0, sub: 'Costo por mil' },
   ];
-  grid.innerHTML = kpis.map(k => `
-    <div class="kpi-card" style="--accent:${k.color}">
+  grid.innerHTML = kpis.map(k => {
+    const bg = k.color + '15';
+    const border = k.color + '25';
+    const glow = k.color.replace(')', ',0.1)').replace('rgb','rgba');
+    return `
+    <div class="kpi-card" style="--accent-bg:${bg};--accent-border:${border};--accent-glow:${k.color}15">
+      <div class="kpi-icon" style="--accent-bg:${bg};--accent-border:${border}">${k.icon}</div>
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value counter" data-target="${k.value}" data-prefix="${k.prefix||''}" data-suffix="${k.suffix||''}" data-decimals="${k.decimals||0}">${k.prefix||''}0${k.suffix||''}</div>
-    </div>
-  `).join('');
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`;
+  }).join('');
   observeCounters();
 }
 
