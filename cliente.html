@@ -62,35 +62,85 @@ section{
 .hero{
   min-height:100vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;
-  position:relative;
+  position:relative;background:#030303;
 }
-.hero-bg{
-  position:absolute;inset:0;z-index:0;
-  background-size:cover;background-position:center;
-  filter:brightness(0.3) saturate(1.2);
+/* Animated gradient mesh */
+.hero-mesh{
+  position:absolute;inset:0;z-index:0;overflow:hidden;
 }
-.hero-overlay{
+.hero-orb{
+  position:absolute;border-radius:50%;filter:blur(100px);
+  animation:orb-drift 20s ease-in-out infinite;
+}
+.hero-orb-1{
+  width:60vw;height:60vw;max-width:800px;max-height:800px;
+  background:radial-gradient(circle,rgba(234,88,12,0.12) 0%,transparent 70%);
+  top:-20%;left:50%;transform:translateX(-50%);
+}
+.hero-orb-2{
+  width:40vw;height:40vw;max-width:500px;max-height:500px;
+  background:radial-gradient(circle,rgba(251,146,60,0.08) 0%,transparent 70%);
+  bottom:-10%;right:-5%;animation-delay:-7s;
+}
+.hero-orb-3{
+  width:35vw;height:35vw;max-width:450px;max-height:450px;
+  background:radial-gradient(circle,rgba(234,88,12,0.06) 0%,transparent 70%);
+  bottom:20%;left:-10%;animation-delay:-13s;
+}
+@keyframes orb-drift{
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(30px,-20px) scale(1.05);}
+  66%{transform:translate(-20px,15px) scale(0.95);}
+}
+/* Subtle grid overlay */
+.hero-grid{
   position:absolute;inset:0;z-index:1;
-  background:linear-gradient(180deg, rgba(3,3,3,0.4) 0%, rgba(3,3,3,0.6) 50%, rgba(3,3,3,1) 100%);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 70%);
 }
-.hero-content{position:relative;z-index:2;max-width:800px;}
+/* Radial fade at bottom */
+.hero-fade{
+  position:absolute;bottom:0;left:0;right:0;height:40%;z-index:2;
+  background:linear-gradient(180deg, transparent 0%, #030303 100%);
+}
+.hero-content{position:relative;z-index:3;max-width:800px;}
+/* Profile avatar */
+.hero-avatar{
+  width:88px;height:88px;border-radius:50%;margin:0 auto 28px;
+  border:2px solid rgba(234,88,12,0.3);
+  box-shadow:0 0 40px rgba(234,88,12,0.15), 0 0 80px rgba(234,88,12,0.05);
+  background:#111 center/cover no-repeat;
+  transition:all 0.6s cubic-bezier(0.16,1,0.3,1);
+  opacity:0;transform:scale(0.8);
+}
+.hero-avatar.loaded{opacity:1;transform:scale(1);}
+.hero-avatar:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 50px rgba(234,88,12,0.25), 0 0 100px rgba(234,88,12,0.1);
+  border-color:rgba(234,88,12,0.5);
+}
 .hero-badge{
   display:inline-flex;align-items:center;gap:8px;
   padding:8px 20px;border-radius:100px;
-  background:rgba(234,88,12,0.1);border:1px solid rgba(234,88,12,0.2);
+  background:rgba(234,88,12,0.08);border:1px solid rgba(234,88,12,0.15);
   font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
   color:#fb923c;margin-bottom:32px;
+  backdrop-filter:blur(10px);
 }
 .hero-badge-dot{width:6px;height:6px;background:#EA580C;border-radius:50%;animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}
 .hero-title{
   font-size:clamp(44px,7vw,88px);font-weight:900;letter-spacing:-3px;
   line-height:1.15;margin-bottom:24px;padding:8px 0;
-  background:linear-gradient(135deg,#fff 0%,#ccc 50%,#999 100%);
+  background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.85) 50%,rgba(255,255,255,0.6) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .hero-sub{
-  font-size:clamp(16px,2vw,22px);font-weight:300;color:#888;
+  font-size:clamp(16px,2vw,22px);font-weight:300;color:#777;
   line-height:1.6;max-width:600px;margin:0 auto 48px;
 }
 .hero-scroll{
@@ -284,9 +334,15 @@ section{
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div class="hero-bg" id="hero-bg"></div>
-  <div class="hero-overlay"></div>
+  <div class="hero-mesh">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+  </div>
+  <div class="hero-grid"></div>
+  <div class="hero-fade"></div>
   <div class="hero-content">
+    <div class="hero-avatar" id="hero-avatar"></div>
     <div class="hero-badge reveal">
       <span class="hero-badge-dot"></span>
       Tu ecosistema digital
@@ -481,14 +537,23 @@ async function loadAll() {
 // =====================================================
 function renderHero(copilot) {
   const ig = copilot && copilot.ig;
+  const avatar = document.getElementById('hero-avatar');
   if (ig) {
     const sub = `@${ig.username} · ${(ig.followers_count || 0).toLocaleString('es-CL')} seguidores`;
     document.getElementById('hero-sub').textContent = sub;
     if (ig.profile_picture_url) {
-      document.getElementById('hero-bg').style.backgroundImage = `url(${ig.profile_picture_url})`;
+      const img = new Image();
+      img.onload = () => {
+        avatar.style.backgroundImage = `url(${ig.profile_picture_url})`;
+        avatar.classList.add('loaded');
+      };
+      img.src = ig.profile_picture_url;
+    } else {
+      avatar.style.display = 'none';
     }
   } else {
     document.getElementById('hero-sub').textContent = 'Tu ecosistema digital conectado';
+    avatar.style.display = 'none';
   }
 }
 
