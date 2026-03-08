@@ -24,82 +24,85 @@ body.intro-done{overflow-y:auto;}
 .intro-overlay{
   position:fixed;inset:0;z-index:200;
   background:#000;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
   transition:opacity 0.8s ease-in-out;
 }
 .intro-overlay.out{opacity:0;pointer-events:none;}
 
-/* Centered avatar */
-.intro-avatar{
-  position:fixed;z-index:202;
-  top:50%;left:50%;
-  transform:translate(-50%,-60%) scale(0);
-  width:110px;height:110px;
-  border-radius:50%;
-  border:2px solid rgba(234,88,12,0.4);
-  background:#111 center/cover no-repeat;
-  opacity:0;
-  animation:introAvatarIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.4s forwards;
-  box-shadow:0 0 0 rgba(234,88,12,0);
+/* SF Logo icon in intro */
+.intro-logo{
+  width:90px;height:90px;
+  background:linear-gradient(145deg,#151515,#0d0d0d);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:28px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:32px;
+  opacity:0;transform:scale(0) rotate(-20deg);
+  animation:introLogoIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.3s forwards;
 }
-@keyframes introAvatarIn{
-  0%{transform:translate(-50%,-60%) scale(0) rotate(-15deg);opacity:0;}
-  100%{transform:translate(-50%,-60%) scale(1) rotate(0deg);opacity:1;}
+.intro-logo-letters{font-size:38px;font-weight:900;color:#fff;letter-spacing:-1px;}
+.intro-logo-dot{
+  display:inline-block;width:10px;height:10px;
+  background:#EA580C;border-radius:50%;
+  margin-left:1px;vertical-align:baseline;
+  box-shadow:0 0 15px rgba(234,88,12,0.8);
+  opacity:0;animation:introDotFlash 0.3s ease-out 0.9s forwards;
+}
+@keyframes introLogoIn{
+  0%{opacity:0;transform:scale(0) rotate(-20deg);}
+  100%{opacity:1;transform:scale(1) rotate(0deg);}
+}
+@keyframes introDotFlash{
+  0%{opacity:0;transform:scale(0);}
+  60%{opacity:1;transform:scale(1.8);}
+  100%{opacity:1;transform:scale(1);}
 }
 
-/* Glow pulse on avatar */
-.intro-avatar.glow{
-  animation:introAvatarGlow 0.8s ease-out forwards;
-}
-@keyframes introAvatarGlow{
-  0%{box-shadow:0 0 0 rgba(234,88,12,0);border-color:rgba(234,88,12,0.4);}
-  50%{box-shadow:0 0 100px rgba(234,88,12,0.5), 0 0 200px rgba(234,88,12,0.2);border-color:rgba(234,88,12,0.8);}
-  100%{box-shadow:0 0 60px rgba(234,88,12,0.3), 0 0 120px rgba(234,88,12,0.1);border-color:rgba(234,88,12,0.6);}
+/* Glow on logo */
+.intro-logo.glow{
+  box-shadow:0 0 100px rgba(234,88,12,0.5), 0 0 200px rgba(234,88,12,0.2);
+  border-color:rgba(234,88,12,0.4);
+  transition:box-shadow 0.6s ease-out, border-color 0.6s ease-out;
 }
 
-/* Client name — big centered */
+/* Client name */
 .intro-name{
-  position:fixed;z-index:201;
-  top:50%;left:50%;
-  transform:translate(-50%, 20px);
-  font-size:clamp(32px,6vw,56px);font-weight:900;
+  font-size:clamp(28px,5vw,48px);font-weight:900;
   letter-spacing:-2px;color:#fff;
   text-align:center;
-  opacity:0;filter:blur(20px);
-  animation:introNameIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s forwards;
+  opacity:0;filter:blur(16px);
+  animation:introNameIn 0.8s cubic-bezier(0.16,1,0.3,1) 1.0s forwards;
 }
 @keyframes introNameIn{
-  0%{opacity:0;filter:blur(20px);transform:translate(-50%, 20px) scale(0.85);}
-  100%{opacity:1;filter:blur(0);transform:translate(-50%, 20px) scale(1);}
+  0%{opacity:0;filter:blur(16px);transform:translateY(15px) scale(0.9);}
+  100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1);}
 }
 
 /* Subtitle */
 .intro-sub{
-  position:fixed;z-index:201;
-  top:50%;left:50%;
-  transform:translate(-50%, 80px);
   font-size:11px;font-weight:600;
   letter-spacing:4px;text-transform:uppercase;
   color:#EA580C;text-align:center;
+  margin-top:16px;
   opacity:0;
-  animation:introSubIn 0.6s ease-out 1.4s forwards;
+  animation:introSubIn 0.6s ease-out 1.5s forwards;
 }
 @keyframes introSubIn{
-  0%{opacity:0;transform:translate(-50%, 90px);}
-  100%{opacity:0.8;transform:translate(-50%, 80px);}
+  0%{opacity:0;transform:translateY(10px);}
+  100%{opacity:0.8;transform:translateY(0);}
 }
 
-/* "by Blend." small text */
+/* "by Blend." */
 .intro-by{
-  position:fixed;z-index:201;
-  top:50%;left:50%;
-  transform:translate(-50%, 110px);
   font-size:11px;font-weight:500;color:rgba(255,255,255,0.3);
-  text-align:center;opacity:0;
-  animation:introByIn 0.5s ease-out 1.7s forwards;
+  text-align:center;margin-top:10px;
+  opacity:0;
+  animation:introByIn 0.5s ease-out 1.8s forwards;
 }
 @keyframes introByIn{
-  0%{opacity:0;transform:translate(-50%, 120px);}
-  100%{opacity:0.4;transform:translate(-50%, 110px);}
+  0%{opacity:0;transform:translateY(8px);}
+  100%{opacity:0.4;transform:translateY(0);}
 }
 
 /* Shockwave rings */
@@ -584,11 +587,14 @@ section{
 <body>
 
 <!-- ===== INTRO SEQUENCE ===== -->
-<div class="intro-overlay" id="intro-overlay"></div>
-<div class="intro-avatar" id="intro-avatar-big"></div>
-<div class="intro-name" id="intro-name"></div>
-<div class="intro-sub">Tu ecosistema digital</div>
-<div class="intro-by">by Blend<span style="color:#EA580C;">.</span></div>
+<div class="intro-overlay" id="intro-overlay">
+  <div class="intro-logo" id="intro-logo">
+    <span class="intro-logo-letters">SF<span class="intro-logo-dot"></span></span>
+  </div>
+  <div class="intro-name" id="intro-name"></div>
+  <div class="intro-sub">Tu ecosistema digital</div>
+  <div class="intro-by">by Blend<span style="color:#EA580C;">.</span></div>
+</div>
 <div class="intro-ring intro-ring-1"></div>
 <div class="intro-ring intro-ring-2"></div>
 <div class="intro-ring intro-ring-3"></div>
@@ -733,34 +739,13 @@ section{
 // =====================================================
 // INTRO SEQUENCE
 // =====================================================
-const introName = document.getElementById('intro-name');
-introName.textContent = SF_USER.name;
+document.getElementById('intro-name').textContent = SF_USER.name;
 
-// Load avatar for intro (from Copilot IG)
-const COPILOT_URL_INTRO = 'https://web-production-2131c.up.railway.app';
-const introAvatarEl = document.getElementById('intro-avatar-big');
-
-(async () => {
-  try {
-    const params = `token=${SF_USER.token}&client=${encodeURIComponent(SF_USER.client_name || SF_USER.name)}`;
-    const res = await fetch(`${COPILOT_URL_INTRO}/api/client-portal?${params}`);
-    const data = await res.json();
-    if (data && data.ig && data.ig.profile_picture_url) {
-      introAvatarEl.style.backgroundImage = `url(${data.ig.profile_picture_url})`;
-    }
-  } catch(e) {}
-})();
-
-// Avatar glow at 1.3s
-setTimeout(() => { introAvatarEl.classList.add('glow'); }, 1300);
+// Logo glow at 1.3s
+setTimeout(() => { document.getElementById('intro-logo').classList.add('glow'); }, 1300);
 
 // Fade out intro at 2.8s, reveal main
 setTimeout(() => {
-  // Hide all intro text/avatar elements immediately
-  document.querySelectorAll('.intro-avatar,.intro-name,.intro-sub,.intro-by').forEach(el => {
-    el.style.transition = 'opacity 0.6s ease-out';
-    el.style.opacity = '0';
-  });
   document.getElementById('intro-overlay').classList.add('out');
   document.getElementById('main-content').classList.add('show');
   document.body.classList.add('intro-done');
@@ -768,7 +753,7 @@ setTimeout(() => {
 
 // Clean up intro elements at 4s
 setTimeout(() => {
-  document.querySelectorAll('.intro-overlay,.intro-avatar,.intro-name,.intro-sub,.intro-by,.intro-ring,.intro-ember,.intro-scan,.intro-streak').forEach(el => el.remove());
+  document.querySelectorAll('.intro-overlay,.intro-ring,.intro-ember,.intro-scan,.intro-streak').forEach(el => el.remove());
 }, 4000);
 
 // =====================================================
