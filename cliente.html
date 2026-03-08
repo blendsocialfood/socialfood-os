@@ -216,6 +216,41 @@ body.intro-done{overflow-y:auto;}
 }
 .cursor.hover{width:50px;height:50px;border-color:rgba(234,88,12,1);}
 
+/* === BACKGROUND SLIDESHOW === */
+.bg-slideshow{
+  position:fixed;inset:0;z-index:0;
+}
+.bg-slide{
+  position:absolute;inset:-30px;
+  background-size:cover;background-position:center;
+  filter:brightness(0.18) saturate(1.4) blur(1px);
+  opacity:0;
+  animation:bgSlide 32s ease-in-out infinite;
+}
+.bg-slide:nth-child(1){background-image:url('https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=1920&q=80&auto=format&fit=crop');animation-delay:0s;}
+.bg-slide:nth-child(2){background-image:url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80&auto=format&fit=crop');animation-delay:8s;}
+.bg-slide:nth-child(3){background-image:url('https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=1920&q=80&auto=format&fit=crop');animation-delay:16s;}
+.bg-slide:nth-child(4){background-image:url('https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=1920&q=80&auto=format&fit=crop');animation-delay:24s;}
+@keyframes bgSlide{
+  0%{opacity:0;transform:scale(1);}
+  5%{opacity:1;}
+  25%{opacity:1;transform:scale(1.05);}
+  30%{opacity:0;transform:scale(1.05);}
+  100%{opacity:0;transform:scale(1);}
+}
+.bg-overlay{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 30%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.85) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(3,3,3,0.6) 50%, #030303 100%);
+  pointer-events:none;
+}
+.bg-vignette{
+  position:fixed;inset:0;z-index:0;
+  box-shadow:inset 0 0 250px rgba(0,0,0,0.9);
+  pointer-events:none;
+}
+
 /* === FILM GRAIN OVERLAY === */
 .grain{
   position:fixed;inset:0;z-index:99998;pointer-events:none;
@@ -260,6 +295,7 @@ body.intro-done{overflow-y:auto;}
 section{
   min-height:100vh;padding:120px 60px 80px;
   position:relative;overflow:visible;
+  z-index:1;
 }
 
 /* === REVEAL ANIMATIONS === */
@@ -289,35 +325,10 @@ section{
 .hero{
   min-height:100vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;
-  position:relative;background:#030303;overflow:hidden;
+  position:relative;background:transparent;overflow:hidden;
 }
 
-/* Hero background image */
-.hero-bg{
-  position:absolute;inset:-30px;z-index:0;
-  background:url('https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=1920&q=80&auto=format&fit=crop') center center/cover no-repeat;
-  animation:heroKenBurns 25s ease-in-out infinite alternate;
-  filter:brightness(0.25) saturate(1.3) blur(2px);
-}
-@keyframes heroKenBurns{
-  0%{transform:scale(1) translate(0,0);}
-  100%{transform:scale(1.08) translate(-1%,-1%);}
-}
-
-/* Dark overlays for depth */
-.hero-overlay{
-  position:absolute;inset:0;z-index:1;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 45%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%),
-    linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(3,3,3,0.3) 40%, rgba(3,3,3,0.7) 80%, #030303 100%);
-}
-
-/* Vignette */
-.hero-vignette{
-  position:absolute;inset:0;z-index:1;
-  box-shadow:inset 0 0 200px rgba(0,0,0,0.8);
-  pointer-events:none;
-}
+/* Hero needs no bg — global slideshow covers it */
 
 /* Aurora effect on top of image */
 .hero-aurora{
@@ -356,8 +367,8 @@ section{
   -webkit-mask-image:radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 70%);
 }
 .hero-fade{
-  position:absolute;bottom:0;left:0;right:0;height:50%;z-index:3;
-  background:linear-gradient(180deg, transparent 0%, #030303 100%);
+  position:absolute;bottom:0;left:0;right:0;height:40%;z-index:3;
+  background:linear-gradient(180deg, transparent 0%, rgba(3,3,3,0.8) 100%);
 }
 .hero-content{position:relative;z-index:5;max-width:800px;}
 
@@ -682,6 +693,16 @@ section{
 <div class="shake-wrapper">
 <div class="main-hidden" id="main-content">
 
+<!-- BACKGROUND SLIDESHOW -->
+<div class="bg-slideshow">
+  <div class="bg-slide"></div>
+  <div class="bg-slide"></div>
+  <div class="bg-slide"></div>
+  <div class="bg-slide"></div>
+</div>
+<div class="bg-overlay"></div>
+<div class="bg-vignette"></div>
+
 <!-- CURSOR -->
 <div class="cursor" id="cursor"></div>
 <div class="cursor-glow" id="cursor-glow"></div>
@@ -708,9 +729,6 @@ section{
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-vignette"></div>
   <div class="hero-aurora">
     <div class="aurora-layer"></div>
     <div class="aurora-layer"></div>
