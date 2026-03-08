@@ -527,28 +527,47 @@
     background: rgba(234,88,12,0.1);
   }
 
-  /* Client */
-  .sel-client.disabled {
-    cursor: default;
-    opacity: 0.3;
-    pointer-events: auto;
+  /* Client — estado activo */
+  .sel-client {
+    border-color: rgba(99,179,237,0.15);
+    background: linear-gradient(170deg, rgba(6,14,25,0.95), rgba(4,8,16,0.95));
   }
-  .sel-client.disabled:hover {
-    opacity: 0.5;
-    transform: translateY(-6px);
-    border-color: rgba(255,255,255,0.15);
-    background: linear-gradient(170deg, rgba(22,22,22,0.95), rgba(12,12,12,0.95));
+  .sel-client::before {
+    background: radial-gradient(ellipse at 50% 0%, rgba(99,179,237,0.08) 0%, transparent 60%);
+    opacity: 1;
+  }
+  .sel-client::after {
+    background: linear-gradient(170deg, rgba(99,179,237,0.4), transparent 40%, transparent 60%, rgba(99,179,237,0.2));
+    opacity: 0.3;
+  }
+  .sel-client .sel-icon {
+    border-color: rgba(99,179,237,0.2);
+    background: linear-gradient(135deg, rgba(99,179,237,0.08), rgba(99,179,237,0.02));
+  }
+  .sel-client .sel-icon svg { stroke: #63b3ed; }
+  .sel-client .sel-title { color: #fff; }
+  .sel-client .sel-desc { color: #aaa; }
+  .sel-client:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(99,179,237,0.4);
+    background: linear-gradient(170deg, rgba(10,22,40,0.95), rgba(6,14,28,0.95));
     box-shadow:
       0 30px 80px rgba(0,0,0,0.5),
-      0 0 60px rgba(255,255,255,0.03);
+      0 0 40px rgba(99,179,237,0.15);
   }
-  .sel-client.disabled:hover .sel-icon {
-    border-color: rgba(255,255,255,0.2);
-    box-shadow: 0 0 30px rgba(255,255,255,0.06);
+  .sel-client:hover .sel-icon {
+    border-color: rgba(99,179,237,0.4);
+    box-shadow: 0 0 20px rgba(99,179,237,0.2);
+    background: linear-gradient(135deg, rgba(99,179,237,0.15), rgba(99,179,237,0.05));
     transform: scale(1.05);
   }
-  .sel-client.disabled:hover .sel-icon svg { stroke: rgba(255,255,255,0.4); }
-  .sel-client.disabled:hover .sel-title { color: rgba(255,255,255,0.6); }
+  .sel-client:hover .sel-icon svg { stroke: #90cdf4; }
+  .sel-client:hover .sel-enter {
+    opacity: 1; transform: translateY(0);
+    border-color: rgba(99,179,237,0.3);
+    color: #63b3ed;
+    background: rgba(99,179,237,0.1);
+  }
 
   .sel-icon {
     width: 68px; height: 68px;
@@ -690,8 +709,8 @@
   <div class="divider"></div>
 
   <div class="selector">
-    <div class="sel-card sel-client disabled">
-      <span class="sel-badge badge-soon">Pronto</span>
+    <a href="/login" class="sel-card sel-client">
+      <span class="sel-badge badge-active">Activo</span>
       <div class="sel-icon">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -701,12 +720,12 @@
       <div class="sel-title">Cliente</div>
       <div class="sel-desc">Revisa tu grilla, resultados<br>y avances del mes</div>
       <div class="sel-enter">
-        Pronto
+        Entrar
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
       </div>
-    </div>
+    </a>
 
     <a href="/admin" class="sel-card sel-admin">
       <span class="sel-badge badge-active">Activo</span>

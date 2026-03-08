@@ -12,6 +12,7 @@ USERS = {
     'paula': {'password': 'Pauliña123',   'role': 'unity',   'name': 'Paula'},
     'juan':  {'password': 'Juanitomachine123', 'role': 'unity', 'name': 'Juan'},
     'seba':  {'password': 'Sebads123',    'role': 'copilot', 'name': 'Sebastián'},
+    'admin': {'password': 'admin', 'role': 'cliente', 'name': 'Bangkok Thai', 'client_name': 'Bangkok'},
 }
 
 def generate_token(username, role):
@@ -56,6 +57,9 @@ def login():
             session['user'] = username
             session['role'] = user['role']
             session['name'] = user['name']
+            session['client_name'] = user.get('client_name', '')
+            if user['role'] == 'cliente':
+                return redirect('/cliente')
             return redirect('/admin')
         return login_page(error='Usuario o contraseña incorrectos')
     return login_page()
@@ -74,6 +78,21 @@ def admin():
         html = f.read()
     user_script = f"""<script>
 const SF_USER = {{username:'{session["user"]}',name:'{session["name"]}',role:'{session["role"]}',token:'{token}'}};
+</script>"""
+    html = html.replace('</head>', user_script + '\n</head>')
+    return html
+
+@app.route('/cliente')
+def cliente():
+    if 'user' not in session:
+        return redirect('/login')
+    if session.get('role') != 'cliente':
+        return redirect('/admin')
+    token = generate_token(session['user'], session['role'])
+    with open('cliente.html', 'r') as f:
+        html = f.read()
+    user_script = f"""<script>
+const SF_USER = {{username:'{session["user"]}',name:'{session["name"]}',role:'{session["role"]}',token:'{token}',client_name:'{session.get("client_name","")}'}};
 </script>"""
     html = html.replace('</head>', user_script + '\n</head>')
     return html

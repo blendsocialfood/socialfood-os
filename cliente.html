@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Food — Tu Espacio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',-apple-system,sans-serif;
+  background:#030303;color:#f5f5f5;
+  overflow-x:hidden;
+}
+/* --- SCROLL PROGRESS BAR --- */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;
+  background:linear-gradient(90deg,#EA580C,#fb923c,#fbbf24);
+  z-index:10000;width:0%;transition:width 0.1s;
+}
+/* --- NAV --- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  padding:16px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(3,3,3,0.8);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  transition:all 0.4s;
+}
+.nav.scrolled{background:rgba(3,3,3,0.95);box-shadow:0 4px 30px rgba(0,0,0,0.5);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-sf{font-size:18px;font-weight:900;color:#fff;letter-spacing:-0.5px;}
+.nav-dot{width:6px;height:6px;background:#EA580C;border-radius:50%;display:inline-block;box-shadow:0 0 10px rgba(234,88,12,0.8);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-name{font-size:12px;color:#888;font-weight:500;}
+.nav-btn{
+  padding:8px 20px;border-radius:10px;font-size:11px;font-weight:600;
+  text-decoration:none;color:#888;border:1px solid rgba(255,255,255,0.1);
+  transition:all 0.3s;letter-spacing:0.5px;
+}
+.nav-btn:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+/* --- SECTIONS --- */
+section{
+  min-height:100vh;padding:120px 60px 80px;
+  position:relative;overflow:hidden;
+}
+/* --- REVEAL ANIMATIONS --- */
+.reveal{
+  opacity:0;transform:translateY(60px);
+  transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:0.1s;}
+.reveal-delay-2{transition-delay:0.2s;}
+.reveal-delay-3{transition-delay:0.3s;}
+.reveal-delay-4{transition-delay:0.4s;}
+
+/* --- HERO --- */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  position:relative;
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background-size:cover;background-position:center;
+  filter:brightness(0.3) saturate(1.2);
+}
+.hero-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg, rgba(3,3,3,0.4) 0%, rgba(3,3,3,0.6) 50%, rgba(3,3,3,1) 100%);
+}
+.hero-content{position:relative;z-index:2;max-width:800px;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 20px;border-radius:100px;
+  background:rgba(234,88,12,0.1);border:1px solid rgba(234,88,12,0.2);
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:#fb923c;margin-bottom:32px;
+}
+.hero-badge-dot{width:6px;height:6px;background:#EA580C;border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.hero-title{
+  font-size:clamp(48px,8vw,96px);font-weight:900;letter-spacing:-3px;
+  line-height:0.95;margin-bottom:24px;
+  background:linear-gradient(135deg,#fff 0%,#ccc 50%,#999 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{
+  font-size:clamp(16px,2vw,22px);font-weight:300;color:#888;
+  line-height:1.6;max-width:600px;margin:0 auto 48px;
+}
+.hero-scroll{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:#555;font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  animation:float-down 2s ease-in-out infinite;
+}
+.hero-scroll svg{width:20px;height:20px;stroke:#EA580C;fill:none;stroke-width:2;}
+@keyframes float-down{0%,100%{transform:translateY(0);}50%{transform:translateY(10px);}}
+
+/* --- COUNTER ANIMATION --- */
+.counter{font-variant-numeric:tabular-nums;}
+
+/* --- CARDS --- */
+.glass-card{
+  background:linear-gradient(170deg,rgba(18,18,18,0.8),rgba(8,8,8,0.8));
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:24px;padding:32px;
+  backdrop-filter:blur(20px);
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.glass-card:hover{
+  border-color:rgba(255,255,255,0.12);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* --- SECTION TITLES --- */
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;
+  color:#EA580C;margin-bottom:12px;
+}
+.section-title{
+  font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-2px;
+  line-height:1.1;margin-bottom:16px;color:#fff;
+}
+.section-desc{font-size:16px;color:#666;line-height:1.7;max-width:600px;}
+
+/* --- KPI GRID --- */
+.kpi-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;margin-top:48px;
+}
+.kpi-card{
+  background:linear-gradient(170deg,rgba(18,18,18,0.9),rgba(8,8,8,0.9));
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:28px;
+  position:relative;overflow:hidden;
+}
+.kpi-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent,#EA580C),transparent);
+  opacity:0.5;
+}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#666;margin-bottom:12px;}
+.kpi-value{font-size:36px;font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;}
+.kpi-delta{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:600;margin-top:8px;padding:4px 10px;
+  border-radius:8px;
+}
+.kpi-up{color:#4ade80;background:rgba(74,222,128,0.1);}
+.kpi-down{color:#f87171;background:rgba(248,113,113,0.1);}
+
+/* --- GRILLA --- */
+.grilla-timeline{display:flex;gap:16px;overflow-x:auto;padding:20px 0;margin-top:32px;}
+.grilla-week{min-width:260px;flex-shrink:0;}
+.grilla-week-title{font-size:13px;font-weight:700;color:#888;margin-bottom:12px;letter-spacing:1px;}
+.grilla-piece{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:14px 16px;margin-bottom:8px;
+  transition:all 0.3s;cursor:default;
+}
+.grilla-piece:hover{border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);}
+.grilla-piece-title{font-size:13px;font-weight:600;color:#ddd;margin-bottom:4px;}
+.grilla-piece-meta{font-size:11px;color:#666;display:flex;gap:8px;align-items:center;}
+.estado-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.estado-draft{background:#666;}
+.estado-revision{background:#fbbf24;}
+.estado-aprobado{background:#4ade80;}
+.estado-clickup{background:#EA580C;}
+.grilla-progress{
+  margin-top:24px;background:rgba(255,255,255,0.05);
+  border-radius:12px;height:8px;overflow:hidden;
+}
+.grilla-progress-bar{height:100%;background:linear-gradient(90deg,#EA580C,#fb923c);border-radius:12px;transition:width 1s ease-out;}
+
+/* --- IG GRID --- */
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:32px;max-width:500px;}
+.ig-post{
+  aspect-ratio:1;border-radius:16px;overflow:hidden;
+  position:relative;cursor:pointer;
+}
+.ig-post img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s cubic-bezier(0.16,1,0.3,1);}
+.ig-post:hover img{transform:scale(1.1);}
+.ig-post-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  opacity:0;transition:opacity 0.3s;font-size:13px;font-weight:600;
+}
+.ig-post:hover .ig-post-overlay{opacity:1;}
+
+/* --- REVIEWS --- */
+.review-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  border-radius:18px;padding:24px;position:relative;
+}
+.review-quote{
+  position:absolute;top:12px;left:16px;font-size:48px;
+  color:rgba(234,88,12,0.15);font-family:Georgia,serif;line-height:1;
+}
+.review-text{font-size:14px;color:#bbb;line-height:1.7;padding-top:20px;font-style:italic;}
+.review-author{font-size:12px;color:#666;margin-top:12px;font-weight:600;}
+.review-stars{color:#fbbf24;font-size:14px;margin-top:6px;}
+
+/* --- EVOLUTION --- */
+.evo-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px;}
+.evo-card{text-align:center;padding:32px;}
+.evo-label{font-size:12px;color:#666;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.evo-value{font-size:48px;font-weight:900;letter-spacing:-2px;}
+.evo-before{color:#666;}
+.evo-after{color:#4ade80;}
+
+/* --- FOOTER --- */
+.footer{
+  text-align:center;padding:60px 40px;
+  border-top:1px solid rgba(255,255,255,0.05);
+}
+.footer-logo{font-size:24px;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:8px;}
+.footer-text{font-size:12px;color:#444;}
+
+/* --- PROGRESS RING --- */
+.progress-ring{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+.progress-ring svg{transform:rotate(-90deg);}
+.progress-ring-value{position:absolute;font-size:20px;font-weight:800;color:#fff;}
+
+/* --- PARTICLES --- */
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* --- DOWNLOAD BTN --- */
+.download-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 28px;border-radius:14px;
+  background:linear-gradient(135deg,#EA580C,#fb923c);
+  color:#fff;font-size:13px;font-weight:700;
+  text-decoration:none;transition:all 0.3s;border:none;cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.download-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(234,88,12,0.4);}
+.download-btn-ghost{
+  background:transparent;border:1px solid rgba(255,255,255,0.1);color:#aaa;
+}
+.download-btn-ghost:hover{border-color:rgba(255,255,255,0.3);color:#fff;box-shadow:none;}
+
+/* --- NOTIFICATIONS BADGE --- */
+.notif-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:10px;
+  background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);
+  font-size:11px;font-weight:600;color:#fbbf24;
+}
+
+/* --- RESPONSIVE --- */
+@media(max-width:768px){
+  section{padding:80px 24px 60px;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  .evo-grid{grid-template-columns:1fr;}
+  .ig-grid{grid-template-columns:repeat(3,1fr);}
+  .nav{padding:12px 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- PARTICLES -->
+<canvas class="particles" id="particles"></canvas>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="/" class="nav-logo">
+    <span class="nav-sf">Blend<span class="nav-dot"></span></span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-name" id="nav-name"></span>
+    <a href="/logout" class="nav-btn">Salir</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge reveal">
+      <span class="hero-badge-dot"></span>
+      Tu ecosistema digital
+    </div>
+    <h1 class="hero-title reveal reveal-delay-1" id="hero-title"></h1>
+    <p class="hero-sub reveal reveal-delay-2" id="hero-sub"></p>
+    <div id="hero-notif" class="reveal reveal-delay-3"></div>
+    <div class="hero-scroll reveal reveal-delay-4">
+      <span>Explorar</span>
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENIDO DEL MES -->
+<section id="sec-grilla">
+  <div class="section-label reveal">Contenido</div>
+  <h2 class="section-title reveal reveal-delay-1">Tu grilla del mes</h2>
+  <p class="section-desc reveal reveal-delay-2" id="grilla-desc"></p>
+  <div class="reveal reveal-delay-2" style="margin-top:24px;">
+    <button class="download-btn" id="btn-download-grilla" onclick="downloadGrilla()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar Grilla PDF
+    </button>
+  </div>
+  <div class="grilla-progress reveal reveal-delay-3"><div class="grilla-progress-bar" id="grilla-bar"></div></div>
+  <p class="reveal reveal-delay-3" style="font-size:12px;color:#666;margin-top:8px;" id="grilla-progress-text"></p>
+  <div class="grilla-timeline reveal reveal-delay-3" id="grilla-timeline"></div>
+</section>
+
+<!-- RESULTADOS ADS -->
+<section id="sec-ads">
+  <div class="section-label reveal">Resultados</div>
+  <h2 class="section-title reveal reveal-delay-1">Tus campanas en accion</h2>
+  <p class="section-desc reveal reveal-delay-2">Metricas de tus anuncios en Meta Ads durante los ultimos 7 dias.</p>
+  <div class="kpi-grid reveal reveal-delay-3" id="kpi-grid"></div>
+</section>
+
+<!-- INSTAGRAM -->
+<section id="sec-ig">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;">
+    <div>
+      <div class="section-label reveal">Instagram</div>
+      <h2 class="section-title reveal reveal-delay-1">Tu presencia digital</h2>
+      <div class="kpi-grid reveal reveal-delay-2" id="ig-stats" style="grid-template-columns:1fr 1fr;"></div>
+    </div>
+    <div class="reveal reveal-delay-3">
+      <div class="ig-grid" id="ig-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESENAS -->
+<section id="sec-reviews">
+  <div class="section-label reveal">Reputacion</div>
+  <h2 class="section-title reveal reveal-delay-1">Lo que dice tu gente</h2>
+  <div class="reveal reveal-delay-2" id="reviews-summary" style="margin-bottom:32px;"></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;" id="reviews-grid" class="reveal reveal-delay-3"></div>
+</section>
+
+<!-- EVOLUCION -->
+<section id="sec-evo">
+  <div class="section-label reveal">Evolucion</div>
+  <h2 class="section-title reveal reveal-delay-1">Tu crecimiento con Blend</h2>
+  <p class="section-desc reveal reveal-delay-2">Desde que empezamos a trabajar juntos.</p>
+  <div class="evo-grid reveal reveal-delay-3" id="evo-grid"></div>
+</section>
+
+<!-- QUE VIENE -->
+<section id="sec-next">
+  <div class="section-label reveal">Proximos pasos</div>
+  <h2 class="section-title reveal reveal-delay-1">Que viene</h2>
+  <div id="next-items" class="reveal reveal-delay-2" style="margin-top:32px;max-width:600px;"></div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">Blend<span style="color:#EA580C;">.</span></div>
+  <div class="footer-text">Powered by Social Food OS — 2026</div>
+</div>
+
+<script>
+// =====================================================
+// INIT
+// =====================================================
+const CLIENT = SF_USER.client_name || SF_USER.name;
+document.getElementById('nav-name').textContent = SF_USER.name;
+document.getElementById('hero-title').textContent = SF_USER.name;
+
+// =====================================================
+// SCROLL PROGRESS
+// =====================================================
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const p = (window.scrollY / h) * 100;
+  document.getElementById('scroll-progress').style.width = p + '%';
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// =====================================================
+// REVEAL ON SCROLL (Intersection Observer)
+// =====================================================
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// =====================================================
+// COUNTER ANIMATION
+// =====================================================
+function animateCounter(el, target, prefix='', suffix='', decimals=0) {
+  const duration = 1500;
+  const start = performance.now();
+  const from = 0;
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 4);
+    const val = from + (target - from) * ease;
+    el.textContent = prefix + val.toLocaleString('es-CL', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + suffix;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// =====================================================
+// PARTICLES (subtle)
+// =====================================================
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function initParticles() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 5;
+  particles = Array.from({length: 40}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.5 + 0.5,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    o: Math.random() * 0.15 + 0.05,
+  }));
+}
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(234,88,12,${p.o})`;
+    ctx.fill();
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+  });
+  requestAnimationFrame(drawParticles);
+}
+initParticles();
+drawParticles();
+window.addEventListener('resize', initParticles);
+
+// =====================================================
+// DATA LOADING
+// =====================================================
+const UNITY_URL = 'https://positive-appreciation-production.up.railway.app';
+const COPILOT_URL = 'https://web-production-2131c.up.railway.app';
+
+async function loadAll() {
+  // Cargar datos en paralelo
+  const [adsData, igData] = await Promise.allSettled([
+    fetch(COPILOT_URL + '/api/data?period=last_7d').then(r => r.json()).catch(() => null),
+    fetch(COPILOT_URL + '/api/ig-metrics').then(r => r.json()).catch(() => null),
+  ]);
+
+  const ads = adsData.status === 'fulfilled' ? adsData.value : null;
+  const ig = igData.status === 'fulfilled' ? igData.value : null;
+
+  renderHero(ads, ig);
+  renderAds(ads);
+  renderIG(ig);
+  renderGrilla();
+  renderReviews();
+  renderEvolution(ig);
+  renderNext();
+}
+
+// =====================================================
+// RENDER HERO
+// =====================================================
+function renderHero(ads, ig) {
+  // Buscar datos del cliente
+  let clientAds = null;
+  if (ads && ads.clients) {
+    clientAds = ads.clients.find(c => c.name.toLowerCase().includes(CLIENT.toLowerCase()));
+  }
+  let igInfo = null;
+  if (ig) {
+    const key = Object.keys(ig).find(k => k.toLowerCase().includes(CLIENT.toLowerCase()));
+    if (key) igInfo = ig[key];
+  }
+
+  const sub = igInfo
+    ? `@${igInfo.username || ''} · ${(igInfo.followers_count || 0).toLocaleString('es-CL')} seguidores`
+    : 'Tu ecosistema digital conectado';
+  document.getElementById('hero-sub').textContent = sub;
+
+  // Set IG profile pic or gradient as hero bg
+  if (igInfo && igInfo.profile_pic_url) {
+    document.getElementById('hero-bg').style.backgroundImage = `url(${igInfo.profile_pic_url})`;
+  }
+}
+
+// =====================================================
+// RENDER ADS
+// =====================================================
+function renderAds(data) {
+  const grid = document.getElementById('kpi-grid');
+  if (!data || !data.clients) {
+    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de campanas disponibles</p>';
+    return;
+  }
+  const client = data.clients.find(c => c.name.toLowerCase().includes(CLIENT.toLowerCase()));
+  if (!client) {
+    grid.innerHTML = '<p style="color:#555;font-size:14px;">Sin campanas activas</p>';
+    return;
+  }
+  const d = client;
+  const kpis = [
+    { label: 'Inversion', value: d.total_gasto || 0, prefix: '$', color: '#EA580C' },
+    { label: 'Alcance', value: d.total_alcance || 0, color: '#63b3ed' },
+    { label: 'Clicks', value: d.total_clicks || 0, color: '#4ade80' },
+    { label: 'Mensajes', value: d.total_mensajes || 0, color: '#fbbf24' },
+  ];
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi-card" style="--accent:${k.color}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value counter" data-target="${k.value}" data-prefix="${k.prefix||''}">${k.prefix||''}0</div>
+    </div>
+  `).join('');
+
+  // Animate counters when visible
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        animateCounter(el, parseFloat(el.dataset.target), el.dataset.prefix || '');
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+}
+
+// =====================================================
+// RENDER IG
+// =====================================================
+function renderIG(data) {
+  const stats = document.getElementById('ig-stats');
+  const grid = document.getElementById('ig-grid');
+  if (!data) {
+    stats.innerHTML = '<p style="color:#555;font-size:14px;">Cargando datos de Instagram...</p>';
+    return;
+  }
+  const key = Object.keys(data).find(k => k.toLowerCase().includes(CLIENT.toLowerCase()));
+  const ig = key ? data[key] : null;
+  if (!ig) {
+    stats.innerHTML = '<p style="color:#555;font-size:14px;">Sin datos de Instagram</p>';
+    return;
+  }
+
+  stats.innerHTML = `
+    <div class="kpi-card" style="--accent:#E1306C">
+      <div class="kpi-label">Seguidores</div>
+      <div class="kpi-value counter" data-target="${ig.followers_count || 0}">0</div>
+    </div>
+    <div class="kpi-card" style="--accent:#E1306C">
+      <div class="kpi-label">Publicaciones</div>
+      <div class="kpi-value counter" data-target="${ig.media_count || 0}">0</div>
+    </div>
+  `;
+
+  // Animate
+  const cObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateCounter(e.target, parseFloat(e.target.dataset.target));
+        cObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  stats.querySelectorAll('.counter').forEach(el => cObs.observe(el));
+
+  // IG posts grid placeholder
+  grid.innerHTML = Array.from({length: 6}, (_, i) => `
+    <div class="ig-post" style="background:linear-gradient(135deg,#111,#1a1a1a);display:flex;align-items:center;justify-content:center;">
+      <span style="color:#333;font-size:24px;">📷</span>
+    </div>
+  `).join('');
+}
+
+// =====================================================
+// RENDER GRILLA (placeholder - loads from Unity)
+// =====================================================
+function renderGrilla() {
+  const timeline = document.getElementById('grilla-timeline');
+  const now = new Date();
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('grilla-desc').textContent = `Contenido planificado para ${monthNames[now.getMonth()]} ${now.getFullYear()}.`;
+
+  // Placeholder weeks
+  const weeks = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+  const estados = ['draft','revision','aprobado','clickup'];
+  const formatos = ['Reel','Carrusel','Imagen','Historia'];
+  const estadoNames = {draft:'Borrador',revision:'En revision',aprobado:'Aprobado',clickup:'Publicado'};
+
+  let totalPieces = 0, approvedPieces = 0;
+  let html = '';
+  weeks.forEach(w => {
+    const pieces = Math.floor(Math.random() * 2) + 3;
+    html += `<div class="grilla-week"><div class="grilla-week-title">${w}</div>`;
+    for (let i = 0; i < pieces; i++) {
+      const estado = estados[Math.floor(Math.random() * estados.length)];
+      const formato = formatos[Math.floor(Math.random() * formatos.length)];
+      totalPieces++;
+      if (estado === 'aprobado' || estado === 'clickup') approvedPieces++;
+      html += `
+        <div class="grilla-piece">
+          <div class="grilla-piece-title">${formato} — Pieza ${i+1}</div>
+          <div class="grilla-piece-meta">
+            <span class="estado-dot estado-${estado}"></span>
+            ${estadoNames[estado]}
+          </div>
+        </div>`;
+    }
+    html += '</div>';
+  });
+  timeline.innerHTML = html;
+  const pct = totalPieces > 0 ? Math.round((approvedPieces / totalPieces) * 100) : 0;
+  document.getElementById('grilla-bar').style.width = pct + '%';
+  document.getElementById('grilla-progress-text').textContent = `${approvedPieces} de ${totalPieces} piezas listas (${pct}%)`;
+}
+
+// =====================================================
+// RENDER REVIEWS (placeholder)
+// =====================================================
+function renderReviews() {
+  const summary = document.getElementById('reviews-summary');
+  const grid = document.getElementById('reviews-grid');
+  summary.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="font-size:48px;font-weight:900;color:#fff;">4.6</div>
+      <div>
+        <div class="review-stars">★★★★★</div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">Google Reviews</div>
+      </div>
+    </div>
+  `;
+  const sampleReviews = [
+    { text: 'Excelente comida, el mejor thai de Santiago. Los sabores son autenticos y el servicio impecable.', author: 'Maria G.', rating: 5 },
+    { text: 'Ambiente increible, muy buena atencion. El pad thai es espectacular, volveremos seguro.', author: 'Carlos R.', rating: 5 },
+    { text: 'Muy buena experiencia. Los platos son generosos y los precios razonables para la calidad.', author: 'Andrea M.', rating: 4 },
+  ];
+  grid.innerHTML = sampleReviews.map(r => `
+    <div class="review-card">
+      <div class="review-quote">"</div>
+      <div class="review-text">${r.text}</div>
+      <div class="review-author">${r.author}</div>
+      <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+    </div>
+  `).join('');
+}
+
+// =====================================================
+// RENDER EVOLUTION
+// =====================================================
+function renderEvolution(igData) {
+  const grid = document.getElementById('evo-grid');
+  grid.innerHTML = `
+    <div class="glass-card evo-card">
+      <div class="evo-label">Seguidores al inicio</div>
+      <div class="evo-value evo-before">~50.000</div>
+    </div>
+    <div class="glass-card evo-card">
+      <div class="evo-label">Seguidores hoy</div>
+      <div class="evo-value evo-after">54.100+</div>
+    </div>
+    <div class="glass-card evo-card">
+      <div class="evo-label">Meses juntos</div>
+      <div class="evo-value" style="color:#EA580C;">3</div>
+    </div>
+    <div class="glass-card evo-card">
+      <div class="evo-label">Piezas creadas</div>
+      <div class="evo-value" style="color:#fb923c;">48+</div>
+    </div>
+  `;
+}
+
+// =====================================================
+// RENDER NEXT
+// =====================================================
+function renderNext() {
+  const box = document.getElementById('next-items');
+  const items = [
+    { icon: '📸', text: 'Sesion de fotos y video — proxima semana' },
+    { icon: '📊', text: 'Informe mensual de resultados — fin de mes' },
+    { icon: '🎯', text: 'Optimizacion de campanas de ads — en curso' },
+    { icon: '📱', text: 'Nuevas piezas de contenido — en produccion' },
+  ];
+  box.innerHTML = items.map((item, i) => `
+    <div class="glass-card" style="display:flex;align-items:center;gap:16px;margin-bottom:12px;padding:20px 24px;opacity:0;animation:fadeSlideIn 0.6s ${i*0.1}s forwards;">
+      <span style="font-size:24px;">${item.icon}</span>
+      <span style="font-size:14px;color:#ccc;">${item.text}</span>
+    </div>
+  `).join('');
+}
+
+// =====================================================
+// DOWNLOAD GRILLA
+// =====================================================
+function downloadGrilla() {
+  const btn = document.getElementById('btn-download-grilla');
+  btn.textContent = 'Generando...';
+  btn.disabled = true;
+  // TODO: Connect to Unity API
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Grilla PDF';
+    btn.disabled = false;
+    alert('Funcion en desarrollo — pronto disponible');
+  }, 1000);
+}
+
+// =====================================================
+// FADE IN ANIMATION
+// =====================================================
+const style = document.createElement('style');
+style.textContent = `@keyframes fadeSlideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}`;
+document.head.appendChild(style);
+
+// =====================================================
+// LOAD
+// =====================================================
+loadAll();
+</script>
+</body>
+</html>
