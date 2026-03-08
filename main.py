@@ -13,6 +13,7 @@ USERS = {
     'juan':  {'password': 'Juanitomachine123', 'role': 'unity', 'name': 'Juan'},
     'seba':  {'password': 'Sebads123',    'role': 'copilot', 'name': 'Sebastián'},
     'admin': {'password': 'admin', 'role': 'cliente', 'name': 'Bangkok Thai', 'client_name': 'Bangkok'},
+    'admin2': {'password': 'admin2', 'role': 'cliente', 'name': 'Fuente Mardoqueo', 'client_name': 'Mardoqueo'},
 }
 
 def generate_token(username, role):

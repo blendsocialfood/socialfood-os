@@ -225,14 +225,7 @@ body.intro-done{overflow-y:auto;}
   background-size:cover;background-position:center;
   filter:brightness(0.35) saturate(1.3);
   opacity:0;
-  animation:bgSlide 48s ease-in-out infinite;
 }
-.bg-slide:nth-child(1){background-image:url('https://bangkokthai.cl/wp-content/uploads/elementor/thumbs/r3-qk8tp5vhls8odc63kk7zxgtvjjxoqi9qk8g3gxu9fo.jpg');animation-delay:0s;}
-.bg-slide:nth-child(2){background-image:url('https://bangkokthai.cl/wp-content/uploads/elementor/thumbs/r1-qk8tp9mud4dtns0mylui7fvpx3f5laonwr21e1ooqs.jpg');animation-delay:8s;}
-.bg-slide:nth-child(3){background-image:url('https://bangkokthai.cl/wp-content/uploads/elementor/thumbs/362945612_251649627801658_1200004620771542826_n-1-qle8zs7tgl6du9cvewcx1u36e1ezdafl4c2nrk5idg.jpg');animation-delay:16s;}
-.bg-slide:nth-child(4){background-image:url('https://bangkokthai.cl/wp-content/uploads/elementor/thumbs/345428670_901789667566975_5782848074130582454_n-1-qle8zqc52x3t71flpvjnwuk979o8xw84g2rot08apw.jpg');animation-delay:24s;}
-.bg-slide:nth-child(5){background-image:url('https://bangkokthai.cl/wp-content/uploads/elementor/thumbs/365664906_251659077800713_63125390665371249_n-qle8zu3hu98yhha53x666tm3kt5pson1sldmq42q10.jpg');animation-delay:32s;}
-.bg-slide:nth-child(6){background-image:url('https://bangkokthai.cl/wp-content/uploads/elementor/thumbs/IMG_1969-scaled-e1710782650747-qleicojczwd52tzt60w48bjr8qw17uw6ftor0umq84.jpg');animation-delay:40s;}
 @keyframes bgSlide{
   0%{opacity:0;transform:scale(1);}
   3%{opacity:1;}
@@ -711,15 +704,8 @@ section{
 <div class="shake-wrapper">
 <div class="main-hidden" id="main-content">
 
-<!-- BACKGROUND SLIDESHOW -->
-<div class="bg-slideshow">
-  <div class="bg-slide"></div>
-  <div class="bg-slide"></div>
-  <div class="bg-slide"></div>
-  <div class="bg-slide"></div>
-  <div class="bg-slide"></div>
-  <div class="bg-slide"></div>
-</div>
+<!-- BACKGROUND SLIDESHOW (populated dynamically from IG posts) -->
+<div class="bg-slideshow" id="bg-slideshow"></div>
 <div class="bg-overlay"></div>
 <div class="bg-vignette"></div>
 
@@ -1092,6 +1078,7 @@ async function loadAll() {
 
   if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
 
+  renderSlideshow(copilot);
   renderHero(copilot);
   renderGrilla(unity);
   renderClickupProgress(unity);
@@ -1103,6 +1090,46 @@ async function loadAll() {
 
   // Init tilt after render
   setTimeout(initTilt, 500);
+}
+
+// =====================================================
+// RENDER BACKGROUND SLIDESHOW (from IG posts)
+// =====================================================
+function renderSlideshow(copilot) {
+  const container = document.getElementById('bg-slideshow');
+  const ig = copilot && copilot.ig;
+  let images = [];
+
+  // Use IG post images (filter out videos, take up to 9)
+  if (ig && ig.posts) {
+    images = ig.posts
+      .filter(p => p.media_url && p.media_type !== 'VIDEO')
+      .map(p => p.media_url)
+      .slice(0, 9);
+  }
+
+  if (images.length === 0) return;
+
+  const totalDuration = images.length * 8; // 8s per image
+  const style = document.createElement('style');
+  const pct1 = (3 / totalDuration * 100).toFixed(1);
+  const pct2 = (14 / totalDuration * 100).toFixed(1);
+  const pct3 = (17 / totalDuration * 100).toFixed(1);
+  style.textContent = `
+    .bg-slide.active{animation:bgSlideAuto ${totalDuration}s ease-in-out infinite;}
+    @keyframes bgSlideAuto{
+      0%{opacity:0;transform:scale(1);}
+      ${pct1}%{opacity:1;}
+      ${pct2}%{opacity:1;transform:scale(1.06);}
+      ${pct3}%{opacity:0;transform:scale(1.06);}
+      100%{opacity:0;transform:scale(1);}
+    }`;
+  document.head.appendChild(style);
+
+  container.innerHTML = images.map((url, i) => {
+    const delay = i * 8;
+    return `<div class="bg-slide active" style="background-image:url('${url}');animation-delay:${delay}s;"></div>`;
+  }).join('');
 }
 
 // =====================================================
