@@ -468,6 +468,7 @@ async function loadAll() {
 
   renderHero(copilot);
   renderGrilla(unity);
+  renderClickupProgress(unity);
   renderAds(copilot);
   renderIG(copilot);
   renderReviews(unity);
@@ -634,11 +635,21 @@ function renderGrilla(unity) {
   }
   timeline.innerHTML = html;
 
-  const total = grilla.total;
-  const aprobadas = grilla.aprobadas;
-  const pct = total > 0 ? Math.round((aprobadas / total) * 100) : 0;
+}
+
+// =====================================================
+// RENDER CLICKUP PROGRESS (producción real)
+// =====================================================
+function renderClickupProgress(unity) {
+  const cu = unity && unity.clickup;
+  if (!cu || cu.total === 0) {
+    document.getElementById('grilla-bar').style.width = '0%';
+    document.getElementById('grilla-progress-text').textContent = 'Sin tareas en ClickUp';
+    return;
+  }
+  const pct = cu.total > 0 ? Math.round((cu.done / cu.total) * 100) : 0;
   document.getElementById('grilla-bar').style.width = pct + '%';
-  document.getElementById('grilla-progress-text').textContent = `${aprobadas} de ${total} piezas listas (${pct}%)`;
+  document.getElementById('grilla-progress-text').textContent = `${cu.done} de ${cu.total} piezas terminadas en ClickUp (${pct}%)`;
 }
 
 // =====================================================
