@@ -223,8 +223,9 @@ body.intro-done{overflow-y:auto;}
 .bg-slide{
   position:absolute;inset:-40px;
   background-size:cover;background-position:center;
-  filter:brightness(0.35) saturate(1.3) blur(3px);
+  filter:brightness(0.3) saturate(1.4) blur(8px);
   opacity:0;
+  will-change:opacity,transform;
 }
 @keyframes bgSlide{
   0%{opacity:0;transform:scale(1);}
@@ -988,9 +989,10 @@ function animateCounter(el, target, prefix='', suffix='', decimals=0) {
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let pts = [];
-const PARTICLE_COUNT = 35;
-const CONNECT_DIST = 120;
+const PARTICLE_COUNT = 20;
+const CONNECT_DIST = 100;
 let mouseCanvas = {x: -1000, y: -1000};
+let particlesRunning = true;
 
 function initParticles() {
   canvas.width = window.innerWidth;
@@ -999,9 +1001,9 @@ function initParticles() {
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     r: Math.random() * 1.5 + 0.5,
-    vx: (Math.random() - 0.5) * 0.3,
-    vy: (Math.random() - 0.5) * 0.3,
-    o: Math.random() * 0.15 + 0.03,
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25,
+    o: Math.random() * 0.12 + 0.03,
   }));
 }
 
@@ -1011,6 +1013,7 @@ document.addEventListener('mousemove', e => {
 });
 
 function drawParticles() {
+  if (!particlesRunning) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = 0; i < pts.length; i++) {
@@ -1032,23 +1035,13 @@ function drawParticles() {
   }
 
   pts.forEach(p => {
-    const dmx = p.x - mouseCanvas.x;
-    const dmy = p.y - mouseCanvas.y;
-    const dm2 = dmx * dmx + dmy * dmy;
-    if (dm2 < 40000 && dm2 > 0) {
-      const dm = Math.sqrt(dm2);
-      const force = (200 - dm) * 0.0002;
-      p.vx += (dmx / dm) * force;
-      p.vy += (dmy / dm) * force;
-    }
-
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(234,88,12,${p.o})`;
     ctx.fill();
 
     p.x += p.vx; p.y += p.vy;
-    p.vx *= 0.998; p.vy *= 0.998;
+    p.vx *= 0.999; p.vy *= 0.999;
     if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
     if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
   });
@@ -1058,6 +1051,16 @@ function drawParticles() {
 initParticles();
 drawParticles();
 window.addEventListener('resize', initParticles);
+
+// Pause animations when tab not visible (fix lag)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    particlesRunning = false;
+  } else {
+    particlesRunning = true;
+    drawParticles();
+  }
+});
 
 // =====================================================
 // DATA LOADING — REAL DATA FROM UNITY + COPILOT
@@ -1093,22 +1096,50 @@ async function loadAll() {
 }
 
 // =====================================================
-// RENDER BACKGROUND SLIDESHOW (from IG posts)
+// RENDER BACKGROUND SLIDESHOW
 // =====================================================
+// HD photos per client — replace URLs with Google Drive links when available
+const CLIENT_PHOTOS = {
+  'Bangkok': [
+    'https://bangkokthai.cl/wp-content/uploads/2024/02/Bangkok-2-1024x801.png',
+    'https://i0.wp.com/experiencias.wherelunch.com/wp-content/uploads/2022/12/Bangkok-restaurante-1.jpg',
+    'https://i0.wp.com/experiencias.wherelunch.com/wp-content/uploads/2022/12/Bangkok-restaurante-2.jpg',
+    'https://i0.wp.com/experiencias.wherelunch.com/wp-content/uploads/2022/12/Bangkok-restaurante-3.jpg',
+    'https://bangkokthai.cl/wp-content/uploads/2024/02/Bangkok-2-1-1024x801.png',
+  ],
+  'Mardoqueo': [
+    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-1.jpg',
+    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-2.jpg',
+    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-3.jpg',
+    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-4.jpg',
+    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-5.jpg',
+  ],
+};
+
 function renderSlideshow(copilot) {
   const container = document.getElementById('bg-slideshow');
-  const ig = copilot && copilot.ig;
   let images = [];
 
-  // Use IG post images (filter out videos, take up to 9)
-  if (ig && ig.posts) {
-    images = ig.posts
-      .filter(p => p.media_url && p.media_type !== 'VIDEO')
-      .map(p => p.media_url)
-      .slice(0, 9);
+  // 1) Use hardcoded HD photos if available for this client
+  if (CLIENT_PHOTOS[CLIENT]) {
+    images = CLIENT_PHOTOS[CLIENT];
+  }
+
+  // 2) Fallback: use IG post images
+  if (images.length === 0) {
+    const ig = copilot && copilot.ig;
+    if (ig && ig.posts) {
+      images = ig.posts
+        .filter(p => p.media_url && p.media_type !== 'VIDEO')
+        .map(p => p.media_url)
+        .slice(0, 6);
+    }
   }
 
   if (images.length === 0) return;
+
+  // Limit to 6 slides max for performance
+  images = images.slice(0, 6);
 
   const totalDuration = images.length * 8; // 8s per image
   const style = document.createElement('style');
