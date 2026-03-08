@@ -483,47 +483,90 @@ section{
 .kpi-value{font-size:36px;font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;}
 
 /* === GRILLA === */
-.grilla-timeline{display:flex;gap:16px;overflow-x:auto;padding:20px 0;margin-top:32px;}
-.grilla-timeline::-webkit-scrollbar{height:4px;}
-.grilla-timeline::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);border-radius:4px;}
-.grilla-timeline::-webkit-scrollbar-thumb{background:rgba(234,88,12,0.3);border-radius:4px;}
-.grilla-week{min-width:260px;flex-shrink:0;}
-.grilla-week-title{font-size:13px;font-weight:700;color:#888;margin-bottom:12px;letter-spacing:1px;}
+.grilla-header{
+  display:flex;align-items:center;gap:40px;flex-wrap:wrap;
+  margin-top:48px;padding:32px;
+  background:linear-gradient(170deg,rgba(18,18,18,0.6),rgba(8,8,8,0.6));
+  border:1px solid rgba(255,255,255,0.06);border-radius:24px;
+  backdrop-filter:blur(20px);
+}
+.grilla-header-ring{flex-shrink:0;}
+.grilla-header-info{flex:1;min-width:200px;}
+.grilla-header-bar{
+  width:100%;height:6px;border-radius:6px;
+  background:rgba(255,255,255,0.06);overflow:hidden;margin-top:12px;
+}
+.grilla-header-bar-fill{
+  height:100%;border-radius:6px;
+  background:linear-gradient(90deg,#EA580C,#fb923c,#fbbf24);
+  background-size:200% 100%;animation:barShimmer 3s linear infinite;
+  transition:width 2s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes barShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.grilla-columns{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:24px;margin-top:32px;
+}
+.grilla-week{min-width:0;}
+.grilla-week-title{
+  font-size:12px;font-weight:700;color:#555;margin-bottom:16px;
+  letter-spacing:2px;text-transform:uppercase;
+  display:flex;align-items:center;gap:12px;
+}
+.grilla-week-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0.08),transparent);
+}
 .grilla-piece{
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
-  border-radius:14px;padding:14px 16px;margin-bottom:8px;
+  background:linear-gradient(170deg,rgba(18,18,18,0.7),rgba(10,10,10,0.7));
+  border:1px solid rgba(255,255,255,0.06);
+  border-left:3px solid var(--status-color,#555);
+  border-radius:16px;padding:18px 20px;margin-bottom:10px;
   transition:all 0.4s cubic-bezier(0.16,1,0.3,1);cursor:default;
+  backdrop-filter:blur(10px);position:relative;overflow:hidden;
+}
+.grilla-piece::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:60px;
+  background:linear-gradient(90deg,var(--status-glow,transparent),transparent);
+  opacity:0.08;pointer-events:none;
 }
 .grilla-piece:hover{
-  border-color:rgba(234,88,12,0.2);background:rgba(255,255,255,0.05);
-  transform:translateX(4px);
-  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  border-color:rgba(255,255,255,0.12);
+  background:linear-gradient(170deg,rgba(24,24,24,0.8),rgba(14,14,14,0.8));
+  transform:translateX(6px) scale(1.01);
+  box-shadow:0 8px 30px rgba(0,0,0,0.4);
 }
-.grilla-piece-title{font-size:13px;font-weight:600;color:#ddd;margin-bottom:4px;}
-.grilla-piece-meta{font-size:11px;color:#666;display:flex;gap:8px;align-items:center;}
-.estado-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.grilla-progress{
-  margin-top:24px;background:rgba(255,255,255,0.05);
-  border-radius:12px;height:8px;overflow:hidden;
+.grilla-piece-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.grilla-piece-title{font-size:14px;font-weight:700;color:#eee;line-height:1.3;}
+.grilla-piece-format{
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 10px;border-radius:8px;flex-shrink:0;white-space:nowrap;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#888;
 }
-.grilla-progress-bar{
-  height:100%;background:linear-gradient(90deg,#EA580C,#fb923c);
-  border-radius:12px;transition:width 1.5s cubic-bezier(0.16,1,0.3,1);
-  position:relative;
+.grilla-piece-format.fmt-imagen{color:#63b3ed;border-color:rgba(99,179,237,0.2);background:rgba(99,179,237,0.06);}
+.grilla-piece-format.fmt-historia{color:#c084fc;border-color:rgba(192,132,252,0.2);background:rgba(192,132,252,0.06);}
+.grilla-piece-format.fmt-video,.grilla-piece-format.fmt-reel{color:#f472b6;border-color:rgba(244,114,182,0.2);background:rgba(244,114,182,0.06);}
+.grilla-piece-format.fmt-carrusel{color:#fbbf24;border-color:rgba(251,191,36,0.2);background:rgba(251,191,36,0.06);}
+.grilla-piece-desc{font-size:12px;color:#777;line-height:1.5;margin-bottom:10px;}
+.grilla-piece-meta{font-size:11px;color:#555;display:flex;gap:12px;align-items:center;}
+.estado-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:8px;font-weight:600;font-size:10px;
+  letter-spacing:0.5px;
 }
-.grilla-progress-bar::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
-  animation:shimmer 2s infinite;
-}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.estado-badge.st-draft{background:rgba(255,255,255,0.05);color:#666;}
+.estado-badge.st-revision{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.15);}
+.estado-badge.st-aprobado{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.15);}
+.estado-badge.st-clickup{background:rgba(99,179,237,0.1);color:#63b3ed;border:1px solid rgba(99,179,237,0.15);}
+.grilla-piece-date{color:#555;}
 
 /* === PROGRESS RING === */
-.progress-ring-wrap{display:flex;align-items:center;gap:24px;margin-top:24px;}
+.progress-ring-wrap{display:flex;align-items:center;gap:24px;}
 .progress-ring{position:relative;display:inline-flex;align-items:center;justify-content:center;}
 .progress-ring svg{transform:rotate(-90deg);}
-.progress-ring circle{transition:stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1);}
-.progress-ring-value{position:absolute;font-size:22px;font-weight:900;color:#fff;}
+.progress-ring circle{transition:stroke-dashoffset 2s cubic-bezier(0.16,1,0.3,1);}
+.progress-ring-value{position:absolute;font-size:24px;font-weight:900;color:#fff;}
 
 /* === IG GRID === */
 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:32px;max-width:500px;}
@@ -702,14 +745,8 @@ section{
   <div class="section-label reveal" data-parallax="0.03">Contenido</div>
   <h2 class="section-title text-reveal reveal-delay-1">Tu grilla del mes</h2>
   <p class="section-desc reveal reveal-delay-2" id="grilla-desc"></p>
-  <div class="reveal reveal-delay-2" style="margin-top:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
-    <button class="download-btn magnetic" id="btn-download-grilla" onclick="downloadGrilla()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Descargar Grilla PDF
-    </button>
-    <div class="progress-ring-wrap" id="progress-ring-wrap"></div>
-  </div>
-  <div class="grilla-timeline reveal reveal-delay-3" id="grilla-timeline"></div>
+  <div class="grilla-header reveal reveal-delay-2" id="grilla-header"></div>
+  <div class="grilla-columns reveal reveal-delay-3" id="grilla-columns"></div>
 </section>
 
 <!-- RESULTADOS ADS -->
@@ -1127,19 +1164,28 @@ function renderIG(copilot) {
 // RENDER GRILLA
 // =====================================================
 function renderGrilla(unity) {
-  const timeline = document.getElementById('grilla-timeline');
+  const columns = document.getElementById('grilla-columns');
   const now = new Date();
   const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   document.getElementById('grilla-desc').textContent = `Contenido planificado para ${monthNames[now.getMonth()]} ${now.getFullYear()}.`;
 
   const grilla = unity && unity.grilla;
   if (!grilla || !grilla.piezas || grilla.piezas.length === 0) {
-    timeline.innerHTML = '<p style="color:#555;font-size:14px;padding:20px 0;">Sin piezas programadas este mes</p>';
+    columns.innerHTML = '<p style="color:#555;font-size:14px;padding:20px 0;">Sin piezas programadas este mes</p>';
     return;
   }
 
-  const estadoNames = {draft:'Borrador',revision:'En revisión',aprobado:'Aprobado',clickup:'Listo'};
+  const estadoNames = {draft:'Borrador',revision:'En revision',aprobado:'Aprobado',clickup:'Listo'};
   const estadoColors = {draft:'#666',revision:'#fbbf24',aprobado:'#4ade80',clickup:'#63b3ed'};
+  const estadoClass = {draft:'st-draft',revision:'st-revision',aprobado:'st-aprobado',clickup:'st-clickup'};
+
+  function fmtClass(formato) {
+    const f = (formato||'').toLowerCase();
+    if (f.includes('historia')) return 'fmt-historia';
+    if (f.includes('reel') || f.includes('video')) return 'fmt-video';
+    if (f.includes('carrusel')) return 'fmt-carrusel';
+    return 'fmt-imagen';
+  }
 
   const porSemana = {};
   grilla.piezas.forEach(p => { const s = p.semana||1; if (!porSemana[s]) porSemana[s]=[]; porSemana[s].push(p); });
@@ -1152,60 +1198,70 @@ function renderGrilla(unity) {
     html += `<div class="grilla-week"><div class="grilla-week-title">Semana ${s}</div>`;
     piezas.forEach(p => {
       const estado = p.estado || 'draft';
+      const color = estadoColors[estado];
+      const desc = p.idea_final ? p.idea_final.substring(0,90)+(p.idea_final.length>90?'...':'') : '';
       html += `
-        <div class="grilla-piece">
-          <div class="grilla-piece-title">${p.titulo || p.formato || 'Pieza'}</div>
-          <div style="font-size:11px;color:#888;margin:4px 0;">${p.idea_final ? p.idea_final.substring(0,80)+(p.idea_final.length>80?'...':'') : ''}</div>
+        <div class="grilla-piece" style="--status-color:${color};--status-glow:${color};">
+          <div class="grilla-piece-top">
+            <div class="grilla-piece-title">${p.titulo || 'Pieza'}</div>
+            ${p.formato?`<span class="grilla-piece-format ${fmtClass(p.formato)}">${p.formato}</span>`:''}
+          </div>
+          ${desc?`<div class="grilla-piece-desc">${desc}</div>`:''}
           <div class="grilla-piece-meta">
-            <span class="estado-dot" style="background:${estadoColors[estado]};box-shadow:0 0 6px ${estadoColors[estado]};"></span>
-            ${estadoNames[estado]||estado}
-            ${p.formato?`<span style="margin-left:8px;color:#555;">· ${p.formato}</span>`:''}
-            ${p.fecha_publicacion?`<span style="margin-left:8px;color:#555;">· ${p.fecha_publicacion}</span>`:''}
+            <span class="estado-badge ${estadoClass[estado]||''}">${estadoNames[estado]||estado}</span>
+            ${p.fecha_publicacion?`<span class="grilla-piece-date">📅 ${p.fecha_publicacion}</span>`:''}
           </div>
         </div>`;
     });
     html += '</div>';
   }
-  timeline.innerHTML = html;
+  columns.innerHTML = html;
 }
 
 // =====================================================
-// CLICKUP PROGRESS RING
+// CLICKUP PROGRESS (header card)
 // =====================================================
 function renderClickupProgress(unity) {
-  const wrap = document.getElementById('progress-ring-wrap');
+  const header = document.getElementById('grilla-header');
   const cu = unity && unity.clickup;
-  if (!cu || cu.total === 0) {
-    wrap.innerHTML = '<span style="font-size:12px;color:#666;">Sin tareas en ClickUp</span>';
-    return;
-  }
-  const pct = cu.total > 0 ? Math.round((cu.done / cu.total) * 100) : 0;
-  const r = 40, circ = 2 * Math.PI * r;
+  const grilla = unity && unity.grilla;
+  const total = cu ? cu.total : (grilla ? grilla.total : 0);
+  const done = cu ? cu.done : 0;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const r = 44, circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
 
-  wrap.innerHTML = `
-    <div class="progress-ring">
-      <svg width="100" height="100">
-        <circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
-        <circle cx="50" cy="50" r="${r}" fill="none" stroke="url(#ring-grad)" stroke-width="6"
-          stroke-dasharray="${circ}" stroke-dashoffset="${circ}" stroke-linecap="round"
-          style="transition:stroke-dashoffset 2s cubic-bezier(0.16,1,0.3,1);"
-          id="ring-circle"/>
-      </svg>
-      <defs><linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EA580C"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient></defs>
-      <span class="progress-ring-value">${pct}%</span>
+  header.innerHTML = `
+    <div class="grilla-header-ring">
+      <div class="progress-ring">
+        <svg width="110" height="110">
+          <circle cx="55" cy="55" r="${r}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/>
+          <circle cx="55" cy="55" r="${r}" fill="none" stroke="url(#ring-grad)" stroke-width="7"
+            stroke-dasharray="${circ}" stroke-dashoffset="${circ}" stroke-linecap="round"
+            id="ring-circle"/>
+        </svg>
+        <defs><linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EA580C"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient></defs>
+        <span class="progress-ring-value">${pct}%</span>
+      </div>
     </div>
-    <div>
-      <div style="font-size:14px;font-weight:700;color:#fff;">${cu.done} de ${cu.total}</div>
-      <div style="font-size:11px;color:#666;margin-top:2px;">piezas terminadas</div>
+    <div class="grilla-header-info">
+      <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">${done} de ${total} piezas listas</div>
+      <div style="font-size:13px;color:#888;margin-bottom:12px;">Progreso de diseno en ClickUp</div>
+      <div class="grilla-header-bar"><div class="grilla-header-bar-fill" id="bar-fill" style="width:0%"></div></div>
     </div>
+    <button class="download-btn magnetic" id="btn-download-grilla" onclick="downloadGrilla()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar PDF
+    </button>
   `;
 
-  // Animate ring
+  // Animate ring + bar
   setTimeout(() => {
     const circle = document.getElementById('ring-circle');
     if (circle) circle.style.strokeDashoffset = offset;
-  }, 300);
+    const bar = document.getElementById('bar-fill');
+    if (bar) bar.style.width = pct + '%';
+  }, 400);
 }
 
 // =====================================================
