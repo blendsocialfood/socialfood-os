@@ -580,8 +580,11 @@ section{
 }
 .estado-badge.st-draft{background:rgba(255,255,255,0.05);color:#666;}
 .estado-badge.st-revision{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.15);}
+.estado-badge.st-revision-cliente{background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);animation:pulse-blue 2s infinite;}
+.estado-badge.st-cambios{background:rgba(251,146,60,0.1);color:#fb923c;border:1px solid rgba(251,146,60,0.15);}
 .estado-badge.st-aprobado{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.15);}
 .estado-badge.st-clickup{background:rgba(99,179,237,0.1);color:#63b3ed;border:1px solid rgba(99,179,237,0.15);}
+@keyframes pulse-blue{0%,100%{box-shadow:0 0 0 0 rgba(96,165,250,0)}50%{box-shadow:0 0 0 4px rgba(96,165,250,0.15);}}
 .grilla-piece-date{color:#555;}
 
 /* === PROGRESS RING === */
@@ -855,6 +858,7 @@ setTimeout(() => {
 // INIT
 // =====================================================
 const CLIENT = SF_USER.client_name || SF_USER.name;
+const CLIENT_NAME = SF_USER.name || CLIENT;
 document.getElementById('nav-name').textContent = SF_USER.name;
 
 // Hero title with word-by-word reveal
@@ -1279,9 +1283,9 @@ function renderGrilla(unity) {
     return;
   }
 
-  const estadoNames = {draft:'Borrador',revision:'En revision',aprobado:'Aprobado',clickup:'Listo'};
-  const estadoColors = {draft:'#666',revision:'#fbbf24',aprobado:'#4ade80',clickup:'#63b3ed'};
-  const estadoClass = {draft:'st-draft',revision:'st-revision',aprobado:'st-aprobado',clickup:'st-clickup'};
+  const estadoNames = {draft:'En desarrollo',revision:'En revisión',en_revision_cliente:'Esperando tu aprobación',cambios_pedidos:'Cambios enviados',aprobado:'Aprobado',clickup:'Listo'};
+  const estadoColors = {draft:'#666',revision:'#fbbf24',en_revision_cliente:'#60a5fa',cambios_pedidos:'#fb923c',aprobado:'#4ade80',clickup:'#63b3ed'};
+  const estadoClass = {draft:'st-draft',revision:'st-revision',en_revision_cliente:'st-revision-cliente',cambios_pedidos:'st-cambios',aprobado:'st-aprobado',clickup:'st-clickup'};
 
   function fmtClass(formato) {
     const f = (formato||'').toLowerCase();
@@ -1304,6 +1308,35 @@ function renderGrilla(unity) {
       const estado = p.estado || 'draft';
       const color = estadoColors[estado];
       const desc = p.idea_final ? p.idea_final.substring(0,90)+(p.idea_final.length>90?'...':'') : '';
+      const needsReview = estado === 'en_revision_cliente';
+      const driveLink = p.drive_url ? `<a href="${p.drive_url}" target="_blank" style="font-size:11px;color:#60a5fa;text-decoration:none;">📎 Ver archivo</a>` : '';
+
+      // Comentarios
+      const coms = p.comentarios || [];
+      let comsHtml = '';
+      if (coms.length > 0) {
+        const items = coms.slice(0,3).map(c => {
+          const fecha = c.created_at ? c.created_at.substring(0,10) : '';
+          const tipoColor = c.autor_tipo === 'equipo' ? '#EA580C' : '#60a5fa';
+          return `<div style="font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:${tipoColor};font-weight:600;">${c.autor}</span> <span style="color:#444;font-size:10px;">${fecha}</span><br><span style="color:#aaa;">${c.texto}</span></div>`;
+        }).join('');
+        comsHtml = `<div style="margin-top:8px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px;">${items}</div>`;
+      }
+
+      // Botones de acción (solo si está en revisión del cliente)
+      let actionHtml = '';
+      if (needsReview) {
+        actionHtml = `
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="aprobarPieza(${p.id})" style="flex:1;padding:8px 12px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);border-radius:8px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;">✅ Aprobar</button>
+            <button onclick="pedirCambios(${p.id})" style="flex:1;padding:8px 12px;background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.2);border-radius:8px;color:#fb923c;font-size:12px;font-weight:600;cursor:pointer;">✏️ Pedir cambios</button>
+          </div>
+          <div id="cambios-form-${p.id}" style="display:none;margin-top:8px;">
+            <textarea id="cambios-text-${p.id}" placeholder="Describe los cambios que necesitas..." style="width:100%;min-height:60px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#ccc;font-size:12px;padding:10px;resize:vertical;font-family:inherit;"></textarea>
+            <button onclick="enviarCambios(${p.id})" style="margin-top:6px;padding:6px 16px;background:#fb923c;border:none;border-radius:6px;color:#000;font-size:11px;font-weight:700;cursor:pointer;">Enviar</button>
+          </div>`;
+      }
+
       html += `
         <div class="grilla-piece" style="--status-color:${color};--status-glow:${color};">
           <div class="grilla-piece-top">
@@ -1311,10 +1344,13 @@ function renderGrilla(unity) {
             ${p.formato?`<span class="grilla-piece-format ${fmtClass(p.formato)}">${p.formato}</span>`:''}
           </div>
           ${desc?`<div class="grilla-piece-desc">${desc}</div>`:''}
+          ${driveLink}
           <div class="grilla-piece-meta">
             <span class="estado-badge ${estadoClass[estado]||''}">${estadoNames[estado]||estado}</span>
             ${p.fecha_publicacion?`<span class="grilla-piece-date">📅 ${p.fecha_publicacion}</span>`:''}
           </div>
+          ${actionHtml}
+          ${comsHtml}
         </div>`;
     });
     html += '</div>';
@@ -1453,12 +1489,14 @@ function renderNext(unity) {
   const items = [];
 
   if (grilla && grilla.piezas) {
-    const enRevision = grilla.piezas.filter(p => p.estado === 'revision').length;
-    const borradores = grilla.piezas.filter(p => p.estado === 'draft').length;
-    const aprobadas = grilla.piezas.filter(p => p.estado === 'aprobado').length;
-    if (enRevision > 0) items.push({ icon: '👀', text: `${enRevision} pieza${enRevision>1?'s':''} en revisión esperando tu aprobación` });
-    if (borradores > 0) items.push({ icon: '✏️', text: `${borradores} pieza${borradores>1?'s':''} en borrador — en desarrollo` });
-    if (aprobadas > 0) items.push({ icon: '✅', text: `${aprobadas} pieza${aprobadas>1?'s':''} lista${aprobadas>1?'s':''} para publicar` });
+    const esperandoAprobacion = grilla.piezas.filter(p => p.estado === 'en_revision_cliente').length;
+    const cambiosPedidos = grilla.piezas.filter(p => p.estado === 'cambios_pedidos').length;
+    const enDesarrollo = grilla.piezas.filter(p => p.estado === 'draft' || p.estado === 'revision').length;
+    const aprobadas = grilla.piezas.filter(p => p.estado === 'aprobado' || p.estado === 'clickup').length;
+    if (esperandoAprobacion > 0) items.push({ icon: '📩', text: `${esperandoAprobacion} pieza${esperandoAprobacion>1?'s':''} esperando tu aprobación` });
+    if (cambiosPedidos > 0) items.push({ icon: '🔄', text: `${cambiosPedidos} pieza${cambiosPedidos>1?'s':''} con cambios solicitados — el equipo está trabajando en ello` });
+    if (enDesarrollo > 0) items.push({ icon: '✏️', text: `${enDesarrollo} pieza${enDesarrollo>1?'s':''} en desarrollo` });
+    if (aprobadas > 0) items.push({ icon: '✅', text: `${aprobadas} pieza${aprobadas>1?'s':''} aprobada${aprobadas>1?'s':''} y lista${aprobadas>1?'s':''} para publicar` });
   }
   items.push({ icon: '📊', text: 'Informe mensual de resultados — disponible a fin de mes' });
   items.push({ icon: '🎯', text: 'Optimización continua de campañas de ads' });
@@ -1469,6 +1507,47 @@ function renderNext(unity) {
       <span style="font-size:14px;color:#ccc;">${item.text}</span>
     </div>
   `).join('');
+}
+
+// =====================================================
+// APROBACIÓN / FEEDBACK DE PIEZAS
+// =====================================================
+async function aprobarPieza(piezaId) {
+  if (!confirm('¿Aprobar esta pieza?')) return;
+  try {
+    const resp = await fetch(UNITY_URL + '/api/pieza-feedback', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ token: TOKEN, pieza_id: piezaId, accion: 'aprobar', autor: CLIENT_NAME })
+    });
+    if (resp.ok) {
+      location.reload();
+    } else {
+      alert('Error al aprobar');
+    }
+  } catch(e) { alert('Error de conexión'); }
+}
+
+function pedirCambios(piezaId) {
+  const form = document.getElementById('cambios-form-' + piezaId);
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function enviarCambios(piezaId) {
+  const texto = document.getElementById('cambios-text-' + piezaId).value.trim();
+  if (!texto) { alert('Escribe qué cambios necesitas'); return; }
+  try {
+    const resp = await fetch(UNITY_URL + '/api/pieza-feedback', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ token: TOKEN, pieza_id: piezaId, accion: 'cambios', texto: texto, autor: CLIENT_NAME })
+    });
+    if (resp.ok) {
+      location.reload();
+    } else {
+      alert('Error al enviar cambios');
+    }
+  } catch(e) { alert('Error de conexión'); }
 }
 
 // =====================================================
