@@ -1,19 +1,20 @@
 from flask import Flask, request, session, redirect, send_from_directory
-import os, hmac, hashlib, time
+import os, hmac, hashlib, time, requests as http_requests
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = os.environ.get('SECRET_KEY', 'sf-os-secret-2026')
 
 AUTH_SECRET = 'blendsf-auth-2026'
 
+UNITY_URL = 'https://positive-appreciation-production.up.railway.app'
+
+# Staff users (hardcoded) — clients authenticate via Unity DB
 USERS = {
     'nico':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Nicolás'},
     'cris':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Cristóbal'},
     'paula': {'password': 'Pauliña123',   'role': 'unity',   'name': 'Paula'},
     'juan':  {'password': 'Juanitomachine123', 'role': 'unity', 'name': 'Juan'},
     'seba':  {'password': 'Sebads123',    'role': 'copilot', 'name': 'Sebastián'},
-    'admin': {'password': 'admin', 'role': 'cliente', 'name': 'Bangkok Thai', 'client_name': 'Bangkok'},
-    'admin2': {'password': 'admin2', 'role': 'cliente', 'name': 'Fuente Mardoqueo', 'client_name': 'Mardoqueo'},
 }
 
 def generate_token(username, role):
@@ -53,15 +54,30 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username', '').lower().strip()
         password = request.form.get('password', '')
+
+        # 1) Check staff users (hardcoded)
         user = USERS.get(username)
         if user and user['password'] == password:
             session['user'] = username
             session['role'] = user['role']
             session['name'] = user['name']
-            session['client_name'] = user.get('client_name', '')
-            if user['role'] == 'cliente':
-                return redirect('/cliente')
+            session['client_name'] = ''
             return redirect('/admin')
+
+        # 2) Check client users via Unity DB
+        try:
+            r = http_requests.post(f'{UNITY_URL}/api/auth-client',
+                json={'username': username, 'password': password}, timeout=5)
+            if r.status_code == 200:
+                data = r.json()
+                session['user'] = username
+                session['role'] = 'cliente'
+                session['name'] = data['name']
+                session['client_name'] = data['client_name']
+                return redirect('/cliente')
+        except Exception:
+            pass
+
         return login_page(error='Usuario o contraseña incorrectos')
     return login_page()
 
