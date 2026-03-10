@@ -92,9 +92,10 @@
     font-size: 14px;
   }
   .nav-prism .nav-icon {
-    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05));
-    border: 1px solid rgba(16,185,129,0.25);
+    background: linear-gradient(135deg, rgba(28,130,180,0.2), rgba(28,130,180,0.05));
+    border: 1px solid rgba(28,130,180,0.25);
     font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
   }
   .nav-firsttouch .nav-icon {
     background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.05));
@@ -287,9 +288,9 @@
     --card-glow: rgba(59,130,246,0.2);
   }
   .card-prism .module-icon {
-    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
-    border: 1px solid rgba(16,185,129,0.2);
-    --card-glow: rgba(16,185,129,0.2);
+    background: linear-gradient(135deg, rgba(28,130,180,0.15), rgba(28,130,180,0.05));
+    border: 1px solid rgba(28,130,180,0.2);
+    --card-glow: rgba(28,130,180,0.2);
   }
   .card-firsttouch .module-icon {
     background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05));
@@ -486,7 +487,7 @@ const navHTML = `
     <span class="nav-label">Copilot</span>
   </a>
   <a href="${canPrism ? PRISM_URL+'?token='+token : '#'}" class="nav-logo nav-prism ${canPrism ? '' : 'disabled'}">
-    <div class="nav-icon">&#9670;</div>
+    <div class="nav-icon"><svg width="16" height="14" viewBox="0 0 16 14"><polygon points="8,0 15,13 1,13" fill="none" stroke="#4AA8D8" stroke-width="1.5"/><line x1="0" y1="7" x2="4" y2="7" stroke="#fff" stroke-width="1" opacity="0.6"/><line x1="12" y1="5" x2="16" y2="3" stroke="#ff6b6b" stroke-width="1" opacity="0.7"/><line x1="12" y1="7" x2="16" y2="7" stroke="#ffd93d" stroke-width="1" opacity="0.7"/><line x1="12" y1="9" x2="16" y2="11" stroke="#4AA8D8" stroke-width="1" opacity="0.7"/></svg></div>
     <span class="nav-label">Prism</span>
   </a>
   <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="nav-logo nav-firsttouch ${canFirstTouch ? '' : 'disabled'}">
@@ -530,7 +531,7 @@ const copilotCard = `
 const prismCard = `
   <a href="${canPrism ? PRISM_URL+'?token='+token : '#'}" class="module-card card-prism ${canPrism ? '' : 'disabled'}">
     <div class="module-arrow">&#8599;</div>
-    <div class="module-icon">&#9670;</div>
+    <div class="module-icon"><svg width="28" height="24" viewBox="0 0 16 14"><polygon points="8,0 15,13 1,13" fill="none" stroke="#4AA8D8" stroke-width="1.3"/><line x1="0" y1="7" x2="4" y2="7" stroke="#fff" stroke-width="0.8" opacity="0.5"/><line x1="12" y1="5" x2="16" y2="3" stroke="#ff6b6b" stroke-width="0.8" opacity="0.7"/><line x1="12" y1="7" x2="16" y2="7" stroke="#ffd93d" stroke-width="0.8" opacity="0.7"/><line x1="12" y1="9" x2="16" y2="11" stroke="#4AA8D8" stroke-width="0.8" opacity="0.7"/></svg></div>
     <div class="module-label">Diseno</div>
     <div class="module-name">Prism</div>
     <div class="module-desc">Vista del disenador: material por pieza, subida a Drive y feedback de clientes.</div>
