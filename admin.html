@@ -467,7 +467,7 @@ const token = SF_USER.token;
 const canUnity = role === 'admin' || role === 'unity';
 const canCopilot = role === 'admin' || role === 'copilot';
 const canFirstTouch = role === 'admin';
-const canPrism = role === 'admin' || role === 'unity';
+const canPrism = role === 'admin' || (role === 'unity' && SF_USER.username === 'juan');
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
