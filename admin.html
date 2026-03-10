@@ -91,6 +91,11 @@
     border: 1px solid rgba(59,130,246,0.25);
     font-size: 14px;
   }
+  .nav-prism .nav-icon {
+    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05));
+    border: 1px solid rgba(16,185,129,0.25);
+    font-size: 14px;
+  }
   .nav-firsttouch .nav-icon {
     background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.05));
     border: 1px solid rgba(168,85,247,0.25);
@@ -216,10 +221,10 @@
 
   /* === MODULE CARDS === */
   .modules {
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 20px; margin-bottom: 48px;
   }
-  @media (max-width: 900px) {
+  @media (max-width: 1100px) {
     .modules { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 600px) {
@@ -280,6 +285,11 @@
     background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05));
     border: 1px solid rgba(59,130,246,0.2);
     --card-glow: rgba(59,130,246,0.2);
+  }
+  .card-prism .module-icon {
+    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
+    border: 1px solid rgba(16,185,129,0.2);
+    --card-glow: rgba(16,185,129,0.2);
   }
   .card-firsttouch .module-icon {
     background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05));
@@ -448,6 +458,7 @@
 const UNITY_URL = 'https://positive-appreciation-production.up.railway.app';
 const COPILOT_URL = 'https://web-production-2131c.up.railway.app/dashboard';
 const FIRSTTOUCH_URL = 'https://blend-first-touch-production.up.railway.app';
+const PRISM_URL = 'https://blend-prism-production.up.railway.app';
 const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
@@ -455,6 +466,7 @@ const token = SF_USER.token;
 const canUnity = role === 'admin' || role === 'unity';
 const canCopilot = role === 'admin' || role === 'copilot';
 const canFirstTouch = role === 'admin';
+const canPrism = role === 'admin' || role === 'unity';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -472,6 +484,10 @@ const navHTML = `
   <a href="${canCopilot ? COPILOT_URL+'?token='+token : '#'}" class="nav-logo nav-copilot ${canCopilot ? '' : 'disabled'}">
     <div class="nav-icon">&#9632;</div>
     <span class="nav-label">Copilot</span>
+  </a>
+  <a href="${canPrism ? PRISM_URL+'?token='+token : '#'}" class="nav-logo nav-prism ${canPrism ? '' : 'disabled'}">
+    <div class="nav-icon">&#9670;</div>
+    <span class="nav-label">Prism</span>
   </a>
   <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="nav-logo nav-firsttouch ${canFirstTouch ? '' : 'disabled'}">
     <div class="nav-icon">&#9830;</div>
@@ -511,6 +527,21 @@ const copilotCard = `
     </div>
   </a>`;
 
+const prismCard = `
+  <a href="${canPrism ? PRISM_URL+'?token='+token : '#'}" class="module-card card-prism ${canPrism ? '' : 'disabled'}">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon">&#9670;</div>
+    <div class="module-label">Diseno</div>
+    <div class="module-name">Prism</div>
+    <div class="module-desc">Vista del disenador: material por pieza, subida a Drive y feedback de clientes.</div>
+    <div class="module-features">
+      <span class="feature-tag">Grilla</span>
+      <span class="feature-tag">Drive</span>
+      <span class="feature-tag">Feedback</span>
+      <span class="feature-tag">Por cliente</span>
+    </div>
+  </a>`;
+
 const firstTouchCard = `
   <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="module-card card-firsttouch ${canFirstTouch ? '' : 'disabled'}">
     <div class="module-arrow">&#8599;</div>
@@ -526,7 +557,7 @@ const firstTouchCard = `
     </div>
   </a>`;
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + firstTouchCard;
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + firstTouchCard;
 </script>
 
 </body>
