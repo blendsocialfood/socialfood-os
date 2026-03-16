@@ -1283,9 +1283,9 @@ function renderGrilla(unity) {
     return;
   }
 
-  const estadoNames = {draft:'En desarrollo',revision:'En revisión',en_revision_cliente:'Esperando tu aprobación',cambios_pedidos:'Cambios enviados',aprobado:'Aprobado',clickup:'Listo'};
-  const estadoColors = {draft:'#666',revision:'#fbbf24',en_revision_cliente:'#60a5fa',cambios_pedidos:'#fb923c',aprobado:'#4ade80',clickup:'#63b3ed'};
-  const estadoClass = {draft:'st-draft',revision:'st-revision',en_revision_cliente:'st-revision-cliente',cambios_pedidos:'st-cambios',aprobado:'st-aprobado',clickup:'st-clickup'};
+  const estadoNames = {draft:'En desarrollo',clickup:'Listo',aprobado_idea:'Idea aprobada',en_curso:'En producción',esperando_check_interno:'En revisión interna',aprobado_interno:'Aprobado por equipo',hacer_ajuste:'En ajuste',esperando_check_cliente:'Esperando tu aprobación',aprobado_final:'Aprobado',publicado:'Publicado',pausado:'Pausado',no_aplica:'No aplica',revision:'En producción',en_revision_cliente:'Esperando tu aprobación',cambios_pedidos:'En ajuste',aprobado:'Aprobado'};
+  const estadoColors = {draft:'#666',clickup:'#63b3ed',aprobado_idea:'#86efac',en_curso:'#fbbf24',esperando_check_interno:'#818cf8',aprobado_interno:'#4ade80',hacer_ajuste:'#fb923c',esperando_check_cliente:'#60a5fa',aprobado_final:'#34d399',publicado:'#c084fc',pausado:'#888',no_aplica:'#555',revision:'#fbbf24',en_revision_cliente:'#60a5fa',cambios_pedidos:'#fb923c',aprobado:'#4ade80'};
+  const estadoClass = {draft:'st-draft',clickup:'st-clickup',aprobado_idea:'st-aprobado-idea',en_curso:'st-en-curso',esperando_check_interno:'st-check-interno',aprobado_interno:'st-aprobado-interno',hacer_ajuste:'st-ajuste',esperando_check_cliente:'st-check-cliente',aprobado_final:'st-aprobado-final',publicado:'st-publicado',pausado:'st-pausado',no_aplica:'st-no-aplica',revision:'st-en-curso',en_revision_cliente:'st-check-cliente',cambios_pedidos:'st-ajuste',aprobado:'st-aprobado-final'};
 
   function fmtClass(formato) {
     const f = (formato||'').toLowerCase();
@@ -1308,7 +1308,7 @@ function renderGrilla(unity) {
       const estado = p.estado || 'draft';
       const color = estadoColors[estado];
       const desc = p.idea_final ? p.idea_final.substring(0,90)+(p.idea_final.length>90?'...':'') : '';
-      const needsReview = estado === 'en_revision_cliente';
+      const needsReview = estado === 'esperando_check_cliente' || estado === 'en_revision_cliente';
       const driveLink = p.drive_url ? `<a href="${p.drive_url}" target="_blank" style="font-size:11px;color:#60a5fa;text-decoration:none;">📎 Ver archivo</a>` : '';
 
       // Comentarios
@@ -1489,10 +1489,10 @@ function renderNext(unity) {
   const items = [];
 
   if (grilla && grilla.piezas) {
-    const esperandoAprobacion = grilla.piezas.filter(p => p.estado === 'en_revision_cliente').length;
-    const cambiosPedidos = grilla.piezas.filter(p => p.estado === 'cambios_pedidos').length;
-    const enDesarrollo = grilla.piezas.filter(p => p.estado === 'draft' || p.estado === 'revision').length;
-    const aprobadas = grilla.piezas.filter(p => p.estado === 'aprobado' || p.estado === 'clickup').length;
+    const esperandoAprobacion = grilla.piezas.filter(p => p.estado === 'esperando_check_cliente' || p.estado === 'en_revision_cliente').length;
+    const cambiosPedidos = grilla.piezas.filter(p => p.estado === 'hacer_ajuste' || p.estado === 'cambios_pedidos').length;
+    const enDesarrollo = grilla.piezas.filter(p => ['draft','en_curso','esperando_check_interno','revision'].includes(p.estado)).length;
+    const aprobadas = grilla.piezas.filter(p => ['aprobado_final','publicado','aprobado'].includes(p.estado)).length;
     if (esperandoAprobacion > 0) items.push({ icon: '📩', text: `${esperandoAprobacion} pieza${esperandoAprobacion>1?'s':''} esperando tu aprobación` });
     if (cambiosPedidos > 0) items.push({ icon: '🔄', text: `${cambiosPedidos} pieza${cambiosPedidos>1?'s':''} con cambios solicitados — el equipo está trabajando en ello` });
     if (enDesarrollo > 0) items.push({ icon: '✏️', text: `${enDesarrollo} pieza${enDesarrollo>1?'s':''} en desarrollo` });
