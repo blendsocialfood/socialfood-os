@@ -464,8 +464,8 @@ const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
 const token = SF_USER.token;
-const canUnity = role === 'admin' || role === 'unity';
-const canCopilot = role === 'admin' || role === 'copilot';
+const canUnity = role === 'admin' || role === 'unity' || role === 'unity+copilot';
+const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity+copilot';
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || (role === 'unity' && SF_USER.username === 'juan');
 

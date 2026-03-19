@@ -14,7 +14,7 @@ USERS = {
     'cris':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Cristóbal'},
     'paula': {'password': 'Pauliña123',   'role': 'unity',   'name': 'Paula'},
     'juan':  {'password': 'Juanitomachine123', 'role': 'unity', 'name': 'Juan'},
-    'seba':  {'password': 'Sebads123',    'role': 'copilot', 'name': 'Sebastián'},
+    'seba':  {'password': 'Sebads123',    'role': 'unity+copilot', 'name': 'Sebastián'},
 }
 
 def generate_token(username, role):
