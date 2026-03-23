@@ -9,6 +9,12 @@ AUTH_SECRET = 'blendsf-auth-2026'
 UNITY_URL = 'https://positive-appreciation-production.up.railway.app'
 FIRST_TOUCH_URL = 'https://blend-first-touch-production.up.railway.app'
 
+# Fallback: if First Touch is down, use these to avoid lockout
+USERS_FALLBACK = {
+    'nico':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Nicolás'},
+    'cris':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Cristóbal'},
+}
+
 def generate_token(username, role):
     ts = str(int(time.time()))
     msg = f"{username}:{role}:{ts}"
@@ -59,7 +65,14 @@ def login():
                 session['client_name'] = ''
                 return redirect('/admin')
         except Exception:
-            pass
+            # Fallback: if First Touch is down, check admin-only backup
+            fb = USERS_FALLBACK.get(username)
+            if fb and fb['password'] == password:
+                session['user'] = username
+                session['role'] = fb['role']
+                session['name'] = fb['name']
+                session['client_name'] = ''
+                return redirect('/admin')
 
         # 2) Check client users via Unity DB
         try:
