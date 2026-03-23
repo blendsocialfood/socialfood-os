@@ -1,5 +1,5 @@
 from flask import Flask, request, session, redirect, send_from_directory
-import os, hmac, hashlib, time, requests as http_requests
+import os, hmac, hashlib, time, json, requests as http_requests
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = os.environ.get('SECRET_KEY', 'sf-os-secret-2026')
@@ -7,15 +7,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'sf-os-secret-2026')
 AUTH_SECRET = 'blendsf-auth-2026'
 
 UNITY_URL = 'https://positive-appreciation-production.up.railway.app'
-
-# Staff users (hardcoded) — clients authenticate via Unity DB
-USERS = {
-    'nico':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Nicolás'},
-    'cris':  {'password': 'Losblend2026', 'role': 'admin',   'name': 'Cristóbal'},
-    'paula': {'password': 'Pauliña123',   'role': 'unity',   'name': 'Paula'},
-    'juan':  {'password': 'Juanitomachine123', 'role': 'unity', 'name': 'Juan'},
-    'seba':  {'password': 'Sebads123',    'role': 'unity_copilot', 'name': 'Sebastián'},
-}
+FIRST_TOUCH_URL = 'https://blend-first-touch-production.up.railway.app'
 
 def generate_token(username, role):
     ts = str(int(time.time()))
@@ -55,14 +47,19 @@ def login():
         username = request.form.get('username', '').lower().strip()
         password = request.form.get('password', '')
 
-        # 1) Check staff users (hardcoded)
-        user = USERS.get(username)
-        if user and user['password'] == password:
-            session['user'] = username
-            session['role'] = user['role']
-            session['name'] = user['name']
-            session['client_name'] = ''
-            return redirect('/admin')
+        # 1) Check staff users via First Touch DB
+        try:
+            r = http_requests.post(f'{FIRST_TOUCH_URL}/api/usuarios/auth',
+                json={'username': username, 'password': password}, timeout=5)
+            if r.status_code == 200:
+                data = r.json()
+                session['user'] = data['username']
+                session['role'] = data['role']
+                session['name'] = data['name']
+                session['client_name'] = ''
+                return redirect('/admin')
+        except Exception:
+            pass
 
         # 2) Check client users via Unity DB
         try:
@@ -93,9 +90,8 @@ def admin():
     token = generate_token(session['user'], session['role'])
     with open('admin.html', 'r') as f:
         html = f.read()
-    user_script = f"""<script>
-const SF_USER = {{username:'{session["user"]}',name:'{session["name"]}',role:'{session["role"]}',token:'{token}'}};
-</script>"""
+    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token})
+    user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
     html = html.replace('</head>', user_script + '\n</head>')
     return html
 
@@ -108,9 +104,8 @@ def cliente():
     token = generate_token(session['user'], session['role'])
     with open('cliente.html', 'r') as f:
         html = f.read()
-    user_script = f"""<script>
-const SF_USER = {{username:'{session["user"]}',name:'{session["name"]}',role:'{session["role"]}',token:'{token}',client_name:'{session.get("client_name","")}'}};
-</script>"""
+    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token, "client_name": session.get("client_name", "")})
+    user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
     html = html.replace('</head>', user_script + '\n</head>')
     return html
 
