@@ -98,6 +98,16 @@ def logout():
 
 @app.route('/admin')
 def admin():
+    # Re-auth via token from cross-app navigation
+    incoming_token = request.args.get('token', '')
+    if incoming_token and 'user' not in session:
+        result = verify_token(incoming_token)
+        if result and result['role'] != 'cliente':
+            # Restore Flask session from token
+            session['user'] = result['username']
+            session['role'] = result['role']
+            session['name'] = result['username'].capitalize()
+            session['client_name'] = ''
     if 'user' not in session:
         return redirect('/login')
     token = generate_token(session['user'], session['role'])
