@@ -1309,7 +1309,14 @@ function renderGrilla(unity) {
       const color = estadoColors[estado];
       const desc = p.idea_final ? p.idea_final.substring(0,90)+(p.idea_final.length>90?'...':'') : '';
       const needsReview = estado === 'esperando_check_cliente' || estado === 'en_revision_cliente';
-      const driveLink = p.drive_url ? `<a href="${p.drive_url}" target="_blank" style="font-size:11px;color:#60a5fa;text-decoration:none;">📎 Ver archivo</a>` : '';
+      let driveLink = '';
+      let thumbHtml = '';
+      if (p.drive_file_id) {
+        driveLink = `<a href="${UNITY_URL}/api/drive/file/${p.drive_file_id}?token=${TOKEN}" target="_blank" style="font-size:11px;color:#60a5fa;text-decoration:none;">📎 Ver archivo</a>`;
+        thumbHtml = `<div style="margin:8px 0;"><img src="${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}" loading="lazy" class="drive-thumb" data-file-id="${p.drive_file_id}" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.08);cursor:pointer;" onerror="this.parentElement.style.display='none'"></div>`;
+      } else if (p.drive_url) {
+        driveLink = `<a href="${p.drive_url}" target="_blank" style="font-size:11px;color:#60a5fa;text-decoration:none;">📎 Ver archivo</a>`;
+      }
 
       // Comentarios (solo del cliente, no del equipo)
       const coms = (p.comentarios || []).filter(c => c.autor_tipo === 'cliente');
@@ -1343,6 +1350,7 @@ function renderGrilla(unity) {
             ${p.formato?`<span class="grilla-piece-format ${fmtClass(p.formato)}">${p.formato}</span>`:''}
           </div>
           ${desc?`<div class="grilla-piece-desc">${desc}</div>`:''}
+          ${thumbHtml}
           ${driveLink}
           <div class="grilla-piece-meta">
             <span class="estado-badge ${estadoClass[estado]||''}">${estadoNames[estado]||estado}</span>
@@ -1577,6 +1585,57 @@ document.head.appendChild(styleEl);
 // =====================================================
 // LOAD
 // =====================================================
+
+// --- DRIVE PREVIEW: hover grande + lightbox ---
+(function() {
+  var preview = document.createElement('div');
+  preview.style.cssText = 'display:none;position:fixed;z-index:10000;pointer-events:none;background:#111;border:1px solid #333;border-radius:12px;padding:4px;box-shadow:0 8px 32px rgba(0,0,0,.6);max-width:420px;max-height:420px;';
+  preview.innerHTML = '<img style="max-width:400px;max-height:400px;border-radius:8px;display:block;">';
+  document.body.appendChild(preview);
+  var pImg = preview.querySelector('img');
+
+  document.addEventListener('mouseover', function(e) {
+    var t = e.target.closest('.drive-thumb'); if (!t) return;
+    pImg.src = UNITY_URL + '/api/drive/thumb/' + t.dataset.fileId + '?token=' + TOKEN;
+    preview.style.display = 'block';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (preview.style.display === 'none') return;
+    var x = e.clientX + 16, y = e.clientY - 200;
+    if (x + 430 > window.innerWidth) x = e.clientX - 430;
+    if (y < 8) y = 8;
+    if (y + 430 > window.innerHeight) y = window.innerHeight - 430;
+    preview.style.left = x + 'px'; preview.style.top = y + 'px';
+  });
+  document.addEventListener('mouseout', function(e) {
+    if (e.target.closest('.drive-thumb')) preview.style.display = 'none';
+  });
+
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest('.drive-thumb'); if (!t) return;
+    e.preventDefault();
+    var fid = t.dataset.fileId;
+    fetch(UNITY_URL + '/api/drive/meta/' + fid + '?token=' + TOKEN)
+      .then(function(r) { return r.json(); })
+      .then(function(meta) { openDriveLightbox(fid, meta); })
+      .catch(function() { window.open(UNITY_URL + '/api/drive/file/' + fid + '?token=' + TOKEN, '_blank'); });
+  });
+
+  function openDriveLightbox(fid, meta) {
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
+    var url = UNITY_URL + '/api/drive/file/' + fid + '?token=' + TOKEN;
+    var inner = meta.is_video
+      ? '<video controls autoplay style="max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 0 40px rgba(0,0,0,.5);"><source src="' + url + '" type="' + meta.mimeType + '"></video>'
+      : '<img src="' + url + '" style="max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 0 40px rgba(0,0,0,.5);">';
+    ov.innerHTML = '<div style="position:absolute;top:16px;right:24px;cursor:pointer;color:#fff;font-size:28px;z-index:20001;background:rgba(0,0,0,.5);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;" onclick="this.parentElement.remove()">✕</div>' +
+      '<a href="' + url + '" target="_blank" style="position:absolute;top:16px;right:80px;color:#fff;font-size:14px;z-index:20001;background:rgba(0,0,0,.5);padding:8px 16px;border-radius:8px;text-decoration:none;">↗ Abrir</a>' + inner;
+    ov.addEventListener('click', function(ev) { if (ev.target === ov) ov.remove(); });
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', function h(ev) { if (ev.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', h); } });
+  }
+})();
+
 loadAll();
 </script>
 </body>
