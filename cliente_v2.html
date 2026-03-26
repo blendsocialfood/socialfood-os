@@ -80,14 +80,15 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 
 /* ── S4 CONTENT ── */
 #content-sec{background:#0a0805;}
-.carousel-wrap{position:relative;overflow:hidden;margin:24px -24px 0;}
-.carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 24px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.carousel::-webkit-scrollbar{display:none;}
-.carousel-item{min-width:200px;height:260px;border-radius:14px;background-size:cover;background-position:center;flex-shrink:0;scroll-snap-align:start;position:relative;border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:transform .2s;}
-.carousel-item:hover{transform:scale(1.03);}
-.carousel-item-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.85));border-radius:0 0 14px 14px;}
-.carousel-item-title{font-size:12px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.carousel-item-meta{font-size:10px;color:#888;margin-top:2px;}
+.content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:24px;perspective:800px;}
+.content-card{aspect-ratio:1;border-radius:14px;background-size:cover;background-position:center;position:relative;border:1px solid rgba(255,255,255,.06);cursor:pointer;overflow:hidden;transition:transform .4s,box-shadow .4s;transform-style:preserve-3d;}
+.content-card:hover{transform:scale(1.06) rotateY(3deg) rotateX(-2deg);box-shadow:0 16px 40px rgba(234,88,12,.15);z-index:2;}
+.content-card-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.9));opacity:0;transition:opacity .3s;}
+.content-card:hover .content-card-overlay{opacity:1;}
+.content-card-title{font-size:11px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.content-card-meta{font-size:9px;color:#888;margin-top:2px;}
+.content-card.stagger{opacity:0;transform:translateY(20px) rotateX(10deg);animation:cardIn .6s forwards;}
+@keyframes cardIn{to{opacity:1;transform:translateY(0) rotateX(0);}}
 
 /* ── S5 REVIEWS ── */
 #reviews-sec{background:#0d0a06;}
@@ -229,8 +230,8 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
     <div class="sec-title rv rv-d1" id="content-title">0 piezas este mes</div>
     <div class="sec-sub rv rv-d1">Contenido creado y publicado para tu marca</div>
   </div>
-  <div class="carousel-wrap rv rv-d2">
-    <div class="carousel" id="carousel"></div>
+  <div class="container rv rv-d2">
+    <div class="content-grid" id="content-grid"></div>
   </div>
 </section>
 
@@ -245,16 +246,7 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   </div>
 </section>
 
-<!-- S6: GROWTH -->
-<section id="growth">
-  <div class="container">
-    <div class="sec-label rv">TU PERFIL CRECE</div>
-    <div class="sec-title rv rv-d1">Evolución de tu marca</div>
-    <div class="growth-grid rv rv-d2" id="growth-grid"></div>
-    <div class="growth-change rv rv-d3" id="growth-change"></div>
-    <div class="growth-months rv rv-d4" id="growth-months"></div>
-  </div>
-</section>
+<!-- S6: GROWTH (merged into numbers) -->
 
 <!-- S7: UPCOMING -->
 <section id="upcoming">
@@ -365,9 +357,8 @@ async function loadAll() {
   renderNumbers(copilot, unity);
   renderMarquee();
   renderInvestment(copilot);
-  renderContent(unity);
+  renderContent(unity, copilot);
   renderReviews(unity);
-  renderGrowth(copilot, unity);
   renderUpcoming(unity);
   renderTeam();
   renderApproval(unity);
@@ -414,16 +405,25 @@ function renderHero(unity, copilot) {
     : 'Tu ecosistema digital conectado';
 }
 
-// ── S2: NUMBERS (IG + Unity — datos que TODOS los clientes tienen) ──
+// ── S2: NUMBERS (IG + Unity + Growth — datos que TODOS los clientes tienen) ──
 function renderNumbers(copilot, unity) {
   const ig = copilot && copilot.ig;
+  const growth = copilot && copilot.ig_growth;
   const grilla = unity && unity.grilla;
-  const reviews = unity && unity.reviews && unity.reviews.google;
+  const client = unity && unity.client;
   const followers = ig ? (ig.followers_count || 0) : 0;
   const engagement = ig ? (ig.engagement_rate || 0) : 0;
   const avgLikes = ig ? (ig.avg_likes || 0) : 0;
   const totalPiezas = grilla ? (grilla.total || 0) : 0;
-  const rating = reviews ? (reviews.rating || 0) : 0;
+  const followersStart = growth ? (growth.followers_start || 0) : 0;
+
+  let meses = 0;
+  if (client && client.fecha_inicio) {
+    const inicio = new Date(client.fecha_inicio);
+    const now = new Date();
+    meses = Math.max(1, (now.getFullYear() - inicio.getFullYear()) * 12 + (now.getMonth() - inicio.getMonth()));
+  }
+  const pctGrowth = followersStart > 0 ? Math.round(((followers - followersStart) / followersStart) * 100) : 0;
 
   const mainEl = document.getElementById('num-main');
   mainEl.className = 'num-main rv rv-d1 counter';
@@ -432,10 +432,12 @@ function renderNumbers(copilot, unity) {
   document.querySelector('.num-main-sub').textContent = 'seguidores en Instagram';
 
   const grid = document.getElementById('num-grid');
+  grid.className = 'num-grid rv rv-d2';
+  grid.style.gridTemplateColumns = 'repeat(4,1fr)';
   grid.innerHTML = `
     <div class="num-item">
       <div class="num-val counter" data-target="${engagement}" data-suffix="%" data-decimals="2">0%</div>
-      <div class="num-desc">engagement rate</div>
+      <div class="num-desc">engagement</div>
     </div>
     <div class="num-item">
       <div class="num-val counter" data-target="${avgLikes}">0</div>
@@ -444,6 +446,10 @@ function renderNumbers(copilot, unity) {
     <div class="num-item">
       <div class="num-val counter" data-target="${totalPiezas}">0</div>
       <div class="num-desc">piezas este mes</div>
+    </div>
+    <div class="num-item">
+      <div class="num-val" style="color:#4ade80;">${pctGrowth > 0 ? '+' + pctGrowth + '%' : (meses > 0 ? meses : '—')}</div>
+      <div class="num-desc">${pctGrowth > 0 ? 'crecimiento' : (meses > 0 ? meses === 1 ? 'mes juntos' : 'meses juntos' : '')}</div>
     </div>
   `;
 }
@@ -489,30 +495,53 @@ function renderInvestment(copilot) {
 }
 
 // ── S4: CONTENT ──
-function renderContent(unity) {
+function renderContent(unity, copilot) {
   const grilla = unity && unity.grilla;
-  if (!grilla || !grilla.piezas || !grilla.piezas.length) {
-    document.getElementById('content-title').textContent = 'Sin contenido este mes';
+  const ig = copilot && copilot.ig;
+  const totalPiezas = grilla ? (grilla.total || 0) : 0;
+  document.getElementById('content-title').textContent = totalPiezas > 0 ? `${totalPiezas} piezas este mes` : 'Tu contenido';
+
+  const grid = document.getElementById('content-grid');
+  let items = [];
+
+  // 1. Piezas con archivo en Drive (las mejores)
+  if (grilla && grilla.piezas) {
+    const conArchivo = grilla.piezas.filter(p => p.drive_file_id);
+    conArchivo.forEach(p => items.push({
+      url: `${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large`,
+      title: p.titulo || 'Pieza',
+      meta: p.formato || '',
+      fileId: p.drive_file_id
+    }));
+  }
+
+  // 2. Fallback: fotos de Instagram
+  if (items.length < 6 && ig && ig.posts) {
+    ig.posts.filter(p => p.media_url && p.media_type !== 'VIDEO').forEach(p => {
+      if (items.length >= 12) return;
+      items.push({
+        url: p.media_url,
+        title: '',
+        meta: `❤️ ${(p.like_count||0).toLocaleString('es-CL')}`,
+        link: p.permalink
+      });
+    });
+  }
+
+  if (!items.length) {
+    grid.innerHTML = '<p style="color:#555;font-size:13px;text-align:center;grid-column:1/-1;">Sin contenido visual disponible</p>';
     return;
   }
 
-  const published = grilla.piezas.filter(p => ['aprobado_final','publicado'].includes(p.estado));
-  document.getElementById('content-title').textContent = `${grilla.total} piezas este mes`;
-
-  const carousel = document.getElementById('carousel');
-  const piezas = grilla.piezas.filter(p => p.drive_file_id || p.estado !== 'draft');
-  carousel.innerHTML = piezas.map(p => {
-    const bg = p.drive_file_id
-      ? `background-image:url(${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large)`
-      : 'background:linear-gradient(135deg,#1a1a1a,#111)';
-    return `
-      <div class="carousel-item" style="${bg}" ${p.drive_file_id ? `onclick="openLightbox('${p.drive_file_id}')"` : ''}>
-        <div class="carousel-item-overlay">
-          <div class="carousel-item-title">${p.titulo || 'Pieza'}</div>
-          <div class="carousel-item-meta">${p.formato || ''} · ${p.pilar || ''}</div>
-        </div>
-      </div>`;
-  }).join('');
+  grid.innerHTML = items.slice(0, 12).map((item, i) => `
+    <div class="content-card stagger" style="background-image:url('${item.url}');animation-delay:${i * 0.08}s;"
+      ${item.fileId ? `onclick="openLightbox('${item.fileId}')"` : (item.link ? `onclick="window.open('${item.link}','_blank')"` : '')}>
+      <div class="content-card-overlay">
+        <div class="content-card-title">${item.title}</div>
+        ${item.meta ? `<div class="content-card-meta">${item.meta}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
 // ── S5: REVIEWS ──
@@ -541,44 +570,7 @@ function renderReviews(unity) {
   }).join('') || '<p style="color:#555;font-size:13px;">Sin reseñas disponibles</p>';
 }
 
-// ── S6: GROWTH ──
-function renderGrowth(copilot, unity) {
-  const ig = copilot && copilot.ig;
-  const growth = copilot && copilot.ig_growth;
-  const client = unity && unity.client;
-  const followersNow = ig ? ig.followers_count : 0;
-  const followersStart = growth ? growth.followers_start : 0;
-
-  document.getElementById('growth-grid').innerHTML = `
-    <div class="growth-box">
-      <div class="growth-label">Cuando empezamos</div>
-      <div class="growth-val" style="color:#888;">${followersStart > 0 ? followersStart.toLocaleString('es-CL') : '—'}</div>
-    </div>
-    <div style="font-size:32px;color:#EA580C;text-align:center;">→</div>
-    <div class="growth-box">
-      <div class="growth-label">Hoy</div>
-      <div class="growth-val counter" data-target="${followersNow}" style="color:#4ade80;">0</div>
-    </div>
-  `;
-
-  if (followersStart > 0 && followersNow > 0) {
-    const pctGrowth = Math.round(((followersNow - followersStart) / followersStart) * 100);
-    document.getElementById('growth-change').textContent = `+${pctGrowth}% de crecimiento`;
-  }
-
-  let meses = 0;
-  if (client && client.fecha_inicio) {
-    const inicio = new Date(client.fecha_inicio);
-    const now = new Date();
-    meses = Math.max(1, (now.getFullYear() - inicio.getFullYear()) * 12 + (now.getMonth() - inicio.getMonth()));
-  }
-  if (meses > 0) {
-    document.getElementById('growth-months').innerHTML = `
-      <span style="font-size:13px;color:#888;">${meses} ${meses===1?'mes':'meses'} juntos</span>
-      <div class="growth-months-bar"><div class="growth-months-fill" style="width:${Math.min(meses/12*100,100)}%"></div></div>
-    `;
-  }
-}
+// ── S6: GROWTH (merged into numbers section) ──
 
 // ── S7: UPCOMING ──
 function renderUpcoming(unity) {
