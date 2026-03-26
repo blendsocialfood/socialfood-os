@@ -121,12 +121,16 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .upcoming-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(234,88,12,.1);color:#EA580C;border:1px solid rgba(234,88,12,.15);}
 
 /* ── S8 TEAM ── */
-#team{background:#0a0805;}
-.team-grid{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:24px;}
-.team-card{text-align:center;width:120px;}
-.team-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1a1a1a,#111);border:2px solid rgba(234,88,12,.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#EA580C;}
-.team-name{font-size:13px;font-weight:600;color:#eee;}
-.team-role{font-size:10px;color:#666;margin-top:2px;}
+#team{background:#050505;overflow:hidden;}
+.team-scroll{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:24px 24px 24px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.team-scroll::-webkit-scrollbar{display:none;}
+.team-card{min-width:220px;height:300px;border-radius:18px;background:linear-gradient(160deg,#111 0%,#0a0a0a 100%);border:1px solid rgba(255,255,255,.06);padding:28px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex-shrink:0;scroll-snap-align:start;position:relative;overflow:hidden;transition:transform .4s,box-shadow .4s;transform-style:preserve-3d;cursor:default;}
+.team-card:hover{transform:scale(1.04) rotateY(4deg);box-shadow:0 20px 50px rgba(234,88,12,.12);border-color:rgba(234,88,12,.2);}
+.team-card::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(234,88,12,.06) 0%,transparent 70%);pointer-events:none;}
+.team-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#EA580C,#ff8c42);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin-bottom:16px;box-shadow:0 8px 24px rgba(234,88,12,.3);letter-spacing:-1px;}
+.team-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-.5px;}
+.team-role{font-size:12px;color:#EA580C;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.team-desc{font-size:11px;color:#555;line-height:1.5;}
 
 /* ── FLOATING APPROVAL BUTTON ── */
 .fab{position:fixed;bottom:24px;right:24px;z-index:90;background:#EA580C;color:#fff;border:none;padding:14px 20px;border-radius:16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(234,88,12,.4);transition:all .2s;display:none;align-items:center;gap:8px;}
@@ -200,6 +204,16 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   </div>
 </section>
 
+<!-- S-TEAM: TU EQUIPO (after hero) -->
+<section id="team">
+  <div class="container">
+    <div class="sec-label rv">QUIÉNES TRABAJAMOS PARA TI</div>
+    <div class="sec-title rv rv-d1" style="margin-bottom:4px;">Tu equipo</div>
+    <p class="rv rv-d1" style="color:#555;font-size:13px;margin-bottom:0;">Profesionales enfocados en hacer crecer tu marca</p>
+  </div>
+  <div class="team-scroll rv rv-d2" id="team-grid"></div>
+</section>
+
 <!-- S2: NUMBERS -->
 <section id="numbers">
   <div class="container">
@@ -257,14 +271,7 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   </div>
 </section>
 
-<!-- S8: TEAM -->
-<section id="team">
-  <div class="container" style="text-align:center;">
-    <div class="sec-label rv">TU EQUIPO</div>
-    <div class="sec-title rv rv-d1">Dedicados a tu marca</div>
-    <div class="team-grid rv rv-d2" id="team-grid"></div>
-  </div>
-</section>
+<!-- S8: TEAM (moved to section 2) -->
 
 <!-- FOOTER -->
 <footer>POWERED BY BLEND — SOCIALFOOD</footer>
@@ -596,20 +603,22 @@ function renderUpcoming(unity) {
     : '<p style="color:#555;font-size:13px;text-align:center;">Todo al día — no hay piezas pendientes</p>';
 }
 
-// ── S8: TEAM ──
+// ── TEAM ──
 function renderTeam() {
   const team = [
-    { name: 'Cristóbal', role: 'Estrategia', initial: 'C' },
-    { name: 'Nicolás', role: 'Dirección Creativa', initial: 'N' },
-    { name: 'Paula', role: 'Community Manager', initial: 'P' },
-    { name: 'Juan', role: 'Diseño', initial: 'J' },
-    { name: 'Seba', role: 'Ads', initial: 'S' },
+    { name: 'Cristóbal', role: 'Estrategia', initial: 'CR', desc: 'Dirección estratégica, sistema y operaciones' },
+    { name: 'Nicolás', role: 'Director Creativo', initial: 'NJ', desc: 'Creatividad, diferenciación y contenido' },
+    { name: 'Paula', role: 'Community Manager', initial: 'PD', desc: 'Gestión de contenido, calendario y publicación' },
+    { name: 'Juan', role: 'Diseñador', initial: 'JM', desc: 'Diseño gráfico, reels y piezas visuales' },
+    { name: 'Seba', role: 'Estratega Ads', initial: 'SM', desc: 'Campañas Meta Ads, optimización y ROAS' },
+    { name: 'Juanes', role: 'Audiovisual', initial: 'JF', desc: 'Fotografía, video y producción audiovisual' },
   ];
-  document.getElementById('team-grid').innerHTML = team.map(t => `
-    <div class="team-card">
+  document.getElementById('team-grid').innerHTML = team.map((t, i) => `
+    <div class="team-card" style="animation:cardIn .6s ${i * 0.1}s forwards;opacity:0;">
       <div class="team-avatar">${t.initial}</div>
       <div class="team-name">${t.name}</div>
       <div class="team-role">${t.role}</div>
+      <div class="team-desc">${t.desc}</div>
     </div>
   `).join('');
 }
