@@ -58,9 +58,15 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
 /* BG text giant */
-.hero-bg-text{position:absolute;font-size:clamp(100px,18vw,220px);font-weight:900;color:rgba(255,255,255,.03);z-index:0;white-space:nowrap;letter-spacing:-8px;will-change:transform;pointer-events:none;}
-.hero-bg-text-l{left:-5vw;top:15vh;}
-.hero-bg-text-r{right:-5vw;bottom:15vh;}
+.hero-bg-text{position:absolute;font-size:clamp(120px,22vw,280px);font-weight:900;color:rgba(255,255,255,.06);z-index:0;white-space:nowrap;letter-spacing:-6px;will-change:transform;pointer-events:none;}
+.hero-bg-text-l{left:2vw;top:8vh;}
+.hero-bg-text-r{right:2vw;bottom:8vh;}
+
+/* Client presentation overlay */
+.hero-present{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;will-change:opacity;pointer-events:none;}
+.hero-present-name{font-size:clamp(48px,9vw,110px);font-weight:900;color:#fff;letter-spacing:-4px;text-shadow:0 4px 40px rgba(0,0,0,.5);}
+.hero-present-line{width:60px;height:3px;background:#EA580C;margin:16px 0;border-radius:3px;}
+.hero-present-by{font-size:12px;color:rgba(255,255,255,.7);letter-spacing:4px;text-transform:uppercase;}
 
 /* ── MASK TRANSITION ── */
 .mask-reveal{position:absolute;inset:0;background:#030303;z-index:3;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));}
@@ -230,6 +236,11 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
     <div class="hero-bg-text hero-bg-text-r" id="hero-bgt-r">FOOD</div>
     <div class="hero-photo" id="hero-photo"></div>
     <div class="hero-photo-overlay"></div>
+    <div class="hero-present" id="hero-present">
+      <div class="hero-present-name" id="hero-present-name"></div>
+      <div class="hero-present-line"></div>
+      <div class="hero-present-by">SOCIALFOOD — by Blend</div>
+    </div>
     <div class="hero-text-wrap">
       <div class="hero-reveal-text" id="hero-reveal-text"></div>
       <div class="hero-badge" id="hero-badge">SOCIALFOOD</div>
@@ -363,28 +374,43 @@ window.addEventListener('scroll', () => {
   const wrapH = heroWrap.offsetHeight - window.innerHeight;
   const progress = Math.max(0, Math.min(1, (window.scrollY - wrapTop) / wrapH));
 
-  // 1. Clip-path circle: 0% → 5% at start, grows to 80% at end
-  const circleSize = 3 + progress * 77;
+  // PHASE 1 (0-50%): Circle grows + text reveals word by word
+  // PHASE 2 (50-75%): Circle fills screen, text fades, photo takes over
+  // PHASE 3 (75-100%): Client name presentation over the photo
+
+  // 1. Clip-path circle: 8% → 85%
+  const circleSize = 8 + progress * 77;
   if (heroPhoto) heroPhoto.style.clipPath = `circle(${circleSize}% at 50% 50%)`;
 
-  // 2. Word-by-word text reveal
+  // 2. Word-by-word text reveal (phase 1: 0-50%)
   if (heroWords.length) {
-    const wordsToLight = Math.floor(progress * heroWords.length * 1.8);
-    heroWords.forEach((span, i) => {
-      span.classList.toggle('lit', i < wordsToLight);
-    });
+    const textProgress = Math.min(1, progress * 2.2);
+    const wordsToLight = Math.floor(textProgress * heroWords.length);
+    heroWords.forEach((span, i) => { span.classList.toggle('lit', i < wordsToLight); });
+  }
+  // Text fades out in phase 2
+  const textWrapOpacity = progress < 0.5 ? 1 : Math.max(0, 1 - (progress - 0.5) * 4);
+  if (heroRevealText) heroRevealText.style.opacity = textWrapOpacity;
+
+  // 3. Background text parallax + fade
+  const bgtOpacity = Math.max(0, 1 - progress * 2);
+  if (heroBgtL) { heroBgtL.style.transform = `translateX(${-progress * 100}px)`; heroBgtL.style.opacity = bgtOpacity; }
+  if (heroBgtR) { heroBgtR.style.transform = `translateX(${progress * 100}px)`; heroBgtR.style.opacity = bgtOpacity; }
+
+  // 4. Client name presentation (phase 3: 70-95%)
+  const presentEl = document.getElementById('hero-present');
+  if (presentEl) {
+    const presProgress = Math.max(0, Math.min(1, (progress - 0.7) * 4));
+    presentEl.style.opacity = presProgress;
+    const nameEl = presentEl.querySelector('.hero-present-name');
+    if (nameEl) nameEl.style.transform = `translateY(${(1 - presProgress) * 30}px)`;
   }
 
-  // 3. Background text parallax
-  if (heroBgtL) heroBgtL.style.transform = `translateX(${-progress * 80}px) translateY(${progress * 30}px)`;
-  if (heroBgtR) heroBgtR.style.transform = `translateX(${progress * 80}px) translateY(${-progress * 30}px)`;
+  // 5. Badge fades with text
+  if (heroBadge) heroBadge.style.opacity = progress > 0.3 && progress < 0.6 ? Math.min(1, (progress - 0.3) * 5) : (progress >= 0.6 ? Math.max(0, 1 - (progress - 0.6) * 5) : 0);
+  if (heroSubEl) heroSubEl.style.opacity = heroBadge ? heroBadge.style.opacity : 0;
 
-  // 4. Badge + sub fade in at 60%+
-  const badgeOpacity = Math.max(0, Math.min(1, (progress - 0.5) * 4));
-  if (heroBadge) heroBadge.style.opacity = badgeOpacity;
-  if (heroSubEl) heroSubEl.style.opacity = badgeOpacity;
-
-  // 5. Scroll hint fades fast
+  // 6. Scroll hint fades fast
   if (scrollHintEl) scrollHintEl.style.opacity = Math.max(0, 1 - progress * 5);
 });
 
@@ -486,6 +512,9 @@ function renderHero(unity, copilot) {
   // Badge + sub
   heroBadge.textContent = `@${ig ? ig.username : CLIENT.toLowerCase()} · SOCIALFOOD`;
   heroSubEl.textContent = followers > 0 ? `${followers.toLocaleString('es-CL')} seguidores` : 'Tu ecosistema digital conectado';
+
+  // Client presentation name
+  document.getElementById('hero-present-name').textContent = CLIENT;
 }
 
 // ── S2: NUMBERS (IG + Unity + Growth — datos que TODOS los clientes tienen) ──
