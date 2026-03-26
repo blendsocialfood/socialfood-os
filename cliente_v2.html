@@ -41,21 +41,27 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .rv.visible{opacity:1;transform:translateY(0);}
 .rv-d1{transition-delay:.1s}.rv-d2{transition-delay:.2s}.rv-d3{transition-delay:.3s}.rv-d4{transition-delay:.4s}.rv-d5{transition-delay:.5s}
 
-/* ── S1 HERO — SCROLL-DRIVEN ZOOM ── */
-#hero-wrap{height:300vh;position:relative;}
-#hero{position:sticky;top:0;height:100vh;overflow:hidden;min-height:unset;scroll-snap-align:none;padding:0;display:flex;align-items:center;justify-content:center;}
-.hero-frame{width:55vw;height:65vh;border-radius:28px;overflow:hidden;position:relative;transition:none;will-change:transform,border-radius;}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.75) saturate(1.15);transition:opacity 1s;opacity:0;}
-.hero-bg.loaded{opacity:1;}
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.6));}
-.hero-text-left{position:absolute;left:4vw;top:50%;transform:translateY(-50%);z-index:2;will-change:transform,opacity;}
-.hero-text-left h1{font-size:clamp(36px,5.5vw,72px);font-weight:900;line-height:.95;letter-spacing:-3px;color:#fff;}
-.hero-text-right{position:absolute;right:4vw;bottom:20vh;z-index:2;text-align:right;will-change:transform,opacity;}
-.hero-text-right h2{font-size:clamp(28px,4vw,56px);font-weight:800;line-height:.95;letter-spacing:-2px;color:#fff;opacity:.7;}
-.hero-center-text{position:absolute;z-index:3;text-align:center;bottom:10vh;left:50%;transform:translateX(-50%);will-change:opacity;}
-.hero-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;background:rgba(0,0,0,.5);border:1px solid rgba(234,88,12,.3);padding:6px 16px;border-radius:20px;backdrop-filter:blur(10px);}
-.scroll-hint{position:absolute;bottom:3vh;left:50%;transform:translateX(-50%);color:#555;font-size:10px;letter-spacing:3px;text-transform:uppercase;z-index:4;animation:float 2.5s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+/* ── S1 HERO — CLIP-PATH CIRCLE REVEAL ── */
+#hero-wrap{height:400vh;position:relative;}
+#hero{position:sticky;top:0;height:100vh;overflow:hidden;min-height:unset;scroll-snap-align:none;padding:0;display:flex;align-items:center;justify-content:center;background:#030303;}
+.hero-photo{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.8) saturate(1.2);clip-path:circle(0% at 50% 50%);will-change:clip-path;transition:opacity .5s;opacity:0;}
+.hero-photo.loaded{opacity:1;}
+.hero-photo-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.5) 100%);z-index:1;}
+.hero-text-wrap{position:relative;z-index:2;text-align:center;max-width:900px;padding:0 24px;}
+.hero-reveal-text{font-size:clamp(36px,6vw,72px);font-weight:900;line-height:1.05;letter-spacing:-3px;}
+.hero-reveal-text .word{display:inline-block;color:#222;transition:color .3s;margin:0 .12em;}
+.hero-reveal-text .word.lit{color:#fff;}
+.hero-reveal-text .word.accent{color:#EA580C !important;}
+.hero-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;background:rgba(0,0,0,.6);border:1px solid rgba(234,88,12,.3);padding:6px 16px;border-radius:20px;backdrop-filter:blur(10px);margin-top:20px;opacity:0;will-change:opacity;}
+.hero-sub{font-size:14px;color:#555;margin-top:12px;opacity:0;will-change:opacity;}
+.scroll-hint{position:absolute;bottom:3vh;left:50%;transform:translateX(-50%);color:#444;font-size:10px;letter-spacing:3px;text-transform:uppercase;z-index:4;}
+.scroll-hint span{display:inline-block;animation:float 2s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* BG text giant */
+.hero-bg-text{position:absolute;font-size:clamp(100px,18vw,220px);font-weight:900;color:rgba(255,255,255,.03);z-index:0;white-space:nowrap;letter-spacing:-8px;will-change:transform;pointer-events:none;}
+.hero-bg-text-l{left:-5vw;top:15vh;}
+.hero-bg-text-r{right:-5vw;bottom:15vh;}
 
 /* ── MASK TRANSITION ── */
 .mask-reveal{position:absolute;inset:0;background:#030303;z-index:3;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));}
@@ -218,23 +224,19 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
 <!-- SCROLL PROGRESS -->
 <div class="scroll-bar" id="scroll-bar"></div>
 
-<!-- S1: HERO — SCROLL ZOOM -->
+<!-- S1: HERO — CLIP-PATH CIRCLE REVEAL -->
 <div id="hero-wrap">
   <section id="hero">
-    <div class="hero-text-left" id="hero-text-left">
-      <h1 id="hero-h1-left">Tu marca<br>crece</h1>
+    <div class="hero-bg-text hero-bg-text-l" id="hero-bgt-l">SOCIAL</div>
+    <div class="hero-bg-text hero-bg-text-r" id="hero-bgt-r">FOOD</div>
+    <div class="hero-photo" id="hero-photo"></div>
+    <div class="hero-photo-overlay"></div>
+    <div class="hero-text-wrap">
+      <div class="hero-reveal-text" id="hero-reveal-text"></div>
+      <div class="hero-badge" id="hero-badge">SOCIALFOOD</div>
+      <div class="hero-sub" id="hero-sub"></div>
     </div>
-    <div class="hero-frame" id="hero-frame">
-      <div class="hero-bg" id="hero-bg"></div>
-      <div class="hero-overlay"></div>
-      <div class="hero-center-text" id="hero-center-text">
-        <div class="hero-badge" id="hero-badge">SOCIALFOOD</div>
-      </div>
-    </div>
-    <div class="hero-text-right" id="hero-text-right">
-      <h2 id="hero-h2-right">con<br>Blend</h2>
-    </div>
-    <div class="scroll-hint">↓ scroll</div>
+    <div class="scroll-hint"><span>↓</span> SCROLL</div>
   </section>
 </div>
 
@@ -342,52 +344,49 @@ function closeIntro() {
   setTimeout(() => intro.remove(), 800);
 }
 
-// ── SCROLL PROGRESS + HERO ZOOM ──
+// ── SCROLL PROGRESS + HERO CLIP-PATH REVEAL ──
 const heroWrap = document.getElementById('hero-wrap');
-const heroFrame = document.getElementById('hero-frame');
-const heroTextL = document.getElementById('hero-text-left');
-const heroTextR = document.getElementById('hero-text-right');
-const heroCenterText = document.getElementById('hero-center-text');
-const scrollHint = document.querySelector('.scroll-hint');
+const heroPhoto = document.getElementById('hero-photo');
+const heroBgtL = document.getElementById('hero-bgt-l');
+const heroBgtR = document.getElementById('hero-bgt-r');
+const heroRevealText = document.getElementById('hero-reveal-text');
+const heroBadge = document.getElementById('hero-badge');
+const heroSubEl = document.getElementById('hero-sub');
+const scrollHintEl = document.querySelector('.scroll-hint');
+let heroWords = [];
 
 window.addEventListener('scroll', () => {
   const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
   document.getElementById('scroll-bar').style.width = pct + '%';
 
-  // Hero zoom effect
-  if (heroWrap && heroFrame) {
-    const wrapTop = heroWrap.offsetTop;
-    const wrapH = heroWrap.offsetHeight - window.innerHeight;
-    const progress = Math.max(0, Math.min(1, (window.scrollY - wrapTop) / wrapH));
+  if (!heroWrap) return;
+  const wrapTop = heroWrap.offsetTop;
+  const wrapH = heroWrap.offsetHeight - window.innerHeight;
+  const progress = Math.max(0, Math.min(1, (window.scrollY - wrapTop) / wrapH));
 
-    // Frame: scale from 1 to filling viewport
-    const startW = 55; // vw
-    const startH = 65; // vh
-    const scaleX = 100 / startW;
-    const scaleY = 100 / startH;
-    const maxScale = Math.max(scaleX, scaleY);
-    const scale = 1 + (maxScale - 1) * progress;
-    const borderRadius = 28 * (1 - progress);
+  // 1. Clip-path circle: 0% → 5% at start, grows to 80% at end
+  const circleSize = 3 + progress * 77;
+  if (heroPhoto) heroPhoto.style.clipPath = `circle(${circleSize}% at 50% 50%)`;
 
-    heroFrame.style.transform = `scale(${scale})`;
-    heroFrame.style.borderRadius = borderRadius + 'px';
-
-    // Text parallax — moves out as zoom progresses
-    const textOpacity = Math.max(0, 1 - progress * 2.5);
-    const textShiftL = progress * -120;
-    const textShiftR = progress * 120;
-    heroTextL.style.transform = `translateY(-50%) translateX(${textShiftL}px)`;
-    heroTextL.style.opacity = textOpacity;
-    heroTextR.style.transform = `translateX(${textShiftR}px)`;
-    heroTextR.style.opacity = textOpacity;
-
-    // Center text fades in then out
-    const centerOpacity = progress > 0.3 && progress < 0.8 ? Math.min(1, (progress - 0.3) * 4) * (1 - Math.max(0, (progress - 0.7) * 4)) : (progress <= 0.3 ? 0 : 0);
-    heroCenterText.style.opacity = centerOpacity;
-
-    // Scroll hint fades
-    if (scrollHint) scrollHint.style.opacity = Math.max(0, 1 - progress * 4);
+  // 2. Word-by-word text reveal
+  if (heroWords.length) {
+    const wordsToLight = Math.floor(progress * heroWords.length * 1.8);
+    heroWords.forEach((span, i) => {
+      span.classList.toggle('lit', i < wordsToLight);
+    });
   }
+
+  // 3. Background text parallax
+  if (heroBgtL) heroBgtL.style.transform = `translateX(${-progress * 80}px) translateY(${progress * 30}px)`;
+  if (heroBgtR) heroBgtR.style.transform = `translateX(${progress * 80}px) translateY(${-progress * 30}px)`;
+
+  // 4. Badge + sub fade in at 60%+
+  const badgeOpacity = Math.max(0, Math.min(1, (progress - 0.5) * 4));
+  if (heroBadge) heroBadge.style.opacity = badgeOpacity;
+  if (heroSubEl) heroSubEl.style.opacity = badgeOpacity;
+
+  // 5. Scroll hint fades fast
+  if (scrollHintEl) scrollHintEl.style.opacity = Math.max(0, 1 - progress * 5);
 });
 
 // ── REVEAL ON SCROLL ──
@@ -453,7 +452,8 @@ function renderHero(unity, copilot) {
   const client = unity && unity.client;
   const ig = copilot && copilot.ig;
   const heroId = client && client.hero_image_id;
-  const heroBg = document.getElementById('hero-bg');
+  const followers = ig ? (ig.followers_count || 0) : 0;
+  const hp = document.getElementById('hero-photo');
 
   // Background — preload then show
   let imgUrl = '';
@@ -465,19 +465,28 @@ function renderHero(unity, copilot) {
   }
   if (imgUrl) {
     const img = new Image();
-    img.onload = () => { heroBg.style.backgroundImage = `url(${imgUrl})`; heroBg.classList.add('loaded'); closeIntro(); };
+    img.onload = () => { hp.style.backgroundImage = `url(${imgUrl})`; hp.classList.add('loaded'); closeIntro(); };
     img.onerror = () => { closeIntro(); };
     img.src = imgUrl;
-    // Fallback: close intro after 5s even if image fails
     setTimeout(closeIntro, 5000);
   } else {
     closeIntro();
   }
 
-  // Text
-  document.getElementById('hero-h1-left').innerHTML = `Tu marca<br>crece`;
-  document.getElementById('hero-h2-right').innerHTML = `con<br>Blend`;
-  document.getElementById('hero-badge').textContent = `@${ig ? ig.username : CLIENT.toLowerCase()} · SOCIALFOOD`;
+  // Word-by-word text
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const mesLabel = meses[new Date().getMonth()];
+  const phrase = `${mesLabel} fue un gran mes para ${CLIENT}`;
+  const accentWord = CLIENT.toLowerCase();
+  heroRevealText.innerHTML = phrase.split(' ').map(w => {
+    const isAccent = w.toLowerCase() === accentWord || w.toLowerCase() === CLIENT.split(' ')[0].toLowerCase();
+    return `<span class="word ${isAccent ? 'accent' : ''}">${w}</span>`;
+  }).join(' ');
+  heroWords = Array.from(heroRevealText.querySelectorAll('.word'));
+
+  // Badge + sub
+  heroBadge.textContent = `@${ig ? ig.username : CLIENT.toLowerCase()} · SOCIALFOOD`;
+  heroSubEl.textContent = followers > 0 ? `${followers.toLocaleString('es-CL')} seguidores` : 'Tu ecosistema digital conectado';
 }
 
 // ── S2: NUMBERS (IG + Unity + Growth — datos que TODOS los clientes tienen) ──
