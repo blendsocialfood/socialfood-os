@@ -41,18 +41,21 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .rv.visible{opacity:1;transform:translateY(0);}
 .rv-d1{transition-delay:.1s}.rv-d2{transition-delay:.2s}.rv-d3{transition-delay:.3s}.rv-d4{transition-delay:.4s}.rv-d5{transition-delay:.5s}
 
-/* ── S1 HERO ── */
-#hero{position:relative;overflow:hidden;}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.65) saturate(1.1);transition:opacity 1.5s;opacity:0;}
+/* ── S1 HERO — SCROLL-DRIVEN ZOOM ── */
+#hero-wrap{height:300vh;position:relative;}
+#hero{position:sticky;top:0;height:100vh;overflow:hidden;min-height:unset;scroll-snap-align:none;padding:0;display:flex;align-items:center;justify-content:center;}
+.hero-frame{width:55vw;height:65vh;border-radius:28px;overflow:hidden;position:relative;transition:none;will-change:transform,border-radius;}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.75) saturate(1.15);transition:opacity 1s;opacity:0;}
 .hero-bg.loaded{opacity:1;}
-.hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,#030303 75%);}
-.hero-gradient{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(transparent,#030303);}
-.hero-content{position:relative;z-index:2;text-align:center;}
-.hero-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.2);padding:6px 16px;border-radius:20px;margin-bottom:20px;}
-.hero-title{font-size:clamp(32px,6vw,64px);font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:12px;}
-.hero-sub{font-size:clamp(14px,2vw,18px);color:#888;font-weight:400;max-width:500px;margin:0 auto;}
-.scroll-hint{margin-top:40px;color:#555;font-size:11px;letter-spacing:2px;text-transform:uppercase;animation:float 2.5s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.6));}
+.hero-text-left{position:absolute;left:4vw;top:50%;transform:translateY(-50%);z-index:2;will-change:transform,opacity;}
+.hero-text-left h1{font-size:clamp(36px,5.5vw,72px);font-weight:900;line-height:.95;letter-spacing:-3px;color:#fff;}
+.hero-text-right{position:absolute;right:4vw;bottom:20vh;z-index:2;text-align:right;will-change:transform,opacity;}
+.hero-text-right h2{font-size:clamp(28px,4vw,56px);font-weight:800;line-height:.95;letter-spacing:-2px;color:#fff;opacity:.7;}
+.hero-center-text{position:absolute;z-index:3;text-align:center;bottom:10vh;left:50%;transform:translateX(-50%);will-change:opacity;}
+.hero-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;background:rgba(0,0,0,.5);border:1px solid rgba(234,88,12,.3);padding:6px 16px;border-radius:20px;backdrop-filter:blur(10px);}
+.scroll-hint{position:absolute;bottom:3vh;left:50%;transform:translateX(-50%);color:#555;font-size:10px;letter-spacing:3px;text-transform:uppercase;z-index:4;animation:float 2.5s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
 
 /* ── MASK TRANSITION ── */
 .mask-reveal{position:absolute;inset:0;background:#030303;z-index:3;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));}
@@ -215,18 +218,25 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
 <!-- SCROLL PROGRESS -->
 <div class="scroll-bar" id="scroll-bar"></div>
 
-<!-- S1: HERO -->
-<section id="hero">
-  <div class="hero-bg" id="hero-bg"></div>
-  <div class="hero-vignette"></div>
-  <div class="hero-gradient"></div>
-  <div class="hero-content rv">
-    <div class="hero-badge" id="hero-badge">SOCIALFOOD</div>
-    <h1 class="hero-title" id="hero-title"></h1>
-    <p class="hero-sub" id="hero-sub"></p>
+<!-- S1: HERO — SCROLL ZOOM -->
+<div id="hero-wrap">
+  <section id="hero">
+    <div class="hero-text-left" id="hero-text-left">
+      <h1 id="hero-h1-left">Tu marca<br>crece</h1>
+    </div>
+    <div class="hero-frame" id="hero-frame">
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-center-text" id="hero-center-text">
+        <div class="hero-badge" id="hero-badge">SOCIALFOOD</div>
+      </div>
+    </div>
+    <div class="hero-text-right" id="hero-text-right">
+      <h2 id="hero-h2-right">con<br>Blend</h2>
+    </div>
     <div class="scroll-hint">↓ scroll</div>
-  </div>
-</section>
+  </section>
+</div>
 
 <!-- S-TEAM: TU EQUIPO (after hero) -->
 <section id="team">
@@ -332,10 +342,52 @@ function closeIntro() {
   setTimeout(() => intro.remove(), 800);
 }
 
-// ── SCROLL PROGRESS ──
+// ── SCROLL PROGRESS + HERO ZOOM ──
+const heroWrap = document.getElementById('hero-wrap');
+const heroFrame = document.getElementById('hero-frame');
+const heroTextL = document.getElementById('hero-text-left');
+const heroTextR = document.getElementById('hero-text-right');
+const heroCenterText = document.getElementById('hero-center-text');
+const scrollHint = document.querySelector('.scroll-hint');
+
 window.addEventListener('scroll', () => {
   const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
   document.getElementById('scroll-bar').style.width = pct + '%';
+
+  // Hero zoom effect
+  if (heroWrap && heroFrame) {
+    const wrapTop = heroWrap.offsetTop;
+    const wrapH = heroWrap.offsetHeight - window.innerHeight;
+    const progress = Math.max(0, Math.min(1, (window.scrollY - wrapTop) / wrapH));
+
+    // Frame: scale from 1 to filling viewport
+    const startW = 55; // vw
+    const startH = 65; // vh
+    const scaleX = 100 / startW;
+    const scaleY = 100 / startH;
+    const maxScale = Math.max(scaleX, scaleY);
+    const scale = 1 + (maxScale - 1) * progress;
+    const borderRadius = 28 * (1 - progress);
+
+    heroFrame.style.transform = `scale(${scale})`;
+    heroFrame.style.borderRadius = borderRadius + 'px';
+
+    // Text parallax — moves out as zoom progresses
+    const textOpacity = Math.max(0, 1 - progress * 2.5);
+    const textShiftL = progress * -120;
+    const textShiftR = progress * 120;
+    heroTextL.style.transform = `translateY(-50%) translateX(${textShiftL}px)`;
+    heroTextL.style.opacity = textOpacity;
+    heroTextR.style.transform = `translateX(${textShiftR}px)`;
+    heroTextR.style.opacity = textOpacity;
+
+    // Center text fades in then out
+    const centerOpacity = progress > 0.3 && progress < 0.8 ? Math.min(1, (progress - 0.3) * 4) * (1 - Math.max(0, (progress - 0.7) * 4)) : (progress <= 0.3 ? 0 : 0);
+    heroCenterText.style.opacity = centerOpacity;
+
+    // Scroll hint fades
+    if (scrollHint) scrollHint.style.opacity = Math.max(0, 1 - progress * 4);
+  }
 });
 
 // ── REVEAL ON SCROLL ──
@@ -423,16 +475,9 @@ function renderHero(unity, copilot) {
   }
 
   // Text
-  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const now = new Date();
-  const mesLabel = meses[now.getMonth()];
-  document.getElementById('hero-title').textContent = `${mesLabel} fue un gran mes para ${CLIENT}`;
-  document.getElementById('hero-badge').textContent = `@${ig ? ig.username : CLIENT.toLowerCase()}`;
-
-  const followers = ig ? ig.followers_count : 0;
-  document.getElementById('hero-sub').textContent = followers > 0
-    ? `${followers.toLocaleString('es-CL')} seguidores · Tu ecosistema digital conectado`
-    : 'Tu ecosistema digital conectado';
+  document.getElementById('hero-h1-left').innerHTML = `Tu marca<br>crece`;
+  document.getElementById('hero-h2-right').innerHTML = `con<br>Blend`;
+  document.getElementById('hero-badge').textContent = `@${ig ? ig.username : CLIENT.toLowerCase()} · SOCIALFOOD`;
 }
 
 // ── S2: NUMBERS (IG + Unity + Growth — datos que TODOS los clientes tienen) ──
