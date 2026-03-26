@@ -173,12 +173,31 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .fab-badge{background:#fff;color:#EA580C;font-size:11px;font-weight:800;padding:2px 7px;border-radius:8px;}
 .fab.show{display:flex;}
 
-/* ── APPROVAL MODAL ── */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;padding:16px;}
+/* ── APPROVAL MODAL — FULLSCREEN GALLERY ── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);display:none;flex-direction:column;padding:0;}
 .modal-overlay.open{display:flex;}
-.modal{background:#111;border:1px solid #222;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:80vh;overflow-y:auto;padding:24px;}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
-.modal-close{background:none;border:none;color:#666;font-size:24px;cursor:pointer;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 28px;border-bottom:1px solid #1a1a1a;}
+.modal-title{font-size:20px;font-weight:800;letter-spacing:-.5px;}
+.modal-count{font-size:12px;color:#EA580C;font-weight:600;}
+.modal-close{background:none;border:1px solid #333;color:#888;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{background:#EA580C;color:#fff;border-color:#EA580C;}
+.modal-body{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px;}
+.approval-card{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:16px;overflow:hidden;transition:border .3s;}
+.approval-card:hover{border-color:#333;}
+.approval-img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;cursor:pointer;transition:transform .3s;}
+.approval-img:hover{transform:scale(1.02);}
+.approval-img-placeholder{width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#1a1a1a,#111);display:flex;align-items:center;justify-content:center;color:#333;font-size:40px;}
+.approval-info{padding:16px 20px;}
+.approval-title{font-size:16px;font-weight:700;margin-bottom:4px;}
+.approval-desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:12px;}
+.approval-meta{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.approval-meta span{font-size:9px;padding:3px 8px;border-radius:4px;background:rgba(234,88,12,.08);color:#EA580C;border:1px solid rgba(234,88,12,.12);}
+.approval-actions{display:flex;gap:10px;}
+.btn-approve{flex:1;padding:12px;background:linear-gradient(135deg,rgba(74,222,128,.12),rgba(74,222,128,.06));border:1px solid rgba(74,222,128,.25);border-radius:12px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;text-align:center;}
+.btn-approve:hover{background:rgba(74,222,128,.2);transform:translateY(-1px);}
+.btn-changes{flex:1;padding:12px;background:linear-gradient(135deg,rgba(251,146,60,.12),rgba(251,146,60,.06));border:1px solid rgba(251,146,60,.25);border-radius:12px;color:#fb923c;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;text-align:center;}
+.btn-changes:hover{background:rgba(251,146,60,.2);transform:translateY(-1px);}
+.approval-status{padding:10px 16px;background:#0a0a0a;border-radius:10px;text-align:center;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
 
 /* ── SECTION LABELS ── */
 .sec-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#EA580C;margin-bottom:12px;}
@@ -327,12 +346,16 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   <span class="fab-badge" id="fab-badge">0</span>
 </button>
 
-<!-- APPROVAL MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeApproval()">
-  <div class="modal">
-    <div class="modal-title">Piezas para aprobar <button class="modal-close" onclick="closeApproval()">✕</button></div>
-    <div id="modal-content"></div>
+<!-- APPROVAL MODAL — FULLSCREEN GALLERY -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-header">
+    <div>
+      <div class="modal-title">Tus piezas</div>
+      <div class="modal-count" id="modal-count"></div>
+    </div>
+    <button class="modal-close" onclick="closeApproval()">✕</button>
   </div>
+  <div class="modal-body" id="modal-content"></div>
 </div>
 
 <script>
@@ -752,27 +775,48 @@ function openApproval() {
   const modal = document.getElementById('modal-overlay');
   modal.classList.add('open');
   const content = document.getElementById('modal-content');
+  const countEl = document.getElementById('modal-count');
+
   const piezasToShow = pendingPiezas.length > 0 ? pendingPiezas : allPiezas.filter(p => !['draft','clickup'].includes(p.estado)).slice(0, 15);
-  content.innerHTML = (pendingPiezas.length === 0 ? '<p style="color:#4ade80;font-size:13px;margin-bottom:16px;text-align:center;">✅ Todo aprobado — no hay piezas pendientes</p>' : '') +
-  piezasToShow.map(p => {
-    const thumb = p.drive_file_id ? `<img src="${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid #222;">` : '';
-    return `
-      <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #1a1a1a;align-items:flex-start;">
-        ${thumb}
-        <div style="flex:1;">
-          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${p.titulo||'Pieza'}</div>
-          <div style="font-size:12px;color:#888;margin-bottom:8px;">${p.idea_final ? p.idea_final.substring(0,100) : ''}</div>
-          ${['esperando_check_cliente','en_revision_cliente'].includes(p.estado) ? `<div style="display:flex;gap:8px;">
-            <button onclick="aprobar(${p.id})" style="padding:6px 14px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✅ Aprobar</button>
-            <button onclick="pedirCambio(${p.id})" style="padding:6px 14px;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.2);border-radius:8px;color:#fb923c;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Cambios</button>
-          </div>` : `<span style="font-size:10px;color:#555;background:#111;padding:3px 8px;border-radius:4px;">${p.estado||''}</span>`}
-          <div id="cambios-${p.id}" style="display:none;margin-top:8px;">
-            <textarea id="cambios-txt-${p.id}" placeholder="Describe los cambios..." style="width:100%;min-height:50px;background:#0a0a0a;border:1px solid #222;border-radius:8px;color:#ccc;font-size:12px;padding:8px;font-family:inherit;resize:vertical;"></textarea>
-            <button onclick="enviarCambio(${p.id})" style="margin-top:4px;padding:5px 12px;background:#fb923c;border:none;border-radius:6px;color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Enviar</button>
-          </div>
+
+  const estadoLabels = {esperando_check_cliente:'Esperando tu aprobación',en_revision_cliente:'En revisión',aprobado_final:'Aprobado',publicado:'Publicado',en_curso:'En producción',hacer_ajuste:'En ajuste',esperando_check_interno:'En revisión interna',aprobado_idea:'Idea aprobada',aprobado_interno:'Aprobado interno'};
+  const estadoColors = {esperando_check_cliente:'#60a5fa',aprobado_final:'#4ade80',publicado:'#a78bfa',en_curso:'#fbbf24',hacer_ajuste:'#fb923c'};
+
+  if (pendingPiezas.length > 0) {
+    countEl.textContent = `${pendingPiezas.length} pieza${pendingPiezas.length>1?'s':''} esperando tu aprobación`;
+  } else {
+    countEl.textContent = `${piezasToShow.length} piezas este mes`;
+  }
+
+  content.innerHTML = piezasToShow.map((p, i) => {
+    const isPending = ['esperando_check_cliente','en_revision_cliente'].includes(p.estado);
+    const img = p.drive_file_id
+      ? `<img class="approval-img" src="${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large" onclick="openLightbox('${p.drive_file_id}')" onerror="this.outerHTML='<div class=approval-img-placeholder>📷</div>'">`
+      : '<div class="approval-img-placeholder">📷</div>';
+
+    const meta = [p.formato, p.pilar, p.fecha_publicacion].filter(Boolean).map(m => `<span>${m}</span>`).join('');
+
+    const actions = isPending
+      ? `<div class="approval-actions">
+          <button class="btn-approve" onclick="aprobar(${p.id})">✓ Aprobar</button>
+          <button class="btn-changes" onclick="pedirCambio(${p.id})">✎ Pedir cambios</button>
         </div>
-      </div>`;
-  }).join('') || '<p style="color:#555;text-align:center;padding:20px;">No hay piezas pendientes</p>';
+        <div id="cambios-${p.id}" style="display:none;margin-top:10px;">
+          <textarea id="cambios-txt-${p.id}" placeholder="Describe qué cambios necesitas..." style="width:100%;min-height:60px;background:#080808;border:1px solid #222;border-radius:10px;color:#ccc;font-size:13px;padding:12px;font-family:inherit;resize:vertical;"></textarea>
+          <button onclick="enviarCambio(${p.id})" style="margin-top:6px;padding:8px 20px;background:linear-gradient(135deg,#fb923c,#EA580C);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Enviar</button>
+        </div>`
+      : `<div class="approval-status" style="color:${estadoColors[p.estado]||'#555'}">${estadoLabels[p.estado]||p.estado}</div>`;
+
+    return `<div class="approval-card" style="animation:cardIn .5s ${i*0.08}s both;">
+      ${img}
+      <div class="approval-info">
+        <div class="approval-title">${p.titulo||'Pieza'}</div>
+        ${p.idea_final ? `<div class="approval-desc">${p.idea_final.substring(0,150)}${p.idea_final.length>150?'...':''}</div>` : ''}
+        ${meta ? `<div class="approval-meta">${meta}</div>` : ''}
+        ${actions}
+      </div>
+    </div>`;
+  }).join('') || '<p style="color:#555;text-align:center;padding:40px;font-size:14px;">Sin piezas disponibles</p>';
 }
 
 function closeApproval() { document.getElementById('modal-overlay').classList.remove('open'); }
