@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Food — Tu Espacio</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-snap-type:y proximity;}
+body{font-family:'Poppins',sans-serif;background:#030303;color:#f5f5f5;overflow-x:hidden;overflow-y:hidden;}
+body.ready{overflow-y:auto;}
+
+/* ── INTRO ── */
+.intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s;}
+.intro.out{opacity:0;pointer-events:none;}
+.intro-logo{width:80px;height:80px;background:linear-gradient(145deg,#151515,#0d0d0d);border:1px solid rgba(255,255,255,.1);border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;opacity:0;transform:scale(0) rotate(-15deg);animation:popIn .5s cubic-bezier(.34,1.56,.64,1) .3s forwards;}
+.intro-logo span{font-size:34px;font-weight:900;color:#fff;letter-spacing:-1px;}
+.intro-dot{display:inline-block;width:9px;height:9px;background:#EA580C;border-radius:50%;margin-left:1px;opacity:0;animation:dotFlash .3s ease-out .8s forwards;}
+.intro-name{font-size:clamp(26px,5vw,44px);font-weight:800;color:#fff;letter-spacing:-1.5px;text-align:center;opacity:0;filter:blur(12px);animation:nameIn .7s cubic-bezier(.16,1,.3,1) 1s forwards;}
+.intro-sub{font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#EA580C;margin-top:14px;opacity:0;animation:fadeUp .5s ease-out 1.4s forwards;}
+@keyframes popIn{0%{opacity:0;transform:scale(0) rotate(-15deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes dotFlash{0%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes nameIn{0%{opacity:0;filter:blur(12px);transform:translateY(12px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:.8;transform:translateY(0)}}
+
+/* ── SCROLL PROGRESS ── */
+.scroll-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#EA580C,#fbbf24);z-index:100;width:0;transition:width .1s;}
+
+/* ── SECTIONS ── */
+section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:60px 24px;position:relative;scroll-snap-align:start;}
+.container{max-width:900px;margin:0 auto;width:100%;}
+
+/* ── REVEAL ── */
+.rv{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s;}
+.rv.visible{opacity:1;transform:translateY(0);}
+.rv-d1{transition-delay:.1s}.rv-d2{transition-delay:.2s}.rv-d3{transition-delay:.3s}.rv-d4{transition-delay:.4s}.rv-d5{transition-delay:.5s}
+
+/* ── S1 HERO ── */
+#hero{position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.4);transition:opacity 1s;}
+.hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,#030303 75%);}
+.hero-gradient{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(transparent,#030303);}
+.hero-content{position:relative;z-index:2;text-align:center;}
+.hero-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.2);padding:6px 16px;border-radius:20px;margin-bottom:20px;}
+.hero-title{font-size:clamp(32px,6vw,64px);font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:12px;}
+.hero-sub{font-size:clamp(14px,2vw,18px);color:#888;font-weight:400;max-width:500px;margin:0 auto;}
+.scroll-hint{margin-top:40px;color:#555;font-size:11px;letter-spacing:2px;text-transform:uppercase;animation:float 2.5s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* ── MASK TRANSITION ── */
+.mask-reveal{position:absolute;inset:0;background:#030303;z-index:3;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));}
+
+/* ── S2 NUMBERS ── */
+#numbers{background:#050505;}
+.num-label{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;margin-bottom:40px;}
+.num-main{font-size:clamp(48px,10vw,100px);font-weight:800;color:#EA580C;line-height:1;margin-bottom:4px;letter-spacing:-3px;}
+.num-main-sub{font-size:clamp(14px,2vw,18px);color:#666;font-weight:400;margin-bottom:40px;}
+.num-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.num-item{text-align:center;}
+.num-val{font-size:clamp(28px,5vw,48px);font-weight:800;color:#f5f5f5;line-height:1;margin-bottom:4px;letter-spacing:-1px;}
+.num-desc{font-size:12px;color:#555;font-weight:500;}
+
+/* ── S3 INVESTMENT ── */
+#investment{background:#080604;}
+.inv-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.inv-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:24px;text-align:center;}
+.inv-label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-weight:600;}
+.inv-val{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;}
+.inv-arrow{font-size:40px;color:#EA580C;display:flex;align-items:center;justify-content:center;padding:0 16px;}
+.trend-bar{height:6px;background:#1a1a1a;border-radius:6px;overflow:hidden;margin-top:8px;}
+.trend-fill{height:100%;background:linear-gradient(90deg,#EA580C,#fbbf24);border-radius:6px;transition:width 1.5s ease-out;}
+.trend-row{display:flex;gap:12px;margin-bottom:8px;align-items:center;}
+.trend-label{font-size:11px;color:#888;min-width:100px;}
+.trend-pct{font-size:11px;color:#4ade80;font-weight:600;min-width:40px;text-align:right;}
+
+/* ── S4 CONTENT ── */
+#content-sec{background:#0a0805;}
+.carousel-wrap{position:relative;overflow:hidden;margin:24px -24px 0;}
+.carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 24px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.carousel::-webkit-scrollbar{display:none;}
+.carousel-item{min-width:200px;height:260px;border-radius:14px;background-size:cover;background-position:center;flex-shrink:0;scroll-snap-align:start;position:relative;border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:transform .2s;}
+.carousel-item:hover{transform:scale(1.03);}
+.carousel-item-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.85));border-radius:0 0 14px 14px;}
+.carousel-item-title{font-size:12px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.carousel-item-meta{font-size:10px;color:#888;margin-top:2px;}
+
+/* ── S5 REVIEWS ── */
+#reviews-sec{background:#0d0a06;}
+.rating-big{font-size:clamp(60px,12vw,100px);font-weight:900;color:#fff;line-height:1;letter-spacing:-3px;}
+.rating-stars{font-size:clamp(18px,3vw,28px);color:#EA580C;margin:8px 0;}
+.rating-count{font-size:14px;color:#666;}
+.review-cards{display:flex;flex-direction:column;gap:12px;margin-top:32px;}
+.review-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:20px 24px;position:relative;}
+.review-text{font-size:14px;color:#ccc;line-height:1.6;font-style:italic;margin-bottom:10px;}
+.review-author{font-size:11px;color:#888;font-weight:600;}
+.review-src{font-size:9px;color:#444;background:rgba(255,255,255,.04);padding:2px 8px;border-radius:4px;position:absolute;top:16px;right:16px;}
+
+/* ── S6 GROWTH ── */
+#growth{background:#080604;}
+.growth-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:24px;}
+.growth-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:24px;text-align:center;}
+.growth-label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;}
+.growth-val{font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-1px;}
+.growth-change{font-size:clamp(20px,4vw,32px);font-weight:800;color:#4ade80;text-align:center;margin-top:16px;}
+.growth-months{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:24px;}
+.growth-months-bar{flex:1;max-width:300px;height:6px;background:#1a1a1a;border-radius:6px;overflow:hidden;}
+.growth-months-fill{height:100%;background:linear-gradient(90deg,#EA580C,#fbbf24);border-radius:6px;}
+
+/* ── S7 UPCOMING ── */
+#upcoming{background:#050505;}
+.upcoming-list{display:flex;flex-direction:column;gap:6px;margin-top:24px;}
+.upcoming-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:10px;}
+.upcoming-date{font-size:11px;color:#EA580C;font-weight:700;min-width:50px;}
+.upcoming-title{font-size:13px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.upcoming-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(234,88,12,.1);color:#EA580C;border:1px solid rgba(234,88,12,.15);}
+
+/* ── S8 TEAM ── */
+#team{background:#0a0805;}
+.team-grid{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:24px;}
+.team-card{text-align:center;width:120px;}
+.team-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1a1a1a,#111);border:2px solid rgba(234,88,12,.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#EA580C;}
+.team-name{font-size:13px;font-weight:600;color:#eee;}
+.team-role{font-size:10px;color:#666;margin-top:2px;}
+
+/* ── FLOATING APPROVAL BUTTON ── */
+.fab{position:fixed;bottom:24px;right:24px;z-index:90;background:#EA580C;color:#fff;border:none;padding:14px 20px;border-radius:16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(234,88,12,.4);transition:all .2s;display:none;align-items:center;gap:8px;}
+.fab:hover{transform:scale(1.05);box-shadow:0 12px 40px rgba(234,88,12,.5);}
+.fab-badge{background:#fff;color:#EA580C;font-size:11px;font-weight:800;padding:2px 7px;border-radius:8px;}
+.fab.show{display:flex;}
+
+/* ── APPROVAL MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#111;border:1px solid #222;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:80vh;overflow-y:auto;padding:24px;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:none;border:none;color:#666;font-size:24px;cursor:pointer;}
+
+/* ── SECTION LABELS ── */
+.sec-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#EA580C;margin-bottom:12px;}
+.sec-title{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;}
+.sec-sub{font-size:14px;color:#666;margin-bottom:24px;}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spacing:2px;}
+
+/* ── MARQUEE ── */
+.marquee{overflow:hidden;padding:16px 0;opacity:.15;}
+.marquee-inner{display:flex;gap:32px;animation:marquee 40s linear infinite;white-space:nowrap;}
+.marquee-inner span{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── COUNTER ── */
+.counter{display:inline-block;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  section{padding:40px 16px;}
+  .num-grid{grid-template-columns:1fr 1fr;gap:16px;}
+  .inv-cards{grid-template-columns:1fr;}
+  .growth-grid{grid-template-columns:1fr;gap:8px;}
+  .growth-grid .inv-arrow{transform:rotate(90deg);}
+  .carousel-item{min-width:160px;height:200px;}
+  .fab{bottom:16px;right:16px;padding:12px 16px;font-size:12px;}
+}
+
+/* ── DRIVE LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.lightbox-close{position:absolute;top:16px;right:24px;cursor:pointer;color:#fff;font-size:28px;z-index:20001;background:rgba(0,0,0,.5);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div class="intro" id="intro">
+  <div class="intro-logo"><span>SF<span class="intro-dot">.</span></span></div>
+  <div class="intro-name" id="intro-client-name"></div>
+  <div class="intro-sub">SOCIALFOOD — by Blend</div>
+</div>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-bar" id="scroll-bar"></div>
+
+<!-- S1: HERO -->
+<section id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-gradient"></div>
+  <div class="hero-content rv">
+    <div class="hero-badge" id="hero-badge">SOCIALFOOD</div>
+    <h1 class="hero-title" id="hero-title"></h1>
+    <p class="hero-sub" id="hero-sub"></p>
+    <div class="scroll-hint">↓ scroll</div>
+  </div>
+</section>
+
+<!-- S2: NUMBERS -->
+<section id="numbers">
+  <div class="container">
+    <div class="num-label rv">ESTE MES</div>
+    <div class="num-main rv rv-d1" id="num-main">0</div>
+    <div class="num-main-sub rv rv-d1">personas te descubrieron</div>
+    <div class="num-grid rv rv-d2" id="num-grid"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee"><div class="marquee-inner" id="marquee-inner"></div></div>
+
+<!-- S3: INVESTMENT -->
+<section id="investment">
+  <div class="container">
+    <div class="sec-label rv">TU INVERSIÓN TRABAJANDO</div>
+    <div class="sec-title rv rv-d1" id="inv-title">Cada peso rinde</div>
+    <div class="inv-cards rv rv-d2" id="inv-cards"></div>
+    <div class="rv rv-d3" id="inv-trends"></div>
+  </div>
+</section>
+
+<!-- S4: CONTENT -->
+<section id="content-sec">
+  <div class="container">
+    <div class="sec-label rv">LO QUE PUBLICAMOS</div>
+    <div class="sec-title rv rv-d1" id="content-title">0 piezas este mes</div>
+    <div class="sec-sub rv rv-d1">Contenido creado y publicado para tu marca</div>
+  </div>
+  <div class="carousel-wrap rv rv-d2">
+    <div class="carousel" id="carousel"></div>
+  </div>
+</section>
+
+<!-- S5: REVIEWS -->
+<section id="reviews-sec">
+  <div class="container" style="text-align:center;">
+    <div class="sec-label rv">LO QUE DICE LA GENTE</div>
+    <div class="rating-big rv rv-d1" id="rating-big">—</div>
+    <div class="rating-stars rv rv-d1" id="rating-stars"></div>
+    <div class="rating-count rv rv-d2" id="rating-count"></div>
+    <div class="review-cards rv rv-d3" id="review-cards"></div>
+  </div>
+</section>
+
+<!-- S6: GROWTH -->
+<section id="growth">
+  <div class="container">
+    <div class="sec-label rv">TU PERFIL CRECE</div>
+    <div class="sec-title rv rv-d1">Evolución de tu marca</div>
+    <div class="growth-grid rv rv-d2" id="growth-grid"></div>
+    <div class="growth-change rv rv-d3" id="growth-change"></div>
+    <div class="growth-months rv rv-d4" id="growth-months"></div>
+  </div>
+</section>
+
+<!-- S7: UPCOMING -->
+<section id="upcoming">
+  <div class="container">
+    <div class="sec-label rv">LO QUE VIENE</div>
+    <div class="sec-title rv rv-d1">Esto preparamos para ti</div>
+    <div class="upcoming-list rv rv-d2" id="upcoming-list"></div>
+  </div>
+</section>
+
+<!-- S8: TEAM -->
+<section id="team">
+  <div class="container" style="text-align:center;">
+    <div class="sec-label rv">TU EQUIPO</div>
+    <div class="sec-title rv rv-d1">Dedicados a tu marca</div>
+    <div class="team-grid rv rv-d2" id="team-grid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>POWERED BY BLEND — SOCIALFOOD</footer>
+
+<!-- FLOATING APPROVAL BUTTON -->
+<button class="fab" id="fab" onclick="openApproval()">
+  <span>📩 Piezas pendientes</span>
+  <span class="fab-badge" id="fab-badge">0</span>
+</button>
+
+<!-- APPROVAL MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeApproval()">
+  <div class="modal">
+    <div class="modal-title">Piezas para aprobar <button class="modal-close" onclick="closeApproval()">✕</button></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const UNITY_URL = 'https://positive-appreciation-production.up.railway.app';
+const COPILOT_URL = 'https://web-production-2131c.up.railway.app';
+const TOKEN = SF_USER.token;
+const CLIENT = SF_USER.client_name || '';
+const CLIENT_NAME = SF_USER.name || CLIENT;
+let UNITY_CLIENT_ID = null;
+
+// ── INTRO ──
+document.getElementById('intro-client-name').textContent = CLIENT;
+setTimeout(() => {
+  document.getElementById('intro').classList.add('out');
+  document.body.classList.add('ready');
+  setTimeout(() => document.getElementById('intro').remove(), 800);
+}, 2600);
+
+// ── SCROLL PROGRESS ──
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('scroll-bar').style.width = pct + '%';
+});
+
+// ── REVEAL ON SCROLL ──
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }});
+}, { threshold: 0.1 });
+function initReveals() { document.querySelectorAll('.rv:not(.visible)').forEach(el => revealObs.observe(el)); }
+
+// ── COUNTER ANIMATION ──
+function animateCounter(el, target, prefix, suffix, decimals) {
+  const duration = 1800;
+  const start = performance.now();
+  function update(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 4);
+    const val = target * ease;
+    if (decimals > 0) el.textContent = prefix + val.toFixed(decimals) + suffix;
+    else el.textContent = prefix + Math.round(val).toLocaleString('es-CL') + suffix;
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+function observeCounters() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        animateCounter(el, parseFloat(el.dataset.target), el.dataset.prefix||'', el.dataset.suffix||'', parseInt(el.dataset.decimals||'0'));
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.counter[data-target]').forEach(el => obs.observe(el));
+}
+
+// ── DATA LOADING ──
+async function loadAll() {
+  const params = `token=${TOKEN}&client=${encodeURIComponent(CLIENT)}`;
+  const [unityRes, copilotRes] = await Promise.allSettled([
+    fetch(`${UNITY_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
+    fetch(`${COPILOT_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
+  ]);
+  const unity = unityRes.status === 'fulfilled' ? unityRes.value : null;
+  const copilot = copilotRes.status === 'fulfilled' ? copilotRes.value : null;
+
+  if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
+
+  renderHero(unity, copilot);
+  renderNumbers(copilot);
+  renderMarquee();
+  renderInvestment(copilot);
+  renderContent(unity);
+  renderReviews(unity);
+  renderGrowth(copilot, unity);
+  renderUpcoming(unity);
+  renderTeam();
+  renderApproval(unity);
+
+  setTimeout(() => { initReveals(); observeCounters(); }, 100);
+}
+
+// ── S1: HERO ──
+function renderHero(unity, copilot) {
+  const client = unity && unity.client;
+  const ig = copilot && copilot.ig;
+  const heroId = client && client.hero_image_id;
+
+  // Background
+  if (heroId) {
+    document.getElementById('hero-bg').style.backgroundImage = `url(${UNITY_URL}/api/drive/file/${heroId}?token=${TOKEN})`;
+  } else if (ig && ig.posts && ig.posts.length) {
+    const photo = ig.posts.find(p => p.media_type !== 'VIDEO');
+    if (photo) document.getElementById('hero-bg').style.backgroundImage = `url(${photo.media_url})`;
+  }
+
+  // Text
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const now = new Date();
+  const mesLabel = meses[now.getMonth()];
+  document.getElementById('hero-title').textContent = `${mesLabel} fue un gran mes para ${CLIENT}`;
+  document.getElementById('hero-badge').textContent = `@${ig ? ig.username : CLIENT.toLowerCase()}`;
+
+  const followers = ig ? ig.followers_count : 0;
+  document.getElementById('hero-sub').textContent = followers > 0
+    ? `${followers.toLocaleString('es-CL')} seguidores · Tu ecosistema digital conectado`
+    : 'Tu ecosistema digital conectado';
+}
+
+// ── S2: NUMBERS ──
+function renderNumbers(copilot) {
+  const ads = copilot && copilot.ads;
+  const reach = ads ? (ads.reach || 0) : 0;
+  const clicks = ads ? (ads.clicks || 0) : 0;
+  const messages = ads ? (ads.messages || 0) : 0;
+
+  const mainEl = document.getElementById('num-main');
+  mainEl.className = 'num-main rv rv-d1 counter';
+  mainEl.dataset.target = reach;
+  mainEl.textContent = '0';
+
+  const grid = document.getElementById('num-grid');
+  const items = [
+    { val: clicks, label: 'visitaron tu perfil' },
+    { val: messages, label: 'te escribieron' },
+    { val: ads ? (ads.roas || 0) : 0, label: 'retorno por peso', prefix: '$', suffix: 'x', decimals: 1 },
+  ];
+  grid.innerHTML = items.map(i => `
+    <div class="num-item">
+      <div class="num-val counter" data-target="${i.val}" data-prefix="${i.prefix||''}" data-suffix="${i.suffix||''}" data-decimals="${i.decimals||0}">${i.prefix||''}0${i.suffix||''}</div>
+      <div class="num-desc">${i.label}</div>
+    </div>
+  `).join('');
+}
+
+// ── MARQUEE ──
+function renderMarquee() {
+  const words = ['contenido','estrategia','engagement','alcance','conversión','creatividad','marca','crecimiento'];
+  const inner = words.map(w => `<span>${w}</span>`).join('');
+  document.getElementById('marquee-inner').innerHTML = inner + inner;
+}
+
+// ── S3: INVESTMENT ──
+function renderInvestment(copilot) {
+  const ads = copilot && copilot.ads;
+  const spend = ads ? (ads.spend || 0) : 0;
+  const reach = ads ? (ads.reach || 0) : 0;
+  const roas = ads ? (ads.roas || 0) : 0;
+
+  document.getElementById('inv-cards').innerHTML = `
+    <div class="inv-card">
+      <div class="inv-label">Invertiste</div>
+      <div class="inv-val counter" data-target="${spend}" data-prefix="$" style="color:#f87171;">${spend > 0 ? '$' + Math.round(spend).toLocaleString('es-CL') : '—'}</div>
+    </div>
+    <div class="inv-card">
+      <div class="inv-label">Alcanzaste</div>
+      <div class="inv-val counter" data-target="${reach}" style="color:#4ade80;">${reach > 0 ? reach.toLocaleString('es-CL') + ' personas' : '—'}</div>
+    </div>
+  `;
+
+  // Trends
+  const discovery = 70, retarget = 30;
+  document.getElementById('inv-trends').innerHTML = `
+    <div style="margin-top:16px;">
+      <div class="trend-row"><span class="trend-label">Descubrimiento</span><div class="trend-bar" style="flex:1;"><div class="trend-fill" style="width:${discovery}%"></div></div><span class="trend-pct">${discovery}%</span></div>
+      <div class="trend-row"><span class="trend-label">Retargeting</span><div class="trend-bar" style="flex:1;"><div class="trend-fill" style="width:${retarget}%"></div></div><span class="trend-pct">${retarget}%</span></div>
+    </div>
+  `;
+}
+
+// ── S4: CONTENT ──
+function renderContent(unity) {
+  const grilla = unity && unity.grilla;
+  if (!grilla || !grilla.piezas || !grilla.piezas.length) {
+    document.getElementById('content-title').textContent = 'Sin contenido este mes';
+    return;
+  }
+
+  const published = grilla.piezas.filter(p => ['aprobado_final','publicado'].includes(p.estado));
+  document.getElementById('content-title').textContent = `${grilla.total} piezas este mes`;
+
+  const carousel = document.getElementById('carousel');
+  const piezas = grilla.piezas.filter(p => p.drive_file_id || p.estado !== 'draft');
+  carousel.innerHTML = piezas.map(p => {
+    const bg = p.drive_file_id
+      ? `background-image:url(${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large)`
+      : 'background:linear-gradient(135deg,#1a1a1a,#111)';
+    return `
+      <div class="carousel-item" style="${bg}" ${p.drive_file_id ? `onclick="openLightbox('${p.drive_file_id}')"` : ''}>
+        <div class="carousel-item-overlay">
+          <div class="carousel-item-title">${p.titulo || 'Pieza'}</div>
+          <div class="carousel-item-meta">${p.formato || ''} · ${p.pilar || ''}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── S5: REVIEWS ──
+function renderReviews(unity) {
+  const reviews = unity && unity.reviews;
+  const google = reviews && reviews.google;
+  if (google && google.rating) {
+    document.getElementById('rating-big').textContent = google.rating;
+    document.getElementById('rating-stars').textContent = '★'.repeat(Math.round(google.rating)) + '☆'.repeat(5 - Math.round(google.rating));
+    document.getElementById('rating-count').textContent = `Google Reviews · ${google.total || 0} reseñas`;
+  }
+
+  let allRevs = [];
+  if (google && google.reviews) allRevs.push(...google.reviews);
+  const ta = reviews && reviews.tripadvisor;
+  if (ta && ta.reviews) allRevs.push(...ta.reviews);
+
+  document.getElementById('review-cards').innerHTML = allRevs.slice(0, 4).map(r => {
+    const src = r.source === 'google' ? 'Google' : r.source === 'tripadvisor' ? 'TripAdvisor' : 'IG';
+    return `
+      <div class="review-card">
+        <div class="review-src">${src}</div>
+        <div class="review-text">"${(r.text||'').substring(0,200)}${(r.text||'').length>200?'...':''}"</div>
+        <div class="review-author">${r.author||'Anónimo'} · ${'★'.repeat(Math.round(r.rating||0))}</div>
+      </div>`;
+  }).join('') || '<p style="color:#555;font-size:13px;">Sin reseñas disponibles</p>';
+}
+
+// ── S6: GROWTH ──
+function renderGrowth(copilot, unity) {
+  const ig = copilot && copilot.ig;
+  const growth = copilot && copilot.ig_growth;
+  const client = unity && unity.client;
+  const followersNow = ig ? ig.followers_count : 0;
+  const followersStart = growth ? growth.followers_start : 0;
+
+  document.getElementById('growth-grid').innerHTML = `
+    <div class="growth-box">
+      <div class="growth-label">Cuando empezamos</div>
+      <div class="growth-val" style="color:#888;">${followersStart > 0 ? followersStart.toLocaleString('es-CL') : '—'}</div>
+    </div>
+    <div style="font-size:32px;color:#EA580C;text-align:center;">→</div>
+    <div class="growth-box">
+      <div class="growth-label">Hoy</div>
+      <div class="growth-val counter" data-target="${followersNow}" style="color:#4ade80;">0</div>
+    </div>
+  `;
+
+  if (followersStart > 0 && followersNow > 0) {
+    const pctGrowth = Math.round(((followersNow - followersStart) / followersStart) * 100);
+    document.getElementById('growth-change').textContent = `+${pctGrowth}% de crecimiento`;
+  }
+
+  let meses = 0;
+  if (client && client.fecha_inicio) {
+    const inicio = new Date(client.fecha_inicio);
+    const now = new Date();
+    meses = Math.max(1, (now.getFullYear() - inicio.getFullYear()) * 12 + (now.getMonth() - inicio.getMonth()));
+  }
+  if (meses > 0) {
+    document.getElementById('growth-months').innerHTML = `
+      <span style="font-size:13px;color:#888;">${meses} meses juntos</span>
+      <div class="growth-months-bar"><div class="growth-months-fill" style="width:${Math.min(meses/12*100,100)}%"></div></div>
+    `;
+  }
+}
+
+// ── S7: UPCOMING ──
+function renderUpcoming(unity) {
+  const grilla = unity && unity.grilla;
+  if (!grilla || !grilla.piezas) return;
+
+  const now = new Date();
+  const upcoming = grilla.piezas
+    .filter(p => p.fecha_publicacion && new Date(p.fecha_publicacion) >= now && p.estado !== 'publicado')
+    .sort((a,b) => a.fecha_publicacion.localeCompare(b.fecha_publicacion))
+    .slice(0, 8);
+
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  document.getElementById('upcoming-list').innerHTML = upcoming.length
+    ? upcoming.map(p => {
+        const d = new Date(p.fecha_publicacion + 'T12:00:00');
+        return `<div class="upcoming-row">
+          <span class="upcoming-date">${dias[d.getDay()]} ${d.getDate()}</span>
+          <span class="upcoming-title">${p.titulo || 'Pieza'}</span>
+          <span class="upcoming-badge">${p.formato || p.tipo_pedido || ''}</span>
+        </div>`;
+      }).join('')
+    : '<p style="color:#555;font-size:13px;text-align:center;">Todo al día — no hay piezas pendientes</p>';
+}
+
+// ── S8: TEAM ──
+function renderTeam() {
+  const team = [
+    { name: 'Cristóbal', role: 'Estrategia', initial: 'C' },
+    { name: 'Nicolás', role: 'Dirección Creativa', initial: 'N' },
+    { name: 'Paula', role: 'Community Manager', initial: 'P' },
+    { name: 'Juan', role: 'Diseño', initial: 'J' },
+    { name: 'Seba', role: 'Ads', initial: 'S' },
+  ];
+  document.getElementById('team-grid').innerHTML = team.map(t => `
+    <div class="team-card">
+      <div class="team-avatar">${t.initial}</div>
+      <div class="team-name">${t.name}</div>
+      <div class="team-role">${t.role}</div>
+    </div>
+  `).join('');
+}
+
+// ── APPROVAL SYSTEM ──
+let pendingPiezas = [];
+function renderApproval(unity) {
+  const grilla = unity && unity.grilla;
+  if (!grilla || !grilla.piezas) return;
+  pendingPiezas = grilla.piezas.filter(p => p.estado === 'esperando_check_cliente' || p.estado === 'en_revision_cliente');
+  if (pendingPiezas.length > 0) {
+    document.getElementById('fab').classList.add('show');
+    document.getElementById('fab-badge').textContent = pendingPiezas.length;
+  }
+}
+
+function openApproval() {
+  const modal = document.getElementById('modal-overlay');
+  modal.classList.add('open');
+  const content = document.getElementById('modal-content');
+  content.innerHTML = pendingPiezas.map(p => {
+    const thumb = p.drive_file_id ? `<img src="${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid #222;">` : '';
+    return `
+      <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #1a1a1a;align-items:flex-start;">
+        ${thumb}
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${p.titulo||'Pieza'}</div>
+          <div style="font-size:12px;color:#888;margin-bottom:8px;">${p.idea_final ? p.idea_final.substring(0,100) : ''}</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="aprobar(${p.id})" style="padding:6px 14px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✅ Aprobar</button>
+            <button onclick="pedirCambio(${p.id})" style="padding:6px 14px;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.2);border-radius:8px;color:#fb923c;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Cambios</button>
+          </div>
+          <div id="cambios-${p.id}" style="display:none;margin-top:8px;">
+            <textarea id="cambios-txt-${p.id}" placeholder="Describe los cambios..." style="width:100%;min-height:50px;background:#0a0a0a;border:1px solid #222;border-radius:8px;color:#ccc;font-size:12px;padding:8px;font-family:inherit;resize:vertical;"></textarea>
+            <button onclick="enviarCambio(${p.id})" style="margin-top:4px;padding:5px 12px;background:#fb923c;border:none;border-radius:6px;color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Enviar</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('') || '<p style="color:#555;text-align:center;padding:20px;">No hay piezas pendientes</p>';
+}
+
+function closeApproval() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+async function aprobar(pid) {
+  if (!confirm('¿Aprobar esta pieza?')) return;
+  try {
+    const r = await fetch(UNITY_URL + '/api/pieza-feedback', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ token: TOKEN, pieza_id: pid, accion: 'aprobar', autor: CLIENT_NAME })
+    });
+    if (r.ok) location.reload();
+    else alert('Error al aprobar');
+  } catch(e) { alert('Error de conexión'); }
+}
+
+function pedirCambio(pid) {
+  const el = document.getElementById('cambios-' + pid);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function enviarCambio(pid) {
+  const texto = document.getElementById('cambios-txt-' + pid).value.trim();
+  if (!texto) { alert('Escribe qué cambios necesitas'); return; }
+  try {
+    const r = await fetch(UNITY_URL + '/api/pieza-feedback', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ token: TOKEN, pieza_id: pid, accion: 'cambios', texto: texto, autor: CLIENT_NAME })
+    });
+    if (r.ok) location.reload();
+    else alert('Error al enviar');
+  } catch(e) { alert('Error de conexión'); }
+}
+
+// ── LIGHTBOX ──
+function openLightbox(fileId) {
+  fetch(UNITY_URL + '/api/drive/meta/' + fileId + '?token=' + TOKEN)
+    .then(r => r.json())
+    .then(meta => {
+      const url = UNITY_URL + '/api/drive/file/' + fileId + '?token=' + TOKEN;
+      const inner = meta.is_video
+        ? `<video controls autoplay style="max-width:90vw;max-height:85vh;border-radius:12px;"><source src="${url}" type="${meta.mimeType}"></video>`
+        : `<img src="${url}" style="max-width:90vw;max-height:85vh;border-radius:12px;">`;
+      const ov = document.createElement('div');
+      ov.className = 'lightbox';
+      ov.innerHTML = `<div class="lightbox-close" onclick="this.parentElement.remove()">✕</div>${inner}`;
+      ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+      document.body.appendChild(ov);
+      document.addEventListener('keydown', function h(e) { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', h); }});
+    })
+    .catch(() => window.open(UNITY_URL + '/api/drive/file/' + fileId + '?token=' + TOKEN, '_blank'));
+}
+
+// ── INIT ──
+loadAll();
+</script>
+</body>
+</html>

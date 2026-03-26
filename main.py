@@ -125,7 +125,7 @@ def cliente():
     if session.get('role') != 'cliente':
         return redirect('/admin')
     token = generate_token(session['user'], session['role'])
-    with open('cliente.html', 'r') as f:
+    with open('cliente_v2.html', 'r') as f:
         html = f.read()
     sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token, "client_name": session.get("client_name", "")})
     user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
