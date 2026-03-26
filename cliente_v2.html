@@ -123,17 +123,35 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .upcoming-title{font-size:13px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .upcoming-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(234,88,12,.1);color:#EA580C;border:1px solid rgba(234,88,12,.15);}
 
-/* ── S8 TEAM ── */
-#team{background:#050505;overflow:hidden;}
-.team-scroll{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:24px 24px 24px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.team-scroll::-webkit-scrollbar{display:none;}
-.team-card{min-width:220px;height:300px;border-radius:18px;background:linear-gradient(160deg,#111 0%,#0a0a0a 100%);border:1px solid rgba(255,255,255,.06);padding:28px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex-shrink:0;scroll-snap-align:start;position:relative;overflow:hidden;transition:transform .4s,box-shadow .4s;transform-style:preserve-3d;cursor:default;}
-.team-card:hover{transform:scale(1.04) rotateY(4deg);box-shadow:0 20px 50px rgba(234,88,12,.12);border-color:rgba(234,88,12,.2);}
-.team-card::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(234,88,12,.06) 0%,transparent 70%);pointer-events:none;}
-.team-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#EA580C,#ff8c42);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin-bottom:16px;box-shadow:0 8px 24px rgba(234,88,12,.3);letter-spacing:-1px;}
-.team-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-.5px;}
-.team-role{font-size:12px;color:#EA580C;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.team-desc{font-size:11px;color:#555;line-height:1.5;}
+/* ── S8 TEAM — HEXAGONAL ── */
+#team{background:#050505;}
+.hex-grid{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:24px;position:relative;}
+.hex-row{display:flex;gap:12px;justify-content:center;}
+.hex-row:nth-child(2){margin-top:-20px;}
+.hex-row:nth-child(3){margin-top:-20px;}
+.hex{width:130px;height:150px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,#161616,#0c0c0c);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:default;transition:all .4s;position:relative;}
+.hex:hover{background:linear-gradient(160deg,#1a0800,#0d0400);transform:scale(1.1);z-index:2;}
+.hex::after{content:'';position:absolute;inset:2px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,#111,#0a0a0a);transition:all .4s;}
+.hex:hover::after{background:linear-gradient(160deg,#140800,#0a0400);}
+.hex-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+.hex-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#EA580C,#ff8c42);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;box-shadow:0 4px 16px rgba(234,88,12,.3);}
+.hex-name{font-size:11px;font-weight:700;color:#fff;}
+.hex-role{font-size:8px;color:#EA580C;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.hex-center{width:130px;height:150px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(135deg,#EA580C,#ff6b2c);display:flex;align-items:center;justify-content:center;}
+.hex-center::after{content:'';position:absolute;inset:2px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,#1a0800,#0d0400);}
+.hex-center-content{position:relative;z-index:1;font-size:20px;font-weight:900;color:#EA580C;letter-spacing:-1px;}
+/* Connectors */
+.hex-grid::before{content:'';position:absolute;top:50%;left:50%;width:200px;height:200px;border:1px solid rgba(234,88,12,.08);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.hex-grid::after{content:'';position:absolute;top:50%;left:50%;width:320px;height:320px;border:1px solid rgba(234,88,12,.04);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;}
+
+@media(max-width:600px){
+  .hex{width:100px;height:115px;}
+  .hex-center{width:100px;height:115px;}
+  .hex-avatar{width:34px;height:34px;font-size:13px;}
+  .hex-name{font-size:9px;}
+  .hex-role{font-size:7px;}
+  .hex-row{gap:6px;}
+}
 
 /* ── FLOATING APPROVAL BUTTON ── */
 .fab{position:fixed;bottom:24px;right:24px;z-index:90;background:#EA580C;color:#fff;border:none;padding:14px 20px;border-radius:16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(234,88,12,.4);transition:all .2s;display:none;align-items:center;gap:8px;}
@@ -212,12 +230,11 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
 
 <!-- S-TEAM: TU EQUIPO (after hero) -->
 <section id="team">
-  <div class="container">
-    <div class="sec-label rv">QUIÉNES TRABAJAMOS PARA TI</div>
-    <div class="sec-title rv rv-d1" style="margin-bottom:4px;">Tu equipo</div>
-    <p class="rv rv-d1" style="color:#555;font-size:13px;margin-bottom:0;">Profesionales enfocados en hacer crecer tu marca</p>
+  <div class="container" style="text-align:center;">
+    <div class="sec-label rv">TU EQUIPO</div>
+    <div class="sec-title rv rv-d1" style="margin-bottom:4px;">Quiénes trabajamos para ti</div>
+    <div class="hex-grid rv rv-d2" id="team-grid"></div>
   </div>
-  <div class="team-scroll rv rv-d2" id="team-grid"></div>
 </section>
 
 <!-- S2: NUMBERS -->
@@ -609,24 +626,26 @@ function renderUpcoming(unity) {
     : '<p style="color:#555;font-size:13px;text-align:center;">Todo al día — no hay piezas pendientes</p>';
 }
 
-// ── TEAM ──
+// ── TEAM — HEXAGONAL ──
 function renderTeam() {
   const team = [
-    { name: 'Cristóbal', role: 'Estrategia', initial: 'CR', desc: 'Dirección estratégica, sistema y operaciones' },
-    { name: 'Nicolás', role: 'Director Creativo', initial: 'NJ', desc: 'Creatividad, diferenciación y contenido' },
-    { name: 'Paula', role: 'Community Manager', initial: 'PD', desc: 'Gestión de contenido, calendario y publicación' },
-    { name: 'Juan', role: 'Diseñador', initial: 'JM', desc: 'Diseño gráfico, reels y piezas visuales' },
-    { name: 'Seba', role: 'Estratega Ads', initial: 'SM', desc: 'Campañas Meta Ads, optimización y ROAS' },
-    { name: 'Juanes', role: 'Audiovisual', initial: 'JF', desc: 'Fotografía, video y producción audiovisual' },
+    { name: 'Cristóbal', role: 'Estrategia', initial: 'CR' },
+    { name: 'Nicolás', role: 'Creativo', initial: 'NJ' },
+    { name: 'Paula', role: 'Community', initial: 'PD' },
+    { name: 'Juan', role: 'Diseño', initial: 'JM' },
+    { name: 'Seba', role: 'Ads', initial: 'SM' },
+    { name: 'Juanes', role: 'Audiovisual', initial: 'JF' },
   ];
-  document.getElementById('team-grid').innerHTML = team.map((t, i) => `
-    <div class="team-card" style="animation:cardIn .6s ${i * 0.1}s forwards;opacity:0;">
-      <div class="team-avatar">${t.initial}</div>
-      <div class="team-name">${t.name}</div>
-      <div class="team-role">${t.role}</div>
-      <div class="team-desc">${t.desc}</div>
-    </div>
-  `).join('');
+
+  function hexCard(t) {
+    return `<div class="hex"><div class="hex-content"><div class="hex-avatar">${t.initial}</div><div class="hex-name">${t.name}</div><div class="hex-role">${t.role}</div></div></div>`;
+  }
+
+  document.getElementById('team-grid').innerHTML = `
+    <div class="hex-row">${hexCard(team[0])}${hexCard(team[1])}${hexCard(team[2])}</div>
+    <div class="hex-row"><div class="hex hex-center"><div class="hex-content"><div class="hex-center-content">SF.</div></div></div></div>
+    <div class="hex-row">${hexCard(team[3])}${hexCard(team[4])}${hexCard(team[5])}</div>
+  `;
 }
 
 // ── APPROVAL SYSTEM ──
