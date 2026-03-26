@@ -732,13 +732,19 @@ function renderTeam() {
 
 // ── APPROVAL SYSTEM ──
 let pendingPiezas = [];
+let allPiezas = [];
 function renderApproval(unity) {
   const grilla = unity && unity.grilla;
   if (!grilla || !grilla.piezas) return;
+  allPiezas = grilla.piezas;
   pendingPiezas = grilla.piezas.filter(p => p.estado === 'esperando_check_cliente' || p.estado === 'en_revision_cliente');
+  const fab = document.getElementById('fab');
+  fab.classList.add('show');
   if (pendingPiezas.length > 0) {
-    document.getElementById('fab').classList.add('show');
     document.getElementById('fab-badge').textContent = pendingPiezas.length;
+  } else {
+    fab.querySelector('span').textContent = '📋 Ver piezas';
+    document.getElementById('fab-badge').style.display = 'none';
   }
 }
 
@@ -746,7 +752,9 @@ function openApproval() {
   const modal = document.getElementById('modal-overlay');
   modal.classList.add('open');
   const content = document.getElementById('modal-content');
-  content.innerHTML = pendingPiezas.map(p => {
+  const piezasToShow = pendingPiezas.length > 0 ? pendingPiezas : allPiezas.filter(p => !['draft','clickup'].includes(p.estado)).slice(0, 15);
+  content.innerHTML = (pendingPiezas.length === 0 ? '<p style="color:#4ade80;font-size:13px;margin-bottom:16px;text-align:center;">✅ Todo aprobado — no hay piezas pendientes</p>' : '') +
+  piezasToShow.map(p => {
     const thumb = p.drive_file_id ? `<img src="${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid #222;">` : '';
     return `
       <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #1a1a1a;align-items:flex-start;">
@@ -754,10 +762,10 @@ function openApproval() {
         <div style="flex:1;">
           <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${p.titulo||'Pieza'}</div>
           <div style="font-size:12px;color:#888;margin-bottom:8px;">${p.idea_final ? p.idea_final.substring(0,100) : ''}</div>
-          <div style="display:flex;gap:8px;">
+          ${['esperando_check_cliente','en_revision_cliente'].includes(p.estado) ? `<div style="display:flex;gap:8px;">
             <button onclick="aprobar(${p.id})" style="padding:6px 14px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✅ Aprobar</button>
             <button onclick="pedirCambio(${p.id})" style="padding:6px 14px;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.2);border-radius:8px;color:#fb923c;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Cambios</button>
-          </div>
+          </div>` : `<span style="font-size:10px;color:#555;background:#111;padding:3px 8px;border-radius:4px;">${p.estado||''}</span>`}
           <div id="cambios-${p.id}" style="display:none;margin-top:8px;">
             <textarea id="cambios-txt-${p.id}" placeholder="Describe los cambios..." style="width:100%;min-height:50px;background:#0a0a0a;border:1px solid #222;border-radius:8px;color:#ccc;font-size:12px;padding:8px;font-family:inherit;resize:vertical;"></textarea>
             <button onclick="enviarCambio(${p.id})" style="margin-top:4px;padding:5px 12px;background:#fb923c;border:none;border-radius:6px;color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Enviar</button>
