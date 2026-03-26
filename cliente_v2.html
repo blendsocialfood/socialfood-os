@@ -23,6 +23,9 @@ body.ready{overflow-y:auto;}
 @keyframes dotFlash{0%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.6)}100%{opacity:1;transform:scale(1)}}
 @keyframes nameIn{0%{opacity:0;filter:blur(12px);transform:translateY(12px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}}
 @keyframes fadeUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:.8;transform:translateY(0)}}
+.intro-loading{font-size:11px;color:#555;margin-top:24px;opacity:0;animation:fadeUp .5s ease-out 1.8s forwards;letter-spacing:1px;}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.intro-loading{animation:fadeUp .5s ease-out 1.8s forwards, pulse 2s ease-in-out 2.3s infinite;}
 
 /* ── SCROLL PROGRESS ── */
 .scroll-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#EA580C,#fbbf24);z-index:100;width:0;transition:width .1s;}
@@ -38,7 +41,8 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 
 /* ── S1 HERO ── */
 #hero{position:relative;overflow:hidden;}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.4);transition:opacity 1s;}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.65) saturate(1.1);transition:opacity 1.5s;opacity:0;}
+.hero-bg.loaded{opacity:1;}
 .hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,#030303 75%);}
 .hero-gradient{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(transparent,#030303);}
 .hero-content{position:relative;z-index:2;text-align:center;}
@@ -176,6 +180,7 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   <div class="intro-logo"><span>SF<span class="intro-dot">.</span></span></div>
   <div class="intro-name" id="intro-client-name"></div>
   <div class="intro-sub">SOCIALFOOD — by Blend</div>
+  <div class="intro-loading" id="intro-loading">Preparando tu espacio...</div>
 </div>
 
 <!-- SCROLL PROGRESS -->
@@ -297,11 +302,13 @@ let UNITY_CLIENT_ID = null;
 
 // ── INTRO ──
 document.getElementById('intro-client-name').textContent = CLIENT;
-setTimeout(() => {
-  document.getElementById('intro').classList.add('out');
+function closeIntro() {
+  const intro = document.getElementById('intro');
+  if (!intro) return;
+  intro.classList.add('out');
   document.body.classList.add('ready');
-  setTimeout(() => document.getElementById('intro').remove(), 800);
-}, 2600);
+  setTimeout(() => intro.remove(), 800);
+}
 
 // ── SCROLL PROGRESS ──
 window.addEventListener('scroll', () => {
@@ -355,7 +362,7 @@ async function loadAll() {
   if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
 
   renderHero(unity, copilot);
-  renderNumbers(copilot);
+  renderNumbers(copilot, unity);
   renderMarquee();
   renderInvestment(copilot);
   renderContent(unity);
@@ -373,13 +380,25 @@ function renderHero(unity, copilot) {
   const client = unity && unity.client;
   const ig = copilot && copilot.ig;
   const heroId = client && client.hero_image_id;
+  const heroBg = document.getElementById('hero-bg');
 
-  // Background
+  // Background — preload then show
+  let imgUrl = '';
   if (heroId) {
-    document.getElementById('hero-bg').style.backgroundImage = `url(${UNITY_URL}/api/drive/file/${heroId}?token=${TOKEN})`;
+    imgUrl = `${UNITY_URL}/api/drive/file/${heroId}?token=${TOKEN}`;
   } else if (ig && ig.posts && ig.posts.length) {
     const photo = ig.posts.find(p => p.media_type !== 'VIDEO');
-    if (photo) document.getElementById('hero-bg').style.backgroundImage = `url(${photo.media_url})`;
+    if (photo) imgUrl = photo.media_url;
+  }
+  if (imgUrl) {
+    const img = new Image();
+    img.onload = () => { heroBg.style.backgroundImage = `url(${imgUrl})`; heroBg.classList.add('loaded'); closeIntro(); };
+    img.onerror = () => { closeIntro(); };
+    img.src = imgUrl;
+    // Fallback: close intro after 5s even if image fails
+    setTimeout(closeIntro, 5000);
+  } else {
+    closeIntro();
   }
 
   // Text
@@ -395,30 +414,38 @@ function renderHero(unity, copilot) {
     : 'Tu ecosistema digital conectado';
 }
 
-// ── S2: NUMBERS ──
-function renderNumbers(copilot) {
-  const ads = copilot && copilot.ads;
-  const reach = ads ? (ads.reach || 0) : 0;
-  const clicks = ads ? (ads.clicks || 0) : 0;
-  const messages = ads ? (ads.messages || 0) : 0;
+// ── S2: NUMBERS (IG + Unity — datos que TODOS los clientes tienen) ──
+function renderNumbers(copilot, unity) {
+  const ig = copilot && copilot.ig;
+  const grilla = unity && unity.grilla;
+  const reviews = unity && unity.reviews && unity.reviews.google;
+  const followers = ig ? (ig.followers_count || 0) : 0;
+  const engagement = ig ? (ig.engagement_rate || 0) : 0;
+  const avgLikes = ig ? (ig.avg_likes || 0) : 0;
+  const totalPiezas = grilla ? (grilla.total || 0) : 0;
+  const rating = reviews ? (reviews.rating || 0) : 0;
 
   const mainEl = document.getElementById('num-main');
   mainEl.className = 'num-main rv rv-d1 counter';
-  mainEl.dataset.target = reach;
+  mainEl.dataset.target = followers;
   mainEl.textContent = '0';
+  document.querySelector('.num-main-sub').textContent = 'seguidores en Instagram';
 
   const grid = document.getElementById('num-grid');
-  const items = [
-    { val: clicks, label: 'visitaron tu perfil' },
-    { val: messages, label: 'te escribieron' },
-    { val: ads ? (ads.roas || 0) : 0, label: 'retorno por peso', prefix: '$', suffix: 'x', decimals: 1 },
-  ];
-  grid.innerHTML = items.map(i => `
+  grid.innerHTML = `
     <div class="num-item">
-      <div class="num-val counter" data-target="${i.val}" data-prefix="${i.prefix||''}" data-suffix="${i.suffix||''}" data-decimals="${i.decimals||0}">${i.prefix||''}0${i.suffix||''}</div>
-      <div class="num-desc">${i.label}</div>
+      <div class="num-val counter" data-target="${engagement}" data-suffix="%" data-decimals="2">0%</div>
+      <div class="num-desc">engagement rate</div>
     </div>
-  `).join('');
+    <div class="num-item">
+      <div class="num-val counter" data-target="${avgLikes}">0</div>
+      <div class="num-desc">likes promedio</div>
+    </div>
+    <div class="num-item">
+      <div class="num-val counter" data-target="${totalPiezas}">0</div>
+      <div class="num-desc">piezas este mes</div>
+    </div>
+  `;
 }
 
 // ── MARQUEE ──
@@ -434,6 +461,11 @@ function renderInvestment(copilot) {
   const spend = ads ? (ads.spend || 0) : 0;
   const reach = ads ? (ads.reach || 0) : 0;
   const roas = ads ? (ads.roas || 0) : 0;
+
+  if (!spend && !reach) {
+    document.getElementById('investment').style.display = 'none';
+    return;
+  }
 
   document.getElementById('inv-cards').innerHTML = `
     <div class="inv-card">
@@ -494,9 +526,9 @@ function renderReviews(unity) {
   }
 
   let allRevs = [];
-  if (google && google.reviews) allRevs.push(...google.reviews);
+  if (google && google.reviews) allRevs.push(...google.reviews.filter(r => (r.rating||0) >= 4));
   const ta = reviews && reviews.tripadvisor;
-  if (ta && ta.reviews) allRevs.push(...ta.reviews);
+  if (ta && ta.reviews) allRevs.push(...ta.reviews.filter(r => (r.rating||0) >= 4));
 
   document.getElementById('review-cards').innerHTML = allRevs.slice(0, 4).map(r => {
     const src = r.source === 'google' ? 'Google' : r.source === 'tripadvisor' ? 'TripAdvisor' : 'IG';
@@ -542,7 +574,7 @@ function renderGrowth(copilot, unity) {
   }
   if (meses > 0) {
     document.getElementById('growth-months').innerHTML = `
-      <span style="font-size:13px;color:#888;">${meses} meses juntos</span>
+      <span style="font-size:13px;color:#888;">${meses} ${meses===1?'mes':'meses'} juntos</span>
       <div class="growth-months-bar"><div class="growth-months-fill" style="width:${Math.min(meses/12*100,100)}%"></div></div>
     `;
   }
