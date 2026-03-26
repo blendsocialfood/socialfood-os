@@ -97,6 +97,11 @@
     font-size: 14px;
     display: flex; align-items: center; justify-content: center;
   }
+  .nav-drop .nav-icon {
+    background: linear-gradient(135deg, rgba(220,38,38,0.2), rgba(220,38,38,0.05));
+    border: 1px solid rgba(220,38,38,0.25);
+    font-size: 14px;
+  }
   .nav-firsttouch .nav-icon {
     background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.05));
     border: 1px solid rgba(168,85,247,0.25);
@@ -291,6 +296,11 @@
     background: linear-gradient(135deg, rgba(28,130,180,0.15), rgba(28,130,180,0.05));
     border: 1px solid rgba(28,130,180,0.2);
     --card-glow: rgba(28,130,180,0.2);
+  }
+  .card-drop .module-icon {
+    background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(220,38,38,0.05));
+    border: 1px solid rgba(220,38,38,0.2);
+    --card-glow: rgba(220,38,38,0.2);
   }
   .card-firsttouch .module-icon {
     background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05));
@@ -493,8 +503,8 @@ const navHTML = `
     <span class="nav-label">Prism</span>
   </a>
   <a href="${canDrop ? DROP_URL+'?token='+token : '#'}" class="nav-logo nav-drop ${canDrop ? '' : 'disabled'}" style="${canDrop ? '' : 'display:none;'}">
-    <div class="nav-icon" style="font-size:14px;">&#128640;</div>
-    <span class="nav-label" style="color:#DC2626;">Drop</span>
+    <div class="nav-icon">&#128640;</div>
+    <span class="nav-label">Drop</span>
   </a>
   <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="nav-logo nav-firsttouch ${canFirstTouch ? '' : 'disabled'}">
     <div class="nav-icon">&#9830;</div>
@@ -564,7 +574,21 @@ const firstTouchCard = `
     </div>
   </a>`;
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + firstTouchCard;
+const dropCard = canDrop ? `
+  <a href="${DROP_URL+'?token='+token}" class="module-card card-drop">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon">&#128640;</div>
+    <div class="module-label">Publicacion</div>
+    <div class="module-name">Drop</div>
+    <div class="module-desc">Centro de publicacion: ve que toca hoy, descarga y marca como publicado.</div>
+    <div class="module-features">
+      <span class="feature-tag">Hoy</span>
+      <span class="feature-tag">Semana</span>
+      <span class="feature-tag">Por cliente</span>
+    </div>
+  </a>` : '';
+
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + dropCard + firstTouchCard;
 </script>
 
 </body>
