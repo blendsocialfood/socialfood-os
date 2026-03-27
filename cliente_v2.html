@@ -190,26 +190,57 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .num-card:nth-child(2) .num-card-bar-fill{background:linear-gradient(90deg,#fbbf24,rgba(251,191,36,.2));}
 .num-card:nth-child(3) .num-card-bar-fill{background:linear-gradient(90deg,#60a5fa,rgba(96,165,250,.2));}
 
-.num-ads{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0;
-  margin-bottom:36px;
-  background:linear-gradient(165deg, rgba(255,255,255,.025) 0%, rgba(255,255,255,.008) 100%);
-  border:1px solid rgba(255,255,255,.04);border-radius:20px;overflow:hidden;
-}
+.num-ads{margin-bottom:36px;display:none;}
 .num-ads-title{
-  grid-column:1/-1;font-size:10px;color:#EA580C;text-transform:uppercase;
-  letter-spacing:2px;font-weight:700;padding:20px 24px 12px;
-  border-bottom:1px solid rgba(255,255,255,.03);
+  font-size:10px;color:#EA580C;text-transform:uppercase;
+  letter-spacing:2px;font-weight:700;margin-bottom:24px;
 }
-.num-ads-item{
-  text-align:center;padding:20px 12px;
-  border-right:1px solid rgba(255,255,255,.03);
-  transition:background var(--dur) var(--ease);
+.num-funnel{display:flex;flex-direction:column;gap:0;position:relative;}
+.num-funnel-step{
+  display:flex;align-items:center;gap:20px;
+  padding:16px 24px;position:relative;
+  border-left:2px solid rgba(234,88,12,.1);
+  transition:all var(--dur) var(--ease);
 }
-.num-ads-item:last-child{border-right:none;}
-.num-ads-item:hover{background:rgba(234,88,12,.03);}
-.num-ads-val{font-size:22px;font-weight:900;color:#f5f5f5;letter-spacing:-0.5px;}
-.num-ads-label{font-size:8px;color:#444;text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;font-weight:600;}
+.num-funnel-step:first-child{border-left-color:#EA580C;}
+.num-funnel-step:hover{background:rgba(234,88,12,.03);border-left-color:#EA580C;}
+.num-funnel-step::before{
+  content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:#1a1a1a;border:2px solid rgba(234,88,12,.2);
+  transition:all var(--dur) var(--ease);
+}
+.num-funnel-step:first-child::before{background:#EA580C;border-color:#EA580C;box-shadow:0 0 12px rgba(234,88,12,.4);}
+.num-funnel-step:hover::before{background:#EA580C;border-color:#EA580C;box-shadow:0 0 12px rgba(234,88,12,.4);}
+.num-funnel-val{
+  font-size:clamp(28px,4vw,40px);font-weight:900;color:#f5f5f5;letter-spacing:-1.5px;
+  min-width:140px;
+}
+.num-funnel-info{flex:1;}
+.num-funnel-label{font-size:13px;font-weight:600;color:#888;}
+.num-funnel-desc{font-size:11px;color:#333;margin-top:2px;}
+.num-funnel-bar{
+  flex:1;max-width:200px;height:4px;border-radius:4px;
+  background:rgba(255,255,255,.04);overflow:hidden;
+}
+.num-funnel-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#EA580C,rgba(234,88,12,.2));transition:width 1.5s var(--ease);}
+.num-funnel-badges{
+  display:flex;gap:12px;margin-top:20px;padding-left:24px;
+}
+.num-funnel-badge{
+  padding:8px 16px;border-radius:10px;
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+  font-size:12px;font-weight:700;color:#888;
+  transition:all var(--dur) var(--ease);
+}
+.num-funnel-badge:hover{border-color:rgba(234,88,12,.2);color:#f5f5f5;}
+.num-funnel-badge span{color:#EA580C;margin-right:6px;}
+
+@media(max-width:700px){
+  .num-funnel-val{font-size:24px;min-width:100px;}
+  .num-funnel-bar{display:none;}
+  .num-funnel-badges{flex-wrap:wrap;padding-left:16px;}
+}
 
 .num-spark{
   margin-bottom:24px;padding:24px;
@@ -1033,23 +1064,51 @@ function renderNumbers(copilot, unity) {
     });
   }, 800);
 
-  // ADS section
+  // ADS section — Funnel visualization
   if (ads && (ads.reach || ads.spend)) {
     const adsEl = document.getElementById('num-ads');
-    adsEl.style.display = 'grid';
+    adsEl.style.display = 'block';
     const fmtK = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : n.toString();
     const fmtCLP = n => '$' + Math.round(n).toLocaleString('es-CL');
-    adsEl.innerHTML = `
-      <div class="num-ads-title">Campañas Ads — ${ads.period || 'últimos 7 días'}</div>
-      <div class="num-ads-item"><div class="num-ads-val counter" data-target="${ads.reach || 0}">${fmtK(ads.reach || 0)}</div><div class="num-ads-label">Alcance</div></div>
-      <div class="num-ads-item"><div class="num-ads-val counter" data-target="${ads.impressions || 0}">${fmtK(ads.impressions || 0)}</div><div class="num-ads-label">Impresiones</div></div>
-      <div class="num-ads-item"><div class="num-ads-val">${fmtCLP(ads.spend || 0)}</div><div class="num-ads-label">Inversión</div></div>
-      <div class="num-ads-item"><div class="num-ads-val">${(ads.ctr || 0).toFixed(2)}%</div><div class="num-ads-label">CTR</div></div>
-      <div class="num-ads-item"><div class="num-ads-val">${fmtCLP(ads.cpm || 0)}</div><div class="num-ads-label">CPM</div></div>
-      <div class="num-ads-item"><div class="num-ads-val counter" data-target="${ads.clicks || 0}">0</div><div class="num-ads-label">Clicks</div></div>
-      ${ads.messages ? '<div class="num-ads-item"><div class="num-ads-val counter" data-target="' + ads.messages + '">0</div><div class="num-ads-label">Mensajes</div></div>' : ''}
-      ${ads.leads ? '<div class="num-ads-item"><div class="num-ads-val counter" data-target="' + ads.leads + '">0</div><div class="num-ads-label">Leads</div></div>' : ''}
-    `;
+    const reach = ads.reach || 0;
+    const impr = ads.impressions || 0;
+    const clicks = ads.clicks || 0;
+    const msgs = ads.messages || 0;
+    const maxVal = Math.max(reach, impr, 1);
+
+    const steps = [
+      { val: fmtCLP(ads.spend || 0), label: 'Invertido', desc: ads.period || 'últimos 7 días', bar: 100 },
+      { val: fmtK(reach), label: 'Personas alcanzadas', desc: 'vieron tu marca', bar: (reach/maxVal)*100 },
+      { val: fmtK(impr), label: 'Impresiones totales', desc: 'veces que apareció', bar: (impr/maxVal)*100 },
+      { val: fmtK(clicks), label: 'Clicks', desc: 'interactuaron con tu ad', bar: (clicks/maxVal)*100 },
+    ];
+    if (msgs > 0) steps.push({ val: msgs.toString(), label: 'Mensajes directos', desc: 'te escribieron', bar: (msgs/maxVal)*100 });
+
+    let funnelHTML = '<div class="num-ads-title">El recorrido de tu inversión</div><div class="num-funnel">';
+    steps.forEach(s => {
+      funnelHTML += `
+        <div class="num-funnel-step">
+          <div class="num-funnel-val">${s.val}</div>
+          <div class="num-funnel-info">
+            <div class="num-funnel-label">${s.label}</div>
+            <div class="num-funnel-desc">${s.desc}</div>
+          </div>
+          <div class="num-funnel-bar"><div class="num-funnel-bar-fill" data-width="${s.bar}%"></div></div>
+        </div>`;
+    });
+    funnelHTML += '</div>';
+    funnelHTML += `<div class="num-funnel-badges">
+      <div class="num-funnel-badge"><span>CTR</span>${(ads.ctr || 0).toFixed(2)}%</div>
+      <div class="num-funnel-badge"><span>CPM</span>${fmtCLP(ads.cpm || 0)}</div>
+      ${ads.leads ? '<div class="num-funnel-badge"><span>Leads</span>' + ads.leads + '</div>' : ''}
+    </div>`;
+    adsEl.innerHTML = funnelHTML;
+
+    setTimeout(() => {
+      adsEl.querySelectorAll('.num-funnel-bar-fill').forEach(bar => {
+        bar.style.width = bar.dataset.width;
+      });
+    }, 1200);
   }
 
   // Growth sparkline
