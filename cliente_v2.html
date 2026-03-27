@@ -361,16 +361,71 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 /* ── S4 CONTENT ── */
 #content-sec{background:#0a0805;}
 #content-sec{min-height:auto;padding-bottom:80px;}
-.content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:24px;perspective:800px;}
-.content-card{aspect-ratio:4/5;border-radius:14px;background-size:cover;background-position:center;position:relative;border:1px solid rgba(255,255,255,.06);cursor:pointer;overflow:hidden;transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease);transform-style:preserve-3d;}
-.content-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 40px rgba(0,0,0,.4);}
-.content-card::after{content:'';position:absolute;inset:0;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(234,88,12,0);transition:box-shadow var(--dur) var(--ease);}
-.content-card:hover::after{box-shadow:inset 0 0 0 1px rgba(234,88,12,.3);}
-.content-card-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.9));opacity:0;transition:opacity var(--dur) var(--ease);}
-.content-card:hover .content-card-overlay{opacity:1;}
-.content-card-title{font-size:13px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.content-card-meta{font-size:11px;color:#888;margin-top:2px;}
-.content-card.stagger{opacity:0;transform:translateY(20px) rotateX(10deg);animation:cardIn .6s forwards;}
+
+/* Cover Flow 3D */
+.cflow-scene{
+  perspective:1000px;height:380px;position:relative;
+  margin-top:32px;overflow:hidden;
+  cursor:grab;
+}
+.cflow-scene:active{cursor:grabbing;}
+.cflow-track{
+  display:flex;align-items:center;justify-content:center;
+  height:100%;position:relative;
+  transform-style:preserve-3d;
+}
+.cflow-card{
+  position:absolute;width:220px;height:310px;
+  border-radius:16px;overflow:hidden;
+  background:#111 center/cover no-repeat;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  transition:all 0.5s var(--ease);
+  cursor:pointer;
+}
+.cflow-card::after{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%);
+  transition:opacity var(--dur) var(--ease);
+}
+.cflow-card.active{
+  box-shadow:0 20px 80px rgba(234,88,12,.15), 0 30px 60px rgba(0,0,0,.5);
+  border-color:rgba(234,88,12,.2);
+}
+.cflow-card.active::after{
+  background:linear-gradient(to top, rgba(0,0,0,.5) 0%, transparent 40%);
+}
+.cflow-info{
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+  padding:16px;
+  opacity:0;transform:translateY(8px);
+  transition:all var(--dur) var(--ease);
+}
+.cflow-card.active .cflow-info{opacity:1;transform:translateY(0);}
+.cflow-info-title{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cflow-info-meta{font-size:12px;color:#888;margin-top:3px;}
+
+/* Reflection */
+.cflow-reflection{
+  position:absolute;bottom:-2px;left:0;right:0;height:60px;
+  background:linear-gradient(to bottom, rgba(10,8,5,.8), rgba(10,8,5,1));
+  pointer-events:none;z-index:5;
+}
+
+/* Nav dots */
+.cflow-dots{
+  display:flex;gap:6px;justify-content:center;margin-top:20px;
+}
+.cflow-dot{
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);
+  cursor:pointer;transition:all var(--dur) var(--ease);
+}
+.cflow-dot.active{background:#EA580C;width:20px;border-radius:3px;}
+
+@media(max-width:700px){
+  .cflow-scene{height:300px;}
+  .cflow-card{width:180px;height:250px;}
+}
 @keyframes cardIn{to{opacity:1;transform:translateY(0) rotateX(0);}}
 
 /* ── S5 REVIEWS ── */
@@ -771,7 +826,11 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
     <div class="sec-sub rv rv-d1">Contenido creado y publicado para tu marca</div>
   </div>
   <div class="container rv rv-d2">
-    <div class="content-grid" id="content-grid"></div>
+    <div class="cflow-scene" id="cflow-scene">
+      <div class="cflow-track" id="cflow-track"></div>
+      <div class="cflow-reflection"></div>
+    </div>
+    <div class="cflow-dots" id="cflow-dots"></div>
   </div>
 </section>
 
@@ -1366,53 +1425,103 @@ function renderInvestment(copilot) {
 }
 
 // ── S4: CONTENT ──
+let cflowItems = [];
+let cflowIdx = 0;
+
 function renderContent(unity, copilot) {
   const grilla = unity && unity.grilla;
   const ig = copilot && copilot.ig;
   const totalPiezas = grilla ? (grilla.total || 0) : 0;
   document.getElementById('content-title').textContent = totalPiezas > 0 ? `${totalPiezas} piezas este mes` : 'Tu contenido';
 
-  const grid = document.getElementById('content-grid');
-  let items = [];
+  const track = document.getElementById('cflow-track');
+  cflowItems = [];
 
-  // 1. Piezas con archivo en Drive (las mejores)
   if (grilla && grilla.piezas) {
-    const conArchivo = grilla.piezas.filter(p => p.drive_file_id);
-    conArchivo.forEach(p => items.push({
+    grilla.piezas.filter(p => p.drive_file_id && !p.drive_file_id.startsWith('folder:')).forEach(p => cflowItems.push({
       url: `${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large`,
-      title: p.titulo || 'Pieza',
-      meta: p.formato || '',
-      fileId: p.drive_file_id
+      title: p.titulo || '', meta: p.formato || '', fileId: p.drive_file_id
     }));
   }
-
-  // 2. Fallback: fotos de Instagram
-  if (items.length < 6 && ig && ig.posts) {
+  if (cflowItems.length < 6 && ig && ig.posts) {
     ig.posts.filter(p => p.media_url && p.media_type !== 'VIDEO').forEach(p => {
-      if (items.length >= 12) return;
-      items.push({
-        url: p.media_url,
-        title: '',
-        meta: `❤️ ${(p.like_count||0).toLocaleString('es-CL')}`,
-        link: p.permalink
-      });
+      if (cflowItems.length >= 12) return;
+      cflowItems.push({ url: p.media_url, title: '', meta: `❤️ ${(p.like_count||0).toLocaleString('es-CL')}`, link: p.permalink });
     });
   }
 
-  if (!items.length) {
-    grid.innerHTML = '<p style="color:#555;font-size:13px;text-align:center;grid-column:1/-1;">Sin contenido visual disponible</p>';
+  if (!cflowItems.length) {
+    track.parentElement.innerHTML = '<p style="color:#555;font-size:14px;text-align:center;padding:60px;">Sin contenido visual</p>';
     return;
   }
 
-  grid.innerHTML = items.slice(0, 12).map((item, i) => `
-    <div class="content-card stagger" style="background-image:url('${item.url}');animation-delay:${i * 0.08}s;"
-      ${item.fileId ? `onclick="openLightbox('${item.fileId}')"` : (item.link ? `onclick="window.open('${item.link}','_blank')"` : '')}>
-      <div class="content-card-overlay">
-        <div class="content-card-title">${item.title}</div>
-        ${item.meta ? `<div class="content-card-meta">${item.meta}</div>` : ''}
-      </div>
-    </div>
-  `).join('');
+  cflowItems = cflowItems.slice(0, 11);
+  cflowIdx = Math.floor(cflowItems.length / 2);
+
+  // Create cards
+  track.innerHTML = '';
+  cflowItems.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'cflow-card';
+    card.style.backgroundImage = `url('${item.url}')`;
+    card.innerHTML = `<div class="cflow-info"><div class="cflow-info-title">${item.title}</div>${item.meta ? `<div class="cflow-info-meta">${item.meta}</div>` : ''}</div>`;
+    card.addEventListener('click', () => {
+      if (i === cflowIdx) {
+        if (item.fileId) openLightbox(item.fileId);
+        else if (item.link) window.open(item.link, '_blank');
+      } else {
+        cflowIdx = i; layoutCflow();
+      }
+    });
+    track.appendChild(card);
+  });
+
+  // Dots
+  const dotsEl = document.getElementById('cflow-dots');
+  dotsEl.innerHTML = cflowItems.map((_, i) => `<div class="cflow-dot" onclick="cflowIdx=${i};layoutCflow()"></div>`).join('');
+
+  layoutCflow();
+
+  // Drag / swipe
+  const scene = document.getElementById('cflow-scene');
+  let dragX = 0, dragging = false;
+  scene.addEventListener('mousedown', e => { dragX = e.clientX; dragging = true; });
+  scene.addEventListener('mousemove', e => { if (!dragging) return; });
+  scene.addEventListener('mouseup', e => {
+    if (!dragging) return; dragging = false;
+    const dx = e.clientX - dragX;
+    if (Math.abs(dx) > 40) {
+      cflowIdx = Math.max(0, Math.min(cflowItems.length - 1, cflowIdx + (dx < 0 ? 1 : -1)));
+      layoutCflow();
+    }
+  });
+  scene.addEventListener('mouseleave', () => { dragging = false; });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('cflow-scene')) return;
+    if (e.key === 'ArrowRight') { cflowIdx = Math.min(cflowItems.length - 1, cflowIdx + 1); layoutCflow(); }
+    if (e.key === 'ArrowLeft') { cflowIdx = Math.max(0, cflowIdx - 1); layoutCflow(); }
+  });
+}
+
+function layoutCflow() {
+  const cards = document.querySelectorAll('.cflow-card');
+  const dots = document.querySelectorAll('.cflow-dot');
+  cards.forEach((card, i) => {
+    const offset = i - cflowIdx;
+    const absOffset = Math.abs(offset);
+    const z = -absOffset * 80;
+    const x = offset * 180;
+    const rotY = offset * -25;
+    const scale = absOffset === 0 ? 1 : Math.max(0.7, 1 - absOffset * 0.12);
+    const opacity = absOffset > 3 ? 0 : Math.max(0.3, 1 - absOffset * 0.25);
+    card.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${rotY}deg) scale(${scale})`;
+    card.style.opacity = opacity;
+    card.style.zIndex = 100 - absOffset;
+    card.classList.toggle('active', offset === 0);
+  });
+  dots.forEach((d, i) => d.classList.toggle('active', i === cflowIdx));
 }
 
 // ── S5: REVIEWS ──
