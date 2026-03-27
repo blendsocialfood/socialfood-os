@@ -93,16 +93,37 @@ body.intro-done{overflow-y:auto;}
   100%{opacity:0.8;transform:translateY(0);}
 }
 
-/* "by Blend." */
-.intro-by{
-  font-size:11px;font-weight:500;color:rgba(255,255,255,0.3);
-  text-align:center;margin-top:10px;
+/* Progress bar in intro */
+.intro-progress-wrap{
+  width:240px;height:2px;
+  background:rgba(255,255,255,0.08);
+  border-radius:2px;
+  margin-top:28px;
+  overflow:hidden;
   opacity:0;
-  animation:introByIn 0.5s ease-out 1.8s forwards;
+  animation:introBarIn 0.5s ease-out 1.6s forwards;
 }
-@keyframes introByIn{
+@keyframes introBarIn{
+  0%{opacity:0;transform:scaleX(0.6);}
+  100%{opacity:1;transform:scaleX(1);}
+}
+.intro-progress-bar{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#EA580C,#fb923c);
+  border-radius:2px;
+  transition:width 0.4s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:0 0 12px rgba(234,88,12,0.4);
+}
+.intro-status{
+  font-size:11px;font-weight:400;color:rgba(255,255,255,0.3);
+  text-align:center;margin-top:14px;
+  letter-spacing:1px;
+  opacity:0;
+  animation:introStatusIn 0.5s ease-out 1.8s forwards;
+}
+@keyframes introStatusIn{
   0%{opacity:0;transform:translateY(8px);}
-  100%{opacity:0.4;transform:translateY(0);}
+  100%{opacity:0.5;transform:translateY(0);}
 }
 
 /* Shockwave rings */
@@ -811,8 +832,11 @@ section{
     <span class="intro-logo-letters">SF<span class="intro-logo-dot"></span></span>
   </div>
   <div class="intro-name" id="intro-name"></div>
-  <div class="intro-sub">Tu ecosistema digital</div>
-  <div class="intro-by">by Blend<span style="color:#EA580C;">.</span></div>
+  <div class="intro-sub">SOCIALFOOD — BY BLEND</div>
+  <div class="intro-progress-wrap">
+    <div class="intro-progress-bar" id="intro-bar"></div>
+  </div>
+  <div class="intro-status" id="intro-status">Preparando tu espacio</div>
 </div>
 <div class="intro-ring intro-ring-1"></div>
 <div class="intro-ring intro-ring-2"></div>
@@ -975,26 +999,43 @@ section{
 
 <script>
 // =====================================================
-// INTRO SEQUENCE
+// INTRO SEQUENCE — progress vinculado a carga real
 // =====================================================
 document.getElementById('intro-name').textContent = SF_USER.name;
+const introBar = document.getElementById('intro-bar');
+const introStatus = document.getElementById('intro-status');
+let introProgress = 0;
+let introDataReady = false;
 
-// Logo glow at 1.3s
-setTimeout(() => { document.getElementById('intro-logo').classList.add('glow'); }, 1300);
+function setIntroProgress(pct, msg) {
+  introProgress = pct;
+  introBar.style.width = pct + '%';
+  if (msg) introStatus.textContent = msg;
+}
 
-// Fade out intro at 2.8s, reveal main
+function finishIntro() {
+  if (introDataReady) return;
+  introDataReady = true;
+  setIntroProgress(100, 'Listo');
+  setTimeout(() => {
+    document.getElementById('intro-overlay').classList.add('out');
+    document.getElementById('main-content').classList.add('show');
+    document.body.classList.add('intro-done');
+    document.querySelectorAll('.hero .reveal, .hero .text-reveal').forEach(el => el.classList.add('visible'));
+  }, 400);
+  setTimeout(() => {
+    document.querySelectorAll('.intro-overlay,.intro-ring,.intro-ember,.intro-scan,.intro-streak').forEach(el => el.remove());
+  }, 1600);
+}
+
+// Step 1: Logo appears (CSS animation handles this)
+setTimeout(() => { setIntroProgress(10, 'Preparando tu espacio'); }, 300);
+
+// Step 2: Logo glow
 setTimeout(() => {
-  document.getElementById('intro-overlay').classList.add('out');
-  document.getElementById('main-content').classList.add('show');
-  document.body.classList.add('intro-done');
-  // Force hero elements visible after intro
-  document.querySelectorAll('.hero .reveal, .hero .text-reveal').forEach(el => el.classList.add('visible'));
-}, 2800);
-
-// Clean up intro elements at 4s
-setTimeout(() => {
-  document.querySelectorAll('.intro-overlay,.intro-ring,.intro-ember,.intro-scan,.intro-streak').forEach(el => el.remove());
-}, 4000);
+  document.getElementById('intro-logo').classList.add('glow');
+  setIntroProgress(20, 'Conectando');
+}, 1300);
 
 // =====================================================
 // INIT
@@ -1217,28 +1258,44 @@ const TOKEN = SF_USER.token;
 
 async function loadAll() {
   const params = `token=${TOKEN}&client=${encodeURIComponent(CLIENT)}`;
-  const [unityRes, copilotRes] = await Promise.allSettled([
-    fetch(`${UNITY_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
-    fetch(`${COPILOT_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
-  ]);
 
-  const unity = unityRes.status === 'fulfilled' ? unityRes.value : null;
-  const copilot = copilotRes.status === 'fulfilled' ? copilotRes.value : null;
+  setIntroProgress(30, 'Cargando tu contenido');
+
+  // Fetch Unity
+  let unity = null;
+  try {
+    const r = await fetch(`${UNITY_URL}/api/client-portal?${params}`);
+    unity = await r.json();
+  } catch(e) {}
+  setIntroProgress(50, 'Cargando campañas');
+
+  // Fetch Copilot
+  let copilot = null;
+  try {
+    const r = await fetch(`${COPILOT_URL}/api/client-portal?${params}`);
+    copilot = await r.json();
+  } catch(e) {}
+  setIntroProgress(70, 'Armando tu portal');
 
   if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
 
   renderSlideshow(copilot);
   renderHero(copilot);
+  setIntroProgress(80, 'Renderizando grilla');
+
   renderGrilla(unity);
   renderClickupProgress(unity);
   renderAds(copilot);
+  setIntroProgress(90, 'Últimos detalles');
+
   renderIG(copilot);
   renderReviews(unity);
   renderEvolution(copilot, unity);
   renderNext(unity);
 
-  // Init tilt after render
   setTimeout(initTilt, 500);
+
+  finishIntro();
 }
 
 // =====================================================
@@ -1779,6 +1836,9 @@ document.head.appendChild(styleEl);
 })();
 
 loadAll();
+
+// Safety: si en 8s no termina la carga, forzar cierre de intro
+setTimeout(() => { if (!introDataReady) finishIntro(); }, 8000);
 
 // =====================================================
 // TEAM ORBITAL
