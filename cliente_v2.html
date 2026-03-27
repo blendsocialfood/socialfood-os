@@ -140,25 +140,15 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 /* ── S8 TEAM — FILMSTRIP + TALENT REVEAL ── */
 #team{background:#050505;overflow:hidden;padding:0;position:relative;min-height:auto;scroll-snap-align:none;}
 
-.team-bg{
-  position:absolute;inset:0;z-index:0;
-  background:#050505 center/cover no-repeat;
-  transition:opacity 0.6s ease, background-image 0.3s ease;
-  opacity:0;
-}
-.team-bg.active{opacity:1;}
-.team-bg::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(to bottom, rgba(5,5,5,.82) 0%, rgba(5,5,5,.75) 40%, rgba(5,5,5,.92) 100%);
-}
-
 .team-header{
   position:relative;z-index:2;text-align:center;
   padding:80px 24px 0;
 }
+.team-header .sec-label{font-size:13px;}
+.team-header .sec-title{font-size:clamp(32px,5vw,48px);}
 .team-subtitle{
-  font-size:14px;font-weight:300;
-  color:rgba(255,255,255,.25);margin-top:8px;letter-spacing:0.5px;
+  font-size:16px;font-weight:300;
+  color:rgba(255,255,255,.3);margin-top:10px;letter-spacing:0.5px;
 }
 
 .team-strip{
@@ -226,6 +216,20 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
   transition:color 0.4s ease;
 }
 .team-panel:hover .team-panel-index{color:rgba(234,88,12,.6);}
+
+.team-panel-talent-photo{
+  position:absolute;inset:0;z-index:1;
+  background:#111 center/cover no-repeat;
+  transform:translateY(100%);
+  transition:transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.team-panel:hover .team-panel-talent-photo{
+  transform:translateY(0);
+}
+.team-panel-talent-photo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.2) 50%, transparent 100%);
+}
 
 .team-panel-line{
   position:absolute;top:0;left:0;width:100%;height:2px;z-index:3;
@@ -348,7 +352,6 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
 
 <!-- S-TEAM: TU EQUIPO — FILMSTRIP + TALENT REVEAL -->
 <section id="team">
-  <div class="team-bg" id="team-bg"></div>
   <div class="team-header">
     <div class="sec-label rv">TU EQUIPO</div>
     <div class="sec-title rv rv-d1" style="margin-bottom:0;">Quiénes mueven tu marca</div>
@@ -823,7 +826,6 @@ function renderTeam() {
   ];
 
   const strip = document.getElementById('team-strip');
-  const bg = document.getElementById('team-bg');
 
   // Preload talent photos so they appear instantly on hover
   team.forEach(m => {
@@ -837,10 +839,12 @@ function renderTeam() {
     const panel = document.createElement('div');
     panel.className = 'team-panel';
     const talentHtml = m.talent ? `<div class="team-panel-talent">${m.talent}</div>` : '';
+    const talentPhotoHtml = m.talentPhoto ? `<div class="team-panel-talent-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.talentPhoto}?token=${TOKEN}&size=large')"></div>` : '';
     panel.innerHTML = `
       <div class="team-panel-line"></div>
       <div class="team-panel-index">0${i + 1}</div>
       <div class="team-panel-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large');background-position:${m.pos}"></div>
+      ${talentPhotoHtml}
       <div class="team-panel-gradient"></div>
       <div class="team-panel-info">
         <div class="team-panel-name">${m.name}</div>
@@ -848,17 +852,6 @@ function renderTeam() {
         ${talentHtml}
       </div>`;
     strip.appendChild(panel);
-
-    // Background talent reveal on hover
-    panel.addEventListener('mouseenter', () => {
-      if (m.talentPhoto) {
-        bg.style.backgroundImage = `url('${UNITY_URL}/api/drive/thumb/${m.talentPhoto}?token=${TOKEN}&size=large')`;
-        bg.classList.add('active');
-      }
-    });
-    panel.addEventListener('mouseleave', () => {
-      bg.classList.remove('active');
-    });
   });
 }
 
