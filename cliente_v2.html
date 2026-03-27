@@ -219,8 +219,77 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .num-funnel-info{flex:1;}
 .num-funnel-label{font-size:16px;font-weight:600;color:#999;}
 .num-funnel-desc{font-size:13px;color:#444;margin-top:3px;}
+/* ── Funnel conversion arrows ── */
+.num-funnel-arrow{
+  padding:4px 24px 4px 48px;
+  border-left:2px solid rgba(234,88,12,.06);
+  position:relative;
+}
+.num-funnel-arrow::before{
+  content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(234,88,12,.08);
+}
+.num-funnel-conv{
+  font-size:11px;font-weight:600;color:rgba(234,88,12,.5);
+  letter-spacing:0.5px;font-style:italic;
+}
+
+/* ── TOP POSTS GALLERY ── */
+.top-posts{margin-bottom:36px;}
+.top-posts-title{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:20px;}
+.top-posts-grid{
+  display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;
+  gap:12px;height:380px;
+}
+.top-post{
+  position:relative;overflow:hidden;border-radius:16px;cursor:pointer;
+  background:#111 center/cover no-repeat;
+  border:1px solid rgba(255,255,255,.04);
+  transition:all var(--dur) var(--ease);
+}
+.top-post:first-child{grid-row:1/3;}
+.top-post:hover{border-color:rgba(234,88,12,.2);transform:scale(1.01);}
+.top-post::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.1) 50%, transparent 100%);
+  transition:opacity var(--dur) var(--ease);
+}
+.top-post:hover::after{background:linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.2) 60%, transparent 100%);}
+
+.top-post-rank{
+  position:absolute;top:12px;left:12px;z-index:2;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;
+  backdrop-filter:blur(8px);
+}
+.top-post:nth-child(1) .top-post-rank{background:rgba(255,183,0,.15);color:#FFB700;border:1px solid rgba(255,183,0,.3);box-shadow:0 0 20px rgba(255,183,0,.15);}
+.top-post:nth-child(2) .top-post-rank{background:rgba(192,192,192,.1);color:#C0C0C0;border:1px solid rgba(192,192,192,.2);}
+.top-post:nth-child(3) .top-post-rank{background:rgba(205,127,50,.1);color:#CD7F32;border:1px solid rgba(205,127,50,.2);}
+
+.top-post-stats{
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+  padding:16px;
+  transform:translateY(4px);opacity:.7;
+  transition:all var(--dur) var(--ease);
+}
+.top-post:hover .top-post-stats{transform:translateY(0);opacity:1;}
+.top-post-likes{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;}
+.top-post:nth-child(2) .top-post-likes,.top-post:nth-child(3) .top-post-likes{font-size:16px;}
+.top-post-meta{font-size:11px;color:#888;margin-top:3px;}
+.top-post-type{
+  position:absolute;top:12px;right:12px;z-index:2;
+  font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);
+  padding:3px 8px;border-radius:6px;backdrop-filter:blur(4px);
+}
+
 @media(max-width:700px){
   .num-funnel-val{font-size:24px;min-width:100px;}
+  .top-posts-grid{grid-template-columns:1fr;grid-template-rows:auto;height:auto;}
+  .top-post{height:200px;}
+  .top-post:first-child{grid-row:auto;height:280px;}
 }
 
 .num-spark{
@@ -619,7 +688,8 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
     </div>
     <div class="num-main-sub rv rv-d1" id="num-main-sub">seguidores en Instagram</div>
     <div class="num-cards rv rv-d2" id="num-cards"></div>
-    <div class="num-ads rv rv-d3" id="num-ads" style="display:none;"></div>
+    <div class="top-posts rv rv-d3" id="top-posts" style="display:none;"></div>
+    <div class="num-ads rv rv-d4" id="num-ads" style="display:none;"></div>
     <div class="num-spark rv rv-d4" id="num-spark" style="display:none;"></div>
   </div>
 </section>
@@ -1058,16 +1128,21 @@ function renderNumbers(copilot, unity) {
     const msgs = ads.messages || 0;
     const maxVal = Math.max(reach, impr, 1);
 
+    const spend = ads.spend || 0;
+    const costPerReach = reach > 0 ? (spend / reach) : 0;
+    const clickRate = reach > 0 ? ((clicks / reach) * 100) : 0;
+    const msgRate = clicks > 0 ? ((msgs / clicks) * 100) : 0;
+
     const steps = [
-      { val: fmtCLP(ads.spend || 0), label: 'Invertido', desc: ads.period || 'últimos 7 días', bar: 100 },
-      { val: fmtK(reach), label: 'Personas alcanzadas', desc: 'vieron tu marca', bar: (reach/maxVal)*100 },
-      { val: fmtK(impr), label: 'Impresiones totales', desc: 'veces que apareció', bar: (impr/maxVal)*100 },
-      { val: fmtK(clicks), label: 'Clicks', desc: 'interactuaron con tu ad', bar: (clicks/maxVal)*100 },
+      { val: fmtCLP(spend), label: 'Invertido', desc: ads.period || 'últimos 7 días', raw: spend },
+      { val: fmtK(reach), label: 'Personas alcanzadas', desc: 'vieron tu marca', raw: reach, conv: `$${costPerReach.toFixed(0)} por persona alcanzada` },
+      { val: fmtK(impr), label: 'Impresiones totales', desc: 'veces que apareció tu marca', raw: impr },
+      { val: fmtK(clicks), label: 'Clicks en tu anuncio', desc: 'interactuaron con tu contenido', raw: clicks, conv: `${clickRate.toFixed(1)}% de quienes te vieron` },
     ];
-    if (msgs > 0) steps.push({ val: msgs.toString(), label: 'Mensajes directos', desc: 'te escribieron', bar: (msgs/maxVal)*100 });
+    if (msgs > 0) steps.push({ val: msgs.toString(), label: 'Mensajes directos', desc: 'te escribieron', raw: msgs, conv: `${msgRate.toFixed(1)}% de quienes hicieron click` });
 
     let funnelHTML = '<div class="num-ads-title">El recorrido de tu inversión</div><div class="num-funnel">';
-    steps.forEach(s => {
+    steps.forEach((s, i) => {
       funnelHTML += `
         <div class="num-funnel-step">
           <div class="num-funnel-val">${s.val}</div>
@@ -1076,6 +1151,9 @@ function renderNumbers(copilot, unity) {
             <div class="num-funnel-desc">${s.desc}</div>
           </div>
         </div>`;
+      if (s.conv) {
+        funnelHTML += `<div class="num-funnel-arrow"><div class="num-funnel-conv">↳ ${s.conv}</div></div>`;
+      }
     });
     // CTR + CPM as inline stats in the last step
     funnelHTML += `<div class="num-funnel-step" style="border-left-color:rgba(234,88,12,.06);padding:12px 24px;">
@@ -1127,7 +1205,32 @@ function renderNumbers(copilot, unity) {
     `;
   }
 
-  // (Charts placeholder — to be redesigned)
+  // ── TOP POSTS GALLERY ──
+  const posts = ig && ig.posts ? ig.posts.slice() : [];
+  if (posts.length >= 3) {
+    const sorted = posts.filter(p => p.media_url).sort((a, b) => ((b.like_count||0) + (b.comments_count||0)*3) - ((a.like_count||0) + (a.comments_count||0)*3));
+    const top3 = sorted.slice(0, 3);
+    const topEl = document.getElementById('top-posts');
+    topEl.style.display = 'block';
+    let postsHtml = '<div class="top-posts-title">Mejores publicaciones del mes</div><div class="top-posts-grid">';
+    top3.forEach((p, i) => {
+      const likes = (p.like_count || 0).toLocaleString('es-CL');
+      const comments = p.comments_count || 0;
+      const type = p.media_type === 'VIDEO' ? 'REEL' : 'POST';
+      const url = p.permalink || '#';
+      postsHtml += `
+        <a href="${url}" target="_blank" class="top-post" style="background-image:url('${p.media_url}');">
+          <div class="top-post-rank">${i + 1}</div>
+          <div class="top-post-type">${type}</div>
+          <div class="top-post-stats">
+            <div class="top-post-likes">❤️ ${likes}</div>
+            <div class="top-post-meta">${comments} comentarios</div>
+          </div>
+        </a>`;
+    });
+    postsHtml += '</div>';
+    topEl.innerHTML = postsHtml;
+  }
 }
 
 // ── MARQUEE ──
