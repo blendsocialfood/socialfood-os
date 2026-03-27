@@ -59,8 +59,8 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 
 /* BG text giant */
 .hero-bg-text{position:absolute;font-size:clamp(120px,22vw,280px);font-weight:900;color:rgba(255,255,255,.06);z-index:0;white-space:nowrap;letter-spacing:-6px;will-change:transform;pointer-events:none;}
-.hero-bg-text-l{left:2vw;top:8vh;}
-.hero-bg-text-r{right:2vw;bottom:8vh;}
+.hero-bg-text-l{left:-2vw;top:2vh;}
+.hero-bg-text-r{right:-2vw;bottom:2vh;}
 
 /* Client presentation overlay */
 .hero-present{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;will-change:opacity;pointer-events:none;}
@@ -583,7 +583,7 @@ function renderHero(unity, copilot) {
   // Background — preload then show
   let imgUrl = '';
   if (heroId) {
-    imgUrl = `${UNITY_URL}/api/drive/thumb/${heroId}?token=${TOKEN}&size=large`;
+    imgUrl = `${UNITY_URL}/api/drive/file/${heroId}?token=${TOKEN}`;
   } else if (ig && ig.posts && ig.posts.length) {
     const photo = ig.posts.find(p => p.media_type !== 'VIDEO');
     if (photo) imgUrl = photo.media_url;
