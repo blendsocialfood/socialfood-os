@@ -137,34 +137,85 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .upcoming-title{font-size:13px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .upcoming-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(234,88,12,.1);color:#EA580C;border:1px solid rgba(234,88,12,.15);}
 
-/* ── S8 TEAM — HEXAGONAL ── */
-#team{background:#050505;}
-.hex-grid{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:24px;position:relative;}
-.hex-row{display:flex;gap:12px;justify-content:center;}
-.hex-row:nth-child(2){margin-top:-20px;}
-.hex-row:nth-child(3){margin-top:-20px;}
-.hex{width:130px;height:150px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,#161616,#0c0c0c);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:default;transition:all .4s;position:relative;}
-.hex:hover{background:linear-gradient(160deg,#1a0800,#0d0400);transform:scale(1.1);z-index:2;}
-.hex::after{content:'';position:absolute;inset:2px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,#111,#0a0a0a);transition:all .4s;}
-.hex:hover::after{background:linear-gradient(160deg,#140800,#0a0400);}
-.hex-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
-.hex-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#EA580C,#ff8c42);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;box-shadow:0 4px 16px rgba(234,88,12,.3);}
-.hex-name{font-size:11px;font-weight:700;color:#fff;}
-.hex-role{font-size:8px;color:#EA580C;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
-.hex-center{width:130px;height:150px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(135deg,#EA580C,#ff6b2c);display:flex;align-items:center;justify-content:center;}
-.hex-center::after{content:'';position:absolute;inset:2px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,#1a0800,#0d0400);}
-.hex-center-content{position:relative;z-index:1;font-size:20px;font-weight:900;color:#EA580C;letter-spacing:-1px;}
-/* Connectors */
-.hex-grid::before{content:'';position:absolute;top:50%;left:50%;width:200px;height:200px;border:1px solid rgba(234,88,12,.08);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;}
-.hex-grid::after{content:'';position:absolute;top:50%;left:50%;width:320px;height:320px;border:1px solid rgba(234,88,12,.04);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;}
+/* ── S8 TEAM — ORBITAL 3D ── */
+#team{background:#050505;overflow:hidden;}
+.orbital-scene{
+  position:relative;height:480px;margin-top:40px;
+  display:flex;align-items:center;justify-content:center;
+  perspective:1200px;
+}
+.orbital-ring{
+  position:relative;width:420px;height:420px;
+  transform-style:preserve-3d;
+  transform:rotateX(60deg) rotateZ(0deg);
+  transition:transform 0.1s linear;
+}
+.orbital-ring-line{
+  position:absolute;inset:20px;
+  border:1px solid rgba(234,88,12,0.12);border-radius:50%;
+  box-shadow:0 0 40px rgba(234,88,12,0.04), inset 0 0 40px rgba(234,88,12,0.02);
+}
+.orbital-ring-line::after{
+  content:'';position:absolute;inset:-25px;
+  border:1px solid rgba(234,88,12,0.05);border-radius:50%;
+}
+.orbital-center{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotateX(-60deg);
+  z-index:10;width:72px;height:72px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;color:#fff;
+  background:radial-gradient(circle,rgba(234,88,12,0.2),rgba(234,88,12,0.04) 70%);
+  border:1px solid rgba(234,88,12,0.3);border-radius:50%;
+  box-shadow:0 0 50px rgba(234,88,12,0.2),0 0 100px rgba(234,88,12,0.05);
+  text-shadow:0 0 20px rgba(234,88,12,0.5);
+}
+.orbital-center span{color:#EA580C;}
+.orbital-member{
+  position:absolute;top:50%;left:50%;
+  width:68px;height:68px;margin:-34px 0 0 -34px;
+  transform-style:preserve-3d;
+  cursor:pointer;z-index:5;
+  opacity:0;transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.orbital-member-inner{
+  width:100%;height:100%;
+  transform:rotateX(-60deg);
+  display:flex;flex-direction:column;align-items:center;
+  transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.orbital-photo{
+  width:68px;height:68px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.1);
+  background:#111 center/cover no-repeat;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.orbital-member:hover .orbital-photo{
+  border-color:rgba(234,88,12,0.6);
+  box-shadow:0 8px 40px rgba(234,88,12,0.3),0 0 60px rgba(234,88,12,0.1);
+  transform:scale(1.3);
+}
+.orbital-info{
+  margin-top:8px;text-align:center;
+  opacity:0;transform:translateY(6px);
+  transition:all 0.3s ease;pointer-events:none;
+}
+.orbital-member:hover .orbital-info{opacity:1;transform:translateY(0);}
+.orbital-name{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,0.8);}
+.orbital-role{font-size:9px;color:#EA580C;letter-spacing:1px;text-transform:uppercase;margin-top:2px;text-shadow:0 2px 8px rgba(0,0,0,0.8);}
+.orbital-particle{
+  position:absolute;width:3px;height:3px;
+  background:#EA580C;border-radius:50%;opacity:0;
+  box-shadow:0 0 6px rgba(234,88,12,0.4);
+}
 
 @media(max-width:600px){
-  .hex{width:100px;height:115px;}
-  .hex-center{width:100px;height:115px;}
-  .hex-avatar{width:34px;height:34px;font-size:13px;}
-  .hex-name{font-size:9px;}
-  .hex-role{font-size:7px;}
-  .hex-row{gap:6px;}
+  .orbital-scene{height:360px;margin-top:24px;}
+  .orbital-ring{width:300px;height:300px;}
+  .orbital-photo{width:50px;height:50px;}
+  .orbital-member{width:50px;height:50px;margin:-25px 0 0 -25px;}
+  .orbital-center{width:56px;height:56px;font-size:18px;}
 }
 
 /* ── FLOATING APPROVAL BUTTON ── */
@@ -269,12 +320,17 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   </section>
 </div>
 
-<!-- S-TEAM: TU EQUIPO (after hero) -->
+<!-- S-TEAM: TU EQUIPO (orbital 3D) -->
 <section id="team">
   <div class="container" style="text-align:center;">
     <div class="sec-label rv">TU EQUIPO</div>
-    <div class="sec-title rv rv-d1" style="margin-bottom:4px;">Quiénes trabajamos para ti</div>
-    <div class="hex-grid rv rv-d2" id="team-grid"></div>
+    <div class="sec-title rv rv-d1" style="margin-bottom:4px;">Quiénes mueven tu marca</div>
+    <div class="orbital-scene rv rv-d2" id="orbital-scene">
+      <div class="orbital-ring" id="orbital-ring">
+        <div class="orbital-ring-line"></div>
+        <div class="orbital-center">SF<span>.</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -731,26 +787,78 @@ function renderUpcoming(unity) {
     : '<p style="color:#555;font-size:13px;text-align:center;">Todo al día — no hay piezas pendientes</p>';
 }
 
-// ── TEAM — HEXAGONAL ──
+// ── TEAM — ORBITAL 3D ──
 function renderTeam() {
   const team = [
-    { name: 'Cristóbal', role: 'Estrategia', initial: 'CR' },
-    { name: 'Nicolás', role: 'Creativo', initial: 'NJ' },
-    { name: 'Paula', role: 'Community', initial: 'PD' },
-    { name: 'Juan', role: 'Diseño', initial: 'JM' },
-    { name: 'Seba', role: 'Ads', initial: 'SM' },
-    { name: 'Juanes', role: 'Audiovisual', initial: 'JF' },
+    { name:'Nico', role:'Estrategia', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM' },
+    { name:'Cris', role:'Ads & Growth', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz' },
+    { name:'Paula', role:'Gestión', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp' },
+    { name:'Juan', role:'Diseño', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J' },
+    { name:'Seba', role:'Desarrollo', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_' },
+    { name:'Pali', role:'Diseño', photo:'1Uzv82S2Pcbs2zw6oje1glRyc_oYL9mI3' },
+    { name:'Juanes', role:'Audiovisual', photo:'1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp' },
   ];
 
-  function hexCard(t) {
-    return `<div class="hex"><div class="hex-content"><div class="hex-avatar">${t.initial}</div><div class="hex-name">${t.name}</div><div class="hex-role">${t.role}</div></div></div>`;
+  const ring = document.getElementById('orbital-ring');
+  const R = 170;
+
+  // Create members on orbit
+  team.forEach((m, i) => {
+    const angle = (360 / team.length) * i;
+    const rad = (angle * Math.PI) / 180;
+    const el = document.createElement('div');
+    el.className = 'orbital-member';
+    el.innerHTML = `
+      <div class="orbital-member-inner">
+        <div class="orbital-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large')"></div>
+        <div class="orbital-info">
+          <div class="orbital-name">${m.name}</div>
+          <div class="orbital-role">${m.role}</div>
+        </div>
+      </div>`;
+    el.style.transform = `translate(${Math.cos(rad)*R}px, ${Math.sin(rad)*R}px)`;
+    ring.appendChild(el);
+    // Staggered fade in
+    setTimeout(() => { el.style.opacity = '1'; }, 300 + i * 120);
+  });
+
+  // Orbital particles
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'orbital-particle';
+    const a = (360/10)*i;
+    const rad = (a*Math.PI)/180;
+    const pr = R + (Math.random()-0.5)*30;
+    p.style.left = (210 + Math.cos(rad)*pr) + 'px';
+    p.style.top = (210 + Math.sin(rad)*pr) + 'px';
+    p.style.width = (2+Math.random()*2)+'px';
+    p.style.height = p.style.width;
+    ring.appendChild(p);
   }
 
-  document.getElementById('team-grid').innerHTML = `
-    <div class="hex-row">${hexCard(team[0])}${hexCard(team[1])}${hexCard(team[2])}</div>
-    <div class="hex-row"><div class="hex hex-center"><div class="hex-content"><div class="hex-center-content">SF.</div></div></div></div>
-    <div class="hex-row">${hexCard(team[3])}${hexCard(team[4])}${hexCard(team[5])}</div>
-  `;
+  // Scroll-driven rotation
+  let orbTicking = false;
+  function orbScroll() {
+    if (orbTicking) return;
+    orbTicking = true;
+    requestAnimationFrame(() => {
+      const scene = document.getElementById('orbital-scene');
+      const rect = scene.getBoundingClientRect();
+      const wh = window.innerHeight;
+      const center = rect.top + rect.height/2;
+      const progress = Math.max(0, Math.min(1, 1 - center/wh));
+      const rotZ = progress * 180;
+      const tiltX = 60 - progress * 15;
+      ring.style.transform = `rotateX(${tiltX}deg) rotateZ(${rotZ}deg)`;
+      // Particles pulse
+      ring.querySelectorAll('.orbital-particle').forEach((p,i) => {
+        p.style.opacity = 0.2 + Math.sin(Date.now()/800 + i)*0.3;
+      });
+      orbTicking = false;
+    });
+  }
+  window.addEventListener('scroll', orbScroll, {passive:true});
+  orbScroll();
 }
 
 // ── APPROVAL SYSTEM ──
