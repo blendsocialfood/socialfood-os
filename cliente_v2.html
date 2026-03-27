@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Social Food — Tu Espacio</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;scroll-snap-type:y proximity;}
@@ -149,7 +149,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .team-bg.active{opacity:1;}
 .team-bg::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(to bottom, rgba(5,5,5,.4) 0%, rgba(5,5,5,.65) 40%, rgba(5,5,5,.95) 100%);
+  background:linear-gradient(to bottom, rgba(5,5,5,.82) 0%, rgba(5,5,5,.75) 40%, rgba(5,5,5,.92) 100%);
 }
 
 .team-header{
@@ -157,7 +157,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
   padding:80px 24px 0;
 }
 .team-subtitle{
-  font-family:'Playfair Display',serif;font-style:italic;font-size:16px;
+  font-size:14px;font-weight:300;
   color:rgba(255,255,255,.25);margin-top:8px;letter-spacing:0.5px;
 }
 
@@ -210,8 +210,8 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
   text-transform:uppercase;margin-top:4px;font-weight:600;
 }
 .team-panel-talent{
-  font-family:'Playfair Display',serif;font-style:italic;
-  font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;
+  font-size:12px;font-weight:300;font-style:italic;
+  color:rgba(255,255,255,.5);margin-top:8px;
   max-height:0;overflow:hidden;opacity:0;
   transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
 }
@@ -824,6 +824,14 @@ function renderTeam() {
 
   const strip = document.getElementById('team-strip');
   const bg = document.getElementById('team-bg');
+
+  // Preload talent photos so they appear instantly on hover
+  team.forEach(m => {
+    if (m.talentPhoto) {
+      const img = new Image();
+      img.src = `${UNITY_URL}/api/drive/thumb/${m.talentPhoto}?token=${TOKEN}&size=large`;
+    }
+  });
 
   team.forEach((m, i) => {
     const panel = document.createElement('div');
