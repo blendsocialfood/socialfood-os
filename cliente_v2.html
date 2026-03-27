@@ -341,6 +341,40 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .sec-title{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;}
 .sec-sub{font-size:14px;color:#666;margin-bottom:24px;}
 
+/* ── STATEMENT BRIDGE ── */
+.bridge{
+  position:relative;overflow:hidden;
+  min-height:auto;scroll-snap-align:none;
+  padding:100px 24px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 50%, rgba(234,88,12,.04) 0%, transparent 70%), #030303;
+}
+.bridge-text{
+  font-size:clamp(28px,5vw,56px);font-weight:800;letter-spacing:-2px;
+  color:rgba(255,255,255,.06);text-align:center;
+  max-width:800px;line-height:1.15;
+  transition:color 1.2s var(--ease);
+}
+.bridge-text.visible{color:rgba(255,255,255,.5);}
+.bridge-line{
+  width:0;height:2px;margin-top:32px;
+  background:linear-gradient(90deg,transparent,#EA580C,transparent);
+  transition:width 1.4s var(--ease);
+}
+.bridge-text.visible + .bridge-line,
+.bridge-line.visible{width:120px;}
+.bridge-sub{
+  font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(234,88,12,0);margin-top:20px;
+  transition:color 1s var(--ease) 0.4s;
+}
+.bridge-text.visible ~ .bridge-sub{color:rgba(234,88,12,.5);}
+
+@media(max-width:700px){
+  .bridge{padding:70px 20px;}
+  .bridge-text{font-size:24px;}
+}
+
 /* ── FOOTER ── */
 footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spacing:2px;}
 
@@ -418,6 +452,13 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   </div>
   <div class="team-strip" id="team-strip"></div>
 </section>
+
+<!-- STATEMENT BRIDGE -->
+<div class="bridge">
+  <div class="bridge-text rv">El trabajo habla por sí solo</div>
+  <div class="bridge-line rv rv-d2"></div>
+  <div class="bridge-sub rv rv-d3">resultados del mes</div>
+</div>
 
 <!-- S2: NUMBERS -->
 <section id="numbers">
