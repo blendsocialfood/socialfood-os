@@ -137,110 +137,111 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .upcoming-title{font-size:13px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .upcoming-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(234,88,12,.1);color:#EA580C;border:1px solid rgba(234,88,12,.15);}
 
-/* ── S8 TEAM — CINEMATIC SPOTLIGHT ── */
-#team{background:#030303;overflow:hidden;padding:100px 0 80px;position:relative;}
-#team::before{
-  content:'EQUIPO';position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  font-family:'Playfair Display',serif;font-size:clamp(100px,18vw,240px);font-weight:700;font-style:italic;
-  color:rgba(255,255,255,.02);pointer-events:none;white-space:nowrap;letter-spacing:-4px;
+/* ── S8 TEAM — FILMSTRIP + TALENT REVEAL ── */
+#team{background:#050505;overflow:hidden;padding:0;position:relative;min-height:auto;scroll-snap-align:none;}
+
+.team-bg{
+  position:absolute;inset:0;z-index:0;
+  background:#050505 center/cover no-repeat;
+  transition:opacity 0.6s ease, background-image 0.3s ease;
+  opacity:0;
+}
+.team-bg.active{opacity:1;}
+.team-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom, rgba(5,5,5,.4) 0%, rgba(5,5,5,.65) 40%, rgba(5,5,5,.95) 100%);
+}
+
+.team-header{
+  position:relative;z-index:2;text-align:center;
+  padding:80px 24px 0;
 }
 .team-subtitle{
   font-family:'Playfair Display',serif;font-style:italic;font-size:16px;
   color:rgba(255,255,255,.25);margin-top:8px;letter-spacing:0.5px;
 }
-.team-grid{
-  display:flex;flex-wrap:wrap;justify-content:center;gap:48px;
-  margin-top:56px;max-width:1100px;margin-left:auto;margin-right:auto;
-  padding:0 20px;
-}
-.team-grid.has-hover .team-card:not(:hover){opacity:.25;}
 
-.team-card{
-  display:flex;flex-direction:column;align-items:center;
-  width:130px;cursor:default;perspective:600px;
-  opacity:0;transform:translateY(40px) scale(.95);
-  transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+.team-strip{
+  position:relative;z-index:2;
+  display:flex;height:420px;
+  margin-top:40px;overflow:hidden;
 }
-.team-card.visible{opacity:1;transform:translateY(0) scale(1);}
+.team-panel{
+  flex:1;position:relative;overflow:hidden;cursor:pointer;
+  transition:flex 0.6s cubic-bezier(0.16,1,0.3,1);
+  border-right:1px solid rgba(255,255,255,.03);
+}
+.team-panel:last-child{border-right:none;}
+.team-strip:hover .team-panel{flex:0.6;}
+.team-strip:hover .team-panel:hover{flex:2.5;}
 
-.team-card-inner{
-  display:flex;flex-direction:column;align-items:center;
-  transition:transform 0.15s ease-out;
-  transform-style:preserve-3d;will-change:transform;
-}
-
-.team-photo-wrap{
-  position:relative;width:120px;height:120px;
-  border-radius:50%;padding:3px;
-  background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
-}
-.team-photo-wrap::after{
-  content:'';position:absolute;inset:-6px;border-radius:50%;
-  border:1px solid rgba(234,88,12,0);
-  transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
-}
-.team-card:hover .team-photo-wrap{
-  background:linear-gradient(135deg, #EA580C, rgba(234,88,12,.15));
-  box-shadow:0 0 60px rgba(234,88,12,.3), 0 0 120px rgba(234,88,12,.08);
-  transform:scale(1.1);
-}
-.team-card:hover .team-photo-wrap::after{
-  border-color:rgba(234,88,12,.2);inset:-12px;
-}
-
-.team-photo{
-  width:100%;height:100%;border-radius:50%;
+.team-panel-photo{
+  position:absolute;inset:0;
   background:#111 center/cover no-repeat;
-  border:2px solid #0a0a0a;
-  filter:grayscale(1) brightness(.7);
-  transition:filter 0.5s cubic-bezier(0.16,1,0.3,1);
+  filter:grayscale(1) brightness(.5);
+  transition:filter 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
 }
-.team-card:hover .team-photo{
-  filter:grayscale(0) brightness(1);
+.team-panel:hover .team-panel-photo{
+  filter:grayscale(0) brightness(.85);
+  transform:scale(1.05);
 }
 
-.team-info{
-  margin-top:18px;text-align:center;
-  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+.team-panel-gradient{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.3) 40%, transparent 100%);
 }
-.team-name{
-  font-size:15px;font-weight:700;color:rgba(255,255,255,.5);
-  letter-spacing:0.3px;white-space:nowrap;
+
+.team-panel-info{
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+  padding:24px 16px;
+  transform:translateY(12px);opacity:.6;
+  transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.team-panel:hover .team-panel-info{
+  transform:translateY(0);opacity:1;
+}
+
+.team-panel-name{
+  font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.team-panel-role{
+  font-size:9px;color:#EA580C;letter-spacing:2px;
+  text-transform:uppercase;margin-top:4px;font-weight:600;
+}
+.team-panel-talent{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;
+  max-height:0;overflow:hidden;opacity:0;
+  transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.team-panel:hover .team-panel-talent{
+  max-height:40px;opacity:1;
+}
+
+.team-panel-index{
+  position:absolute;top:16px;left:16px;z-index:2;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.15);
+  letter-spacing:1px;
   transition:color 0.4s ease;
 }
-.team-card:hover .team-name{color:#fff;}
+.team-panel:hover .team-panel-index{color:rgba(234,88,12,.6);}
 
-.team-role{
-  font-size:9px;color:rgba(234,88,12,.4);letter-spacing:2px;
-  text-transform:uppercase;margin-top:6px;font-weight:600;
-  transition:color 0.4s ease;
+.team-panel-line{
+  position:absolute;top:0;left:0;width:100%;height:2px;z-index:3;
+  background:transparent;
+  transition:background 0.4s ease;
 }
-.team-card:hover .team-role{color:#EA580C;}
-
-.team-glow{
-  position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
-  width:80px;height:40px;
-  background:radial-gradient(ellipse,rgba(234,88,12,.15),transparent 70%);
-  opacity:0;transition:opacity 0.5s ease;pointer-events:none;
-}
-.team-card:hover .team-glow{opacity:1;}
-
-@keyframes teamReveal{
-  0%{opacity:0;transform:translateY(40px) scale(.95);filter:blur(8px);}
-  100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+.team-panel:hover .team-panel-line{
+  background:linear-gradient(90deg, transparent, #EA580C, transparent);
 }
 
 @media(max-width:700px){
-  #team{padding:70px 0 50px;}
-  .team-grid{gap:28px;margin-top:36px;}
-  .team-card{width:100px;}
-  .team-photo-wrap{width:88px;height:88px;}
-  .team-name{font-size:12px;margin-top:12px;}
-  .team-role{font-size:8px;}
+  .team-strip{height:320px;}
+  .team-header{padding:60px 24px 0;}
+  .team-panel-name{font-size:14px;}
+  .team-panel-info{padding:16px 10px;}
   .team-subtitle{font-size:13px;}
-  #team::before{font-size:80px;}
 }
 
 /* ── FLOATING APPROVAL BUTTON ── */
@@ -345,14 +346,15 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   </section>
 </div>
 
-<!-- S-TEAM: TU EQUIPO — CINEMATIC SPOTLIGHT -->
+<!-- S-TEAM: TU EQUIPO — FILMSTRIP + TALENT REVEAL -->
 <section id="team">
-  <div class="container" style="text-align:center;">
+  <div class="team-bg" id="team-bg"></div>
+  <div class="team-header">
     <div class="sec-label rv">TU EQUIPO</div>
     <div class="sec-title rv rv-d1" style="margin-bottom:0;">Quiénes mueven tu marca</div>
-    <div class="team-subtitle rv rv-d2">Las personas detrás de cada pieza</div>
-    <div class="team-grid" id="team-grid"></div>
+    <div class="team-subtitle rv rv-d2">Pasa el mouse para descubrir quién es quién</div>
   </div>
+  <div class="team-strip" id="team-strip"></div>
 </section>
 
 <!-- S2: NUMBERS -->
@@ -808,58 +810,48 @@ function renderUpcoming(unity) {
     : '<p style="color:#555;font-size:13px;text-align:center;">Todo al día — no hay piezas pendientes</p>';
 }
 
-// ── TEAM — CINEMATIC SPOTLIGHT ──
+// ── TEAM — FILMSTRIP + TALENT REVEAL ──
 function renderTeam() {
   const team = [
-    { name:'Nico', role:'Co-Fundador & Innovación', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM', pos:'center 18%' },
-    { name:'Cris', role:'Co-Fundador & Operaciones', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz', pos:'center 20%' },
-    { name:'Paula', role:'Coordinadora & Community', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp', pos:'center 8%' },
-    { name:'Juan', role:'Senior Designer', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J', pos:'center 15%' },
-    { name:'Seba', role:'Especialista Ads', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_', pos:'center 20%' },
-    { name:'Pali', role:'Diseñadora Audiovisual', photo:'1Uzv82S2Pcbs2zw6oje1glRyc_oYL9mI3', pos:'center 32%' },
-    { name:'Juanes', role:'Audiovisual', photo:'1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp', pos:'center 12%' },
+    { name:'Nico', role:'Co-Fundador & Innovación', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM', pos:'center 18%', talent:'Downhill rider', talentPhoto:'1G9quOUhKG_L1rgAsnTVFnHC7IJUuq8Jh' },
+    { name:'Cris', role:'Co-Fundador & Operaciones', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz', pos:'center 20%', talent:'', talentPhoto:'' },
+    { name:'Paula', role:'Coordinadora & Community', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp', pos:'center 8%', talent:'', talentPhoto:'' },
+    { name:'Juan', role:'Senior Designer', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J', pos:'center 15%', talent:'', talentPhoto:'' },
+    { name:'Seba', role:'Especialista Ads', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_', pos:'center 20%', talent:'', talentPhoto:'' },
+    { name:'Pali', role:'Diseñadora Audiovisual', photo:'1Uzv82S2Pcbs2zw6oje1glRyc_oYL9mI3', pos:'center 32%', talent:'', talentPhoto:'' },
+    { name:'Juanes', role:'Audiovisual', photo:'1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp', pos:'center 12%', talent:'', talentPhoto:'' },
   ];
 
-  const grid = document.getElementById('team-grid');
+  const strip = document.getElementById('team-strip');
+  const bg = document.getElementById('team-bg');
 
   team.forEach((m, i) => {
-    const card = document.createElement('div');
-    card.className = 'team-card';
-    card.innerHTML = `
-      <div class="team-card-inner">
-        <div class="team-photo-wrap">
-          <div class="team-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large');background-position:${m.pos}"></div>
-        </div>
-        <div class="team-glow"></div>
-        <div class="team-info">
-          <div class="team-name">${m.name}</div>
-          <div class="team-role">${m.role}</div>
-        </div>
+    const panel = document.createElement('div');
+    panel.className = 'team-panel';
+    const talentHtml = m.talent ? `<div class="team-panel-talent">${m.talent}</div>` : '';
+    panel.innerHTML = `
+      <div class="team-panel-line"></div>
+      <div class="team-panel-index">0${i + 1}</div>
+      <div class="team-panel-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large');background-position:${m.pos}"></div>
+      <div class="team-panel-gradient"></div>
+      <div class="team-panel-info">
+        <div class="team-panel-name">${m.name}</div>
+        <div class="team-panel-role">${m.role}</div>
+        ${talentHtml}
       </div>`;
-    grid.appendChild(card);
+    strip.appendChild(panel);
 
-    // Staggered cinematic entrance
-    setTimeout(() => {
-      card.style.animation = `teamReveal 0.8s cubic-bezier(0.16,1,0.3,1) forwards`;
-      card.classList.add('visible');
-    }, 150 + i * 100);
-
-    // 3D tilt on mouse move
-    const inner = card.querySelector('.team-card-inner');
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      inner.style.transform = `rotateY(${x * 20}deg) rotateX(${-y * 20}deg)`;
+    // Background talent reveal on hover
+    panel.addEventListener('mouseenter', () => {
+      if (m.talentPhoto) {
+        bg.style.backgroundImage = `url('${UNITY_URL}/api/drive/thumb/${m.talentPhoto}?token=${TOKEN}&size=large')`;
+        bg.classList.add('active');
+      }
     });
-    card.addEventListener('mouseleave', () => {
-      inner.style.transform = 'rotateY(0) rotateX(0)';
+    panel.addEventListener('mouseleave', () => {
+      bg.classList.remove('active');
     });
   });
-
-  // Spotlight: dim others on hover
-  grid.addEventListener('mouseenter', () => grid.classList.add('has-hover'));
-  grid.addEventListener('mouseleave', () => grid.classList.remove('has-hover'));
 }
 
 // ── APPROVAL SYSTEM ──
