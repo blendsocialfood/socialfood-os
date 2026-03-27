@@ -163,7 +163,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 }
 .team-photo{
   width:100%;height:100%;border-radius:50%;
-  background:#111 center 20%/cover no-repeat;
+  background:#111 center/cover no-repeat;
   border:2px solid #0a0a0a;
 }
 .team-name{
@@ -756,13 +756,13 @@ function renderUpcoming(unity) {
 // ── TEAM — PREMIUM CARDS ──
 function renderTeam() {
   const team = [
-    { name:'Nico', role:'Co-Fundador & Innovación', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM' },
-    { name:'Cris', role:'Co-Fundador & Operaciones', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz' },
-    { name:'Paula', role:'Coordinadora & Community', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp' },
-    { name:'Juan', role:'Senior Designer', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J' },
-    { name:'Seba', role:'Especialista Ads', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_' },
-    { name:'Pali', role:'Diseñadora Audiovisual', photo:'1Uzv82S2Pcbs2zw6oje1glRyc_oYL9mI3' },
-    { name:'Juanes', role:'Audiovisual', photo:'1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp' },
+    { name:'Nico', role:'Co-Fundador & Innovación', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM', pos:'center 18%' },
+    { name:'Cris', role:'Co-Fundador & Operaciones', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz', pos:'center 20%' },
+    { name:'Paula', role:'Coordinadora & Community', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp', pos:'center 8%' },
+    { name:'Juan', role:'Senior Designer', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J', pos:'center 15%' },
+    { name:'Seba', role:'Especialista Ads', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_', pos:'center 20%' },
+    { name:'Pali', role:'Diseñadora Audiovisual', photo:'1Uzv82S2Pcbs2zw6oje1glRyc_oYL9mI3', pos:'center 32%' },
+    { name:'Juanes', role:'Audiovisual', photo:'1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp', pos:'center 12%' },
   ];
 
   const grid = document.getElementById('team-grid');
@@ -771,7 +771,7 @@ function renderTeam() {
     card.className = 'team-card';
     card.innerHTML = `
       <div class="team-photo-wrap">
-        <div class="team-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=small')"></div>
+        <div class="team-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=small');background-position:${m.pos}"></div>
       </div>
       <div class="team-name">${m.name}</div>
       <div class="team-role">${m.role}</div>
