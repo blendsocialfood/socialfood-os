@@ -190,7 +190,20 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .num-card:nth-child(2) .num-card-bar-fill{background:linear-gradient(90deg,#fbbf24,rgba(251,191,36,.2));}
 .num-card:nth-child(3) .num-card-bar-fill{background:linear-gradient(90deg,#60a5fa,rgba(96,165,250,.2));}
 
-.num-ads{margin-bottom:36px;display:none;}
+.num-ads{
+  margin-bottom:36px;display:none;position:relative;
+  background-image:radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:24px 24px;
+  padding:40px;border-radius:20px;
+}
+.num-funnel-val{position:relative;}
+.num-funnel-val::before{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:200px;height:100px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(234,88,12,.06),transparent 70%);
+  pointer-events:none;z-index:-1;
+}
 .num-ads-title{
   font-size:14px;color:#EA580C;text-transform:uppercase;
   letter-spacing:3px;font-weight:700;margin-bottom:48px;text-align:center;
