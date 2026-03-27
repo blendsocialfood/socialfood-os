@@ -163,7 +163,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 }
 .team-photo{
   width:100%;height:100%;border-radius:50%;
-  background:#111 center/cover no-repeat;
+  background:#111 center 20%/cover no-repeat;
   border:2px solid #0a0a0a;
 }
 .team-name{
@@ -528,7 +528,7 @@ function renderHero(unity, copilot) {
   // Background — preload then show
   let imgUrl = '';
   if (heroId) {
-    imgUrl = `${UNITY_URL}/api/drive/file/${heroId}?token=${TOKEN}`;
+    imgUrl = `${UNITY_URL}/api/drive/thumb/${heroId}?token=${TOKEN}&size=large`;
   } else if (ig && ig.posts && ig.posts.length) {
     const photo = ig.posts.find(p => p.media_type !== 'VIDEO');
     if (photo) imgUrl = photo.media_url;
@@ -771,7 +771,7 @@ function renderTeam() {
     card.className = 'team-card';
     card.innerHTML = `
       <div class="team-photo-wrap">
-        <div class="team-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large')"></div>
+        <div class="team-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=small')"></div>
       </div>
       <div class="team-name">${m.name}</div>
       <div class="team-role">${m.role}</div>
