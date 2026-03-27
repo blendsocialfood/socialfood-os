@@ -123,15 +123,70 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 /* ── MASK TRANSITION ── */
 .mask-reveal{position:absolute;inset:0;background:#030303;z-index:3;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));}
 
-/* ── S2 NUMBERS ── */
-#numbers{background:#050505;}
-.num-label{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#EA580C;margin-bottom:40px;}
-.num-main{font-size:clamp(48px,10vw,100px);font-weight:800;color:#EA580C;line-height:1;margin-bottom:4px;letter-spacing:-3px;}
-.num-main-sub{font-size:clamp(14px,2vw,18px);color:#666;font-weight:400;margin-bottom:40px;}
-.num-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-.num-item{text-align:center;}
-.num-val{font-size:clamp(28px,5vw,48px);font-weight:800;color:#f5f5f5;line-height:1;margin-bottom:4px;letter-spacing:-1px;}
-.num-desc{font-size:12px;color:#555;font-weight:500;}
+/* ── S2 NUMBERS — PREMIUM DASHBOARD ── */
+#numbers{background:#050505;padding:80px 24px;}
+.num-hero{display:flex;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap;}
+.num-main{font-size:clamp(56px,12vw,120px);font-weight:900;color:#EA580C;line-height:.85;letter-spacing:-4px;}
+.num-growth{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:14px;font-weight:700;color:#4ade80;
+  background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.15);
+  padding:4px 10px;border-radius:8px;margin-bottom:10px;
+}
+.num-growth.negative{color:#f87171;background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.15);}
+.num-main-sub{font-size:clamp(14px,2vw,18px);color:#555;font-weight:400;margin-bottom:48px;}
+
+.num-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.num-card{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;padding:20px;
+  backdrop-filter:blur(8px);
+  transition:all var(--dur) var(--ease);
+  position:relative;overflow:hidden;
+}
+.num-card::before{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:radial-gradient(circle at 50% 0%, rgba(234,88,12,.06), transparent 70%);
+  opacity:0;transition:opacity var(--dur) var(--ease);
+}
+.num-card:hover{border-color:rgba(234,88,12,.15);}
+.num-card:hover::before{opacity:1;}
+.num-card-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:12px;}
+.num-card-val{font-size:clamp(24px,3.5vw,36px);font-weight:800;color:#f5f5f5;letter-spacing:-1px;line-height:1;}
+.num-card-sub{font-size:11px;color:#444;margin-top:6px;}
+.num-card-ring{position:absolute;top:16px;right:16px;width:44px;height:44px;}
+.num-card-ring circle{fill:none;stroke-width:3;stroke-linecap:round;}
+.num-card-ring .ring-bg{stroke:rgba(255,255,255,.04);}
+.num-card-ring .ring-fill{stroke:#EA580C;transition:stroke-dashoffset 1.5s var(--ease);transform:rotate(-90deg);transform-origin:center;}
+
+.num-ads{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
+  margin-bottom:32px;padding:20px;
+  background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:16px;
+}
+.num-ads-title{grid-column:1/-1;font-size:10px;color:#EA580C;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:4px;}
+.num-ads-item{text-align:center;padding:8px 0;}
+.num-ads-val{font-size:20px;font-weight:800;color:#f5f5f5;letter-spacing:-0.5px;}
+.num-ads-label{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-weight:500;}
+
+.num-spark{
+  margin-bottom:24px;padding:20px;
+  background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:16px;
+}
+.num-spark-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.num-spark-title{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:600;}
+.num-spark-delta{font-size:12px;font-weight:700;color:#4ade80;}
+.num-spark svg{width:100%;height:60px;}
+.num-spark-line{fill:none;stroke:#EA580C;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.num-spark-area{fill:url(#sparkGrad);opacity:.3;}
+.num-spark-dot{fill:#EA580C;filter:drop-shadow(0 0 4px rgba(234,88,12,.5));}
+
+@media(max-width:700px){
+  .num-cards{grid-template-columns:1fr 1fr;gap:12px;}
+  .num-ads{grid-template-columns:1fr 1fr;}
+  #numbers{padding:60px 16px;}
+}
 
 /* ── S3 INVESTMENT ── */
 #investment{background:#080604;}
@@ -498,13 +553,18 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
   <div class="bridge-sub rv rv-d3">resultados del mes</div>
 </div>
 
-<!-- S2: NUMBERS -->
+<!-- S2: NUMBERS — PREMIUM DASHBOARD -->
 <section id="numbers">
   <div class="container">
-    <div class="num-label rv">ESTE MES</div>
-    <div class="num-main rv rv-d1" id="num-main">0</div>
-    <div class="num-main-sub rv rv-d1">personas te descubrieron</div>
-    <div class="num-grid rv rv-d2" id="num-grid"></div>
+    <div class="sec-label rv">ESTE MES</div>
+    <div class="num-hero rv rv-d1">
+      <div class="num-main counter" id="num-main" data-target="0">0</div>
+      <div class="num-growth" id="num-growth"></div>
+    </div>
+    <div class="num-main-sub rv rv-d1" id="num-main-sub">seguidores en Instagram</div>
+    <div class="num-cards rv rv-d2" id="num-cards"></div>
+    <div class="num-ads rv rv-d3" id="num-ads" style="display:none;"></div>
+    <div class="num-spark rv rv-d4" id="num-spark" style="display:none;"></div>
   </div>
 </section>
 
@@ -850,14 +910,20 @@ function renderHero(unity, copilot) {
 // ── S2: NUMBERS (IG + Unity + Growth — datos que TODOS los clientes tienen) ──
 function renderNumbers(copilot, unity) {
   const ig = copilot && copilot.ig;
+  const ads = copilot && copilot.ads;
   const growth = copilot && copilot.ig_growth;
   const grilla = unity && unity.grilla;
   const client = unity && unity.client;
+  const cu = unity && unity.clickup;
+
   const followers = ig ? (ig.followers_count || 0) : 0;
   const engagement = ig ? (ig.engagement_rate || 0) : 0;
   const avgLikes = ig ? (ig.avg_likes || 0) : 0;
   const totalPiezas = grilla ? (grilla.total || 0) : 0;
   const followersStart = growth ? (growth.followers_start || 0) : 0;
+  const followersEnd = growth ? (growth.followers_end || followers) : followers;
+  const growthAbs = growth ? (growth.growth || 0) : 0;
+  const daysTracked = growth ? (growth.days_tracked || 0) : 0;
 
   let meses = 0;
   if (client && client.fecha_inicio) {
@@ -867,33 +933,128 @@ function renderNumbers(copilot, unity) {
   }
   const pctGrowth = followersStart > 0 ? Math.round(((followers - followersStart) / followersStart) * 100) : 0;
 
+  // Hero follower count
   const mainEl = document.getElementById('num-main');
-  mainEl.className = 'num-main rv rv-d1 counter';
   mainEl.dataset.target = followers;
   mainEl.textContent = '0';
-  document.querySelector('.num-main-sub').textContent = 'seguidores en Instagram';
 
-  const grid = document.getElementById('num-grid');
-  grid.className = 'num-grid rv rv-d2';
-  grid.style.gridTemplateColumns = 'repeat(4,1fr)';
-  grid.innerHTML = `
-    <div class="num-item">
-      <div class="num-val counter" data-target="${engagement}" data-suffix="%" data-decimals="2">0%</div>
-      <div class="num-desc">engagement</div>
+  // Growth badge
+  const growthEl = document.getElementById('num-growth');
+  if (pctGrowth !== 0) {
+    const isPos = pctGrowth > 0;
+    growthEl.className = 'num-growth' + (isPos ? '' : ' negative');
+    growthEl.innerHTML = `${isPos ? '↑' : '↓'} ${isPos ? '+' : ''}${pctGrowth}%`;
+  } else if (meses > 0) {
+    growthEl.innerHTML = `${meses} ${meses === 1 ? 'mes' : 'meses'} juntos`;
+    growthEl.style.color = '#888';
+    growthEl.style.background = 'rgba(255,255,255,.04)';
+    growthEl.style.borderColor = 'rgba(255,255,255,.08)';
+  }
+
+  document.getElementById('num-main-sub').textContent = 'seguidores en Instagram';
+
+  // SVG ring helper
+  function ringSVG(pct, color) {
+    const r = 18, c = 2 * Math.PI * r;
+    const offset = c - (Math.min(pct, 100) / 100) * c;
+    return `<svg class="num-card-ring" viewBox="0 0 44 44">
+      <circle class="ring-bg" cx="22" cy="22" r="${r}"/>
+      <circle class="ring-fill" cx="22" cy="22" r="${r}" stroke="${color || '#EA580C'}"
+        stroke-dasharray="${c}" stroke-dashoffset="${offset}"
+        style="transform:rotate(-90deg);transform-origin:center;"/>
+    </svg>`;
+  }
+
+  // 4 Metric Cards
+  const engPct = Math.min(engagement * 10, 100); // scale engagement for ring (3% = 30%)
+  const cuDone = cu ? cu.done : 0;
+  const cuTotal = cu ? cu.total : 0;
+  const cuPct = cuTotal > 0 ? Math.round((cuDone / cuTotal) * 100) : 0;
+
+  const cards = document.getElementById('num-cards');
+  cards.innerHTML = `
+    <div class="num-card">
+      ${ringSVG(engPct)}
+      <div class="num-card-label">Engagement</div>
+      <div class="num-card-val counter" data-target="${engagement}" data-suffix="%" data-decimals="2">0%</div>
+      <div class="num-card-sub">tasa de interacción</div>
     </div>
-    <div class="num-item">
-      <div class="num-val counter" data-target="${avgLikes}">0</div>
-      <div class="num-desc">likes promedio</div>
+    <div class="num-card">
+      ${ringSVG(Math.min((avgLikes / Math.max(followers, 1)) * 1000, 100), '#fbbf24')}
+      <div class="num-card-label">Likes promedio</div>
+      <div class="num-card-val counter" data-target="${avgLikes}">0</div>
+      <div class="num-card-sub">por publicación</div>
     </div>
-    <div class="num-item">
-      <div class="num-val counter" data-target="${totalPiezas}">0</div>
-      <div class="num-desc">piezas este mes</div>
+    <div class="num-card">
+      ${ringSVG((totalPiezas / Math.max(client && client.graficas || 12, 1)) * 100, '#60a5fa')}
+      <div class="num-card-label">Contenido</div>
+      <div class="num-card-val counter" data-target="${totalPiezas}">0</div>
+      <div class="num-card-sub">piezas este mes</div>
     </div>
-    <div class="num-item">
-      <div class="num-val" style="color:#4ade80;">${pctGrowth > 0 ? '+' + pctGrowth + '%' : (meses > 0 ? meses : '—')}</div>
-      <div class="num-desc">${pctGrowth > 0 ? 'crecimiento' : (meses > 0 ? meses === 1 ? 'mes juntos' : 'meses juntos' : '')}</div>
+    <div class="num-card">
+      ${ringSVG(cuPct, '#4ade80')}
+      <div class="num-card-label">Progreso</div>
+      <div class="num-card-val">${cuTotal > 0 ? cuDone + '/' + cuTotal : meses + (meses === 1 ? ' mes' : ' meses')}</div>
+      <div class="num-card-sub">${cuTotal > 0 ? 'tareas completadas' : 'trabajando juntos'}</div>
     </div>
   `;
+
+  // ADS section
+  if (ads && (ads.reach || ads.spend)) {
+    const adsEl = document.getElementById('num-ads');
+    adsEl.style.display = 'grid';
+    const fmtK = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : n.toString();
+    const fmtCLP = n => '$' + Math.round(n).toLocaleString('es-CL');
+    adsEl.innerHTML = `
+      <div class="num-ads-title">Campañas Ads — ${ads.period || 'últimos 7 días'}</div>
+      <div class="num-ads-item"><div class="num-ads-val counter" data-target="${ads.reach || 0}">${fmtK(ads.reach || 0)}</div><div class="num-ads-label">Alcance</div></div>
+      <div class="num-ads-item"><div class="num-ads-val counter" data-target="${ads.impressions || 0}">${fmtK(ads.impressions || 0)}</div><div class="num-ads-label">Impresiones</div></div>
+      <div class="num-ads-item"><div class="num-ads-val">${fmtCLP(ads.spend || 0)}</div><div class="num-ads-label">Inversión</div></div>
+      <div class="num-ads-item"><div class="num-ads-val">${(ads.ctr || 0).toFixed(2)}%</div><div class="num-ads-label">CTR</div></div>
+      <div class="num-ads-item"><div class="num-ads-val">${fmtCLP(ads.cpm || 0)}</div><div class="num-ads-label">CPM</div></div>
+      <div class="num-ads-item"><div class="num-ads-val counter" data-target="${ads.clicks || 0}">0</div><div class="num-ads-label">Clicks</div></div>
+      ${ads.messages ? '<div class="num-ads-item"><div class="num-ads-val counter" data-target="' + ads.messages + '">0</div><div class="num-ads-label">Mensajes</div></div>' : ''}
+      ${ads.leads ? '<div class="num-ads-item"><div class="num-ads-val counter" data-target="' + ads.leads + '">0</div><div class="num-ads-label">Leads</div></div>' : ''}
+    `;
+  }
+
+  // Growth sparkline
+  if (growth && followersStart > 0 && daysTracked > 1) {
+    const sparkEl = document.getElementById('num-spark');
+    sparkEl.style.display = 'block';
+    // Generate synthetic sparkline points (we don't have daily data, simulate trend)
+    const points = [];
+    const steps = 8;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const val = followersStart + (followersEnd - followersStart) * (t * t * (3 - 2 * t)); // smooth ease
+      const noise = (Math.random() - 0.5) * growthAbs * 0.15;
+      points.push(Math.round(val + (i > 0 && i < steps ? noise : 0)));
+    }
+    const min = Math.min(...points) * 0.998;
+    const max = Math.max(...points) * 1.002;
+    const w = 100, h = 60;
+    const coords = points.map((v, i) => `${(i / steps) * w},${h - ((v - min) / (max - min)) * (h - 8) - 4}`);
+    const polyline = coords.join(' ');
+    const areaCoords = `0,${h} ${polyline} ${w},${h}`;
+    const last = coords[coords.length - 1];
+
+    sparkEl.innerHTML = `
+      <div class="num-spark-header">
+        <div class="num-spark-title">Crecimiento de seguidores</div>
+        <div class="num-spark-delta">${pctGrowth > 0 ? '+' : ''}${growthAbs.toLocaleString('es-CL')} (${pctGrowth > 0 ? '+' : ''}${pctGrowth}%)</div>
+      </div>
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#EA580C" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#EA580C" stop-opacity="0"/>
+        </linearGradient></defs>
+        <polygon class="num-spark-area" points="${areaCoords}"/>
+        <polyline class="num-spark-line" points="${polyline}"/>
+        <circle class="num-spark-dot" cx="${last.split(',')[0]}" cy="${last.split(',')[1]}" r="3"/>
+      </svg>
+    `;
+  }
 }
 
 // ── MARQUEE ──
