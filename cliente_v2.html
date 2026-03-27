@@ -123,69 +123,112 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 /* ── MASK TRANSITION ── */
 .mask-reveal{position:absolute;inset:0;background:#030303;z-index:3;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));mask-image:radial-gradient(circle at 50% 50%,transparent var(--mask-size,0%),#000 calc(var(--mask-size,0%) + 2%));}
 
-/* ── S2 NUMBERS — PREMIUM DASHBOARD ── */
-#numbers{background:#050505;padding:80px 24px;}
-.num-hero{display:flex;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap;}
-.num-main{font-size:clamp(56px,12vw,120px);font-weight:900;color:#EA580C;line-height:.85;letter-spacing:-4px;}
+/* ── S2 NUMBERS — ATMOSPHERIC DASHBOARD ── */
+#numbers{
+  background:#050505;padding:100px 24px;position:relative;overflow:hidden;
+}
+#numbers::before{
+  content:'';position:absolute;
+  top:-20%;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(234,88,12,.07) 0%,transparent 70%);
+  pointer-events:none;animation:numPulse 6s ease-in-out infinite;
+}
+@keyframes numPulse{0%,100%{opacity:.6;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.15);}}
+
+.num-hero{display:flex;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap;position:relative;}
+.num-main{
+  font-size:clamp(64px,14vw,140px);font-weight:900;color:#EA580C;line-height:.8;letter-spacing:-5px;
+  text-shadow:0 0 80px rgba(234,88,12,.25), 0 0 160px rgba(234,88,12,.08);
+}
 .num-growth{
   display:inline-flex;align-items:center;gap:4px;
   font-size:14px;font-weight:700;color:#4ade80;
-  background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.15);
-  padding:4px 10px;border-radius:8px;margin-bottom:10px;
+  background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.12);
+  padding:5px 12px;border-radius:8px;margin-bottom:14px;
 }
-.num-growth.negative{color:#f87171;background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.15);}
-.num-main-sub{font-size:clamp(14px,2vw,18px);color:#555;font-weight:400;margin-bottom:48px;}
+.num-growth.negative{color:#f87171;background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.12);}
+.num-main-sub{font-size:clamp(14px,2vw,18px);color:#444;font-weight:400;margin-bottom:56px;}
 
-.num-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.num-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:36px;}
 .num-card{
-  background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:16px;padding:20px;
-  backdrop-filter:blur(8px);
-  transition:all var(--dur) var(--ease);
   position:relative;overflow:hidden;
+  border-radius:20px;padding:28px 24px;
+  background:linear-gradient(165deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,.01) 100%);
+  border:1px solid rgba(255,255,255,.05);
+  transition:all var(--dur) var(--ease);
 }
 .num-card::before{
-  content:'';position:absolute;inset:0;border-radius:16px;
-  background:radial-gradient(circle at 50% 0%, rgba(234,88,12,.06), transparent 70%);
-  opacity:0;transition:opacity var(--dur) var(--ease);
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:20px 20px 0 0;
+  transition:opacity var(--dur) var(--ease);
 }
-.num-card:hover{border-color:rgba(234,88,12,.15);}
-.num-card:hover::before{opacity:1;}
-.num-card-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:12px;}
-.num-card-val{font-size:clamp(24px,3.5vw,36px);font-weight:800;color:#f5f5f5;letter-spacing:-1px;line-height:1;}
-.num-card-sub{font-size:11px;color:#444;margin-top:6px;}
-.num-card-ring{position:absolute;top:16px;right:16px;width:44px;height:44px;}
-.num-card-ring circle{fill:none;stroke-width:3;stroke-linecap:round;}
-.num-card-ring .ring-bg{stroke:rgba(255,255,255,.04);}
-.num-card-ring .ring-fill{stroke:#EA580C;transition:stroke-dashoffset 1.5s var(--ease);transform:rotate(-90deg);transform-origin:center;}
+.num-card:nth-child(1)::before{background:linear-gradient(90deg,#EA580C,transparent);}
+.num-card:nth-child(2)::before{background:linear-gradient(90deg,#fbbf24,transparent);}
+.num-card:nth-child(3)::before{background:linear-gradient(90deg,#60a5fa,transparent);}
+.num-card::after{
+  content:'';position:absolute;top:0;right:0;width:120px;height:120px;
+  border-radius:0 20px 0 0;
+  opacity:.03;pointer-events:none;
+}
+.num-card:nth-child(1)::after{background:radial-gradient(circle at top right,#EA580C,transparent 70%);}
+.num-card:nth-child(2)::after{background:radial-gradient(circle at top right,#fbbf24,transparent 70%);}
+.num-card:nth-child(3)::after{background:radial-gradient(circle at top right,#60a5fa,transparent 70%);}
+.num-card:hover{border-color:rgba(255,255,255,.1);transform:translateY(-2px);}
+
+.num-card-icon{font-size:28px;margin-bottom:16px;display:block;filter:grayscale(1) brightness(1.5);transition:filter var(--dur) var(--ease);}
+.num-card:hover .num-card-icon{filter:grayscale(0) brightness(1);}
+.num-card-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:14px;}
+.num-card-val{font-size:clamp(32px,5vw,48px);font-weight:900;color:#f5f5f5;letter-spacing:-2px;line-height:1;}
+.num-card-sub{font-size:11px;color:#3a3a3a;margin-top:8px;font-weight:400;}
+.num-card-bar{
+  margin-top:16px;height:3px;border-radius:3px;overflow:hidden;
+  background:rgba(255,255,255,.04);
+}
+.num-card-bar-fill{height:100%;border-radius:3px;width:0;transition:width 1.5s var(--ease);}
+.num-card:nth-child(1) .num-card-bar-fill{background:linear-gradient(90deg,#EA580C,rgba(234,88,12,.2));}
+.num-card:nth-child(2) .num-card-bar-fill{background:linear-gradient(90deg,#fbbf24,rgba(251,191,36,.2));}
+.num-card:nth-child(3) .num-card-bar-fill{background:linear-gradient(90deg,#60a5fa,rgba(96,165,250,.2));}
 
 .num-ads{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
-  margin-bottom:32px;padding:20px;
-  background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:16px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0;
+  margin-bottom:36px;
+  background:linear-gradient(165deg, rgba(255,255,255,.025) 0%, rgba(255,255,255,.008) 100%);
+  border:1px solid rgba(255,255,255,.04);border-radius:20px;overflow:hidden;
 }
-.num-ads-title{grid-column:1/-1;font-size:10px;color:#EA580C;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:4px;}
-.num-ads-item{text-align:center;padding:8px 0;}
-.num-ads-val{font-size:20px;font-weight:800;color:#f5f5f5;letter-spacing:-0.5px;}
-.num-ads-label{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-weight:500;}
+.num-ads-title{
+  grid-column:1/-1;font-size:10px;color:#EA580C;text-transform:uppercase;
+  letter-spacing:2px;font-weight:700;padding:20px 24px 12px;
+  border-bottom:1px solid rgba(255,255,255,.03);
+}
+.num-ads-item{
+  text-align:center;padding:20px 12px;
+  border-right:1px solid rgba(255,255,255,.03);
+  transition:background var(--dur) var(--ease);
+}
+.num-ads-item:last-child{border-right:none;}
+.num-ads-item:hover{background:rgba(234,88,12,.03);}
+.num-ads-val{font-size:22px;font-weight:900;color:#f5f5f5;letter-spacing:-0.5px;}
+.num-ads-label{font-size:8px;color:#444;text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;font-weight:600;}
 
 .num-spark{
-  margin-bottom:24px;padding:20px;
-  background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:16px;
+  margin-bottom:24px;padding:24px;
+  background:linear-gradient(165deg, rgba(255,255,255,.025) 0%, rgba(255,255,255,.008) 100%);
+  border:1px solid rgba(255,255,255,.04);border-radius:20px;
 }
-.num-spark-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.num-spark-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
 .num-spark-title{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:600;}
-.num-spark-delta{font-size:12px;font-weight:700;color:#4ade80;}
-.num-spark svg{width:100%;height:60px;}
-.num-spark-line{fill:none;stroke:#EA580C;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.num-spark-area{fill:url(#sparkGrad);opacity:.3;}
-.num-spark-dot{fill:#EA580C;filter:drop-shadow(0 0 4px rgba(234,88,12,.5));}
+.num-spark-delta{font-size:13px;font-weight:800;color:#4ade80;letter-spacing:-0.3px;}
+.num-spark svg{width:100%;height:80px;}
+.num-spark-line{fill:none;stroke:#EA580C;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px rgba(234,88,12,.3));}
+.num-spark-area{fill:url(#sparkGrad);opacity:.2;}
+.num-spark-dot{fill:#EA580C;filter:drop-shadow(0 0 6px rgba(234,88,12,.6));}
 
 @media(max-width:700px){
-  .num-cards{grid-template-columns:1fr 1fr;gap:12px;}
+  .num-cards{grid-template-columns:1fr;gap:14px;}
   .num-ads{grid-template-columns:1fr 1fr;}
-  #numbers{padding:60px 16px;}
+  #numbers{padding:70px 16px;}
+  .num-ads-item{border-bottom:1px solid rgba(255,255,255,.03);}
 }
 
 /* ── S3 INVESTMENT ── */
@@ -953,51 +996,42 @@ function renderNumbers(copilot, unity) {
 
   document.getElementById('num-main-sub').textContent = 'seguidores en Instagram';
 
-  // SVG ring helper
-  function ringSVG(pct, color) {
-    const r = 18, c = 2 * Math.PI * r;
-    const offset = c - (Math.min(pct, 100) / 100) * c;
-    return `<svg class="num-card-ring" viewBox="0 0 44 44">
-      <circle class="ring-bg" cx="22" cy="22" r="${r}"/>
-      <circle class="ring-fill" cx="22" cy="22" r="${r}" stroke="${color || '#EA580C'}"
-        stroke-dasharray="${c}" stroke-dashoffset="${offset}"
-        style="transform:rotate(-90deg);transform-origin:center;"/>
-    </svg>`;
-  }
-
-  // 4 Metric Cards
-  const engPct = Math.min(engagement * 10, 100); // scale engagement for ring (3% = 30%)
-  const cuDone = cu ? cu.done : 0;
-  const cuTotal = cu ? cu.total : 0;
-  const cuPct = cuTotal > 0 ? Math.round((cuDone / cuTotal) * 100) : 0;
+  // 3 Metric Cards — atmospheric
+  const engBarPct = Math.min(engagement * 20, 100);
+  const likesBarPct = Math.min((avgLikes / Math.max(followers * 0.05, 1)) * 100, 100);
+  const piezasTarget = client && client.graficas ? client.graficas : 12;
+  const piezasBarPct = Math.min((totalPiezas / piezasTarget) * 100, 100);
 
   const cards = document.getElementById('num-cards');
   cards.innerHTML = `
     <div class="num-card">
-      ${ringSVG(engPct)}
+      <div class="num-card-icon">📊</div>
       <div class="num-card-label">Engagement</div>
       <div class="num-card-val counter" data-target="${engagement}" data-suffix="%" data-decimals="2">0%</div>
       <div class="num-card-sub">tasa de interacción</div>
+      <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${engBarPct}%"></div></div>
     </div>
     <div class="num-card">
-      ${ringSVG(Math.min((avgLikes / Math.max(followers, 1)) * 1000, 100), '#fbbf24')}
+      <div class="num-card-icon">❤️</div>
       <div class="num-card-label">Likes promedio</div>
       <div class="num-card-val counter" data-target="${avgLikes}">0</div>
       <div class="num-card-sub">por publicación</div>
+      <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${likesBarPct}%"></div></div>
     </div>
     <div class="num-card">
-      ${ringSVG((totalPiezas / Math.max(client && client.graficas || 12, 1)) * 100, '#60a5fa')}
+      <div class="num-card-icon">🎨</div>
       <div class="num-card-label">Contenido</div>
       <div class="num-card-val counter" data-target="${totalPiezas}">0</div>
-      <div class="num-card-sub">piezas este mes</div>
-    </div>
-    <div class="num-card">
-      ${ringSVG(cuPct, '#4ade80')}
-      <div class="num-card-label">Progreso</div>
-      <div class="num-card-val">${cuTotal > 0 ? cuDone + '/' + cuTotal : meses + (meses === 1 ? ' mes' : ' meses')}</div>
-      <div class="num-card-sub">${cuTotal > 0 ? 'tareas completadas' : 'trabajando juntos'}</div>
+      <div class="num-card-sub">piezas creadas este mes</div>
+      <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${piezasBarPct}%"></div></div>
     </div>
   `;
+  // Animate bars on scroll
+  setTimeout(() => {
+    cards.querySelectorAll('.num-card-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 800);
 
   // ADS section
   if (ads && (ads.reach || ads.spend)) {
