@@ -8,9 +8,105 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;scroll-snap-type:y proximity;}
-body{font-family:'Poppins',sans-serif;background:#030303;color:#f5f5f5;overflow-x:hidden;overflow-y:hidden;}
+body{font-family:'Poppins',sans-serif;background:#030303;color:#f5f5f5;overflow-x:hidden;overflow-y:hidden;cursor:none;}
 body.ready{overflow-y:auto;}
 :root{--ease:cubic-bezier(0.65, 0.05, 0, 1);--dur:0.75s;}
+a,button,.team-panel,.cflow-card,.top-post,.slider-nav,.fab,.modal-close{cursor:none;}
+
+/* ── GLOBAL GRAIN + NOISE ── */
+body::after{
+  content:'';position:fixed;inset:-50%;z-index:9999;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+  opacity:.08;animation:noiseShift 4s steps(6) infinite;
+}
+@keyframes noiseShift{
+  0%{transform:translate(0,0)}16%{transform:translate(-2%,-1%)}33%{transform:translate(1%,2%)}
+  50%{transform:translate(-1%,-2%)}66%{transform:translate(2%,1%)}83%{transform:translate(-1%,1%)}100%{transform:translate(0,0)}
+}
+
+/* ── MESH GRADIENT (lava) ── */
+.mesh-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+}
+.mesh-blob{
+  position:absolute;border-radius:50%;filter:blur(120px);
+  animation:meshFloat 20s ease-in-out infinite;
+}
+.mesh-blob:nth-child(1){width:500px;height:500px;top:-10%;left:-10%;background:rgba(234,88,12,.08);animation-delay:0s;}
+.mesh-blob:nth-child(2){width:400px;height:400px;bottom:-10%;right:-10%;background:rgba(180,40,0,.06);animation-delay:-7s;animation-duration:25s;}
+.mesh-blob:nth-child(3){width:350px;height:350px;top:40%;left:50%;background:rgba(234,88,12,.04);animation-delay:-14s;animation-duration:30s;}
+@keyframes meshFloat{
+  0%,100%{transform:translate(0,0) scale(1);}
+  25%{transform:translate(60px,-40px) scale(1.1);}
+  50%{transform:translate(-30px,60px) scale(0.95);}
+  75%{transform:translate(40px,30px) scale(1.05);}
+}
+
+/* ── PARTICLES ── */
+.particles{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+.particle{
+  position:absolute;width:2px;height:2px;border-radius:50%;
+  background:#EA580C;opacity:0;
+  animation:particleFloat linear infinite;
+}
+@keyframes particleFloat{
+  0%{transform:translateY(100vh) translateX(0);opacity:0;}
+  10%{opacity:.12;}
+  90%{opacity:.12;}
+  100%{transform:translateY(-10vh) translateX(30px);opacity:0;}
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor-dot{
+  position:fixed;top:0;left:0;width:8px;height:8px;
+  background:#EA580C;border-radius:50%;
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:transform 0.1s ease, width 0.3s, height 0.3s, background 0.3s;
+}
+.cursor-dot.hover{width:12px;height:12px;background:#ff8c42;}
+.cursor-ring{
+  position:fixed;top:0;left:0;width:36px;height:36px;
+  border:1.5px solid rgba(234,88,12,.4);border-radius:50%;
+  pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:width 0.4s var(--ease), height 0.4s var(--ease), border-color 0.3s, opacity 0.3s;
+}
+.cursor-ring.hover{width:52px;height:52px;border-color:rgba(234,88,12,.6);}
+.cursor-ring.click{width:28px;height:28px;border-color:#EA580C;}
+
+/* ── BLEND HEADER ── */
+.blend-header{
+  position:fixed;top:0;left:0;right:0;z-index:90;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 24px;
+  background:linear-gradient(to bottom, rgba(0,0,0,.6), transparent);
+  pointer-events:none;opacity:0;
+  transition:opacity var(--dur) var(--ease);
+}
+body.ready .blend-header{opacity:1;}
+.blend-header-logo{
+  font-size:16px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:-0.5px;
+  pointer-events:auto;
+}
+.blend-header-logo span{color:rgba(234,88,12,.5);}
+.blend-header-client{
+  font-size:12px;font-weight:600;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase;
+}
+
+/* ── BLEND FOOTER ── */
+.blend-footer{
+  padding:80px 24px 40px;text-align:center;position:relative;
+  background:linear-gradient(to bottom, #030303, #0a0a0a);
+}
+.blend-footer-logo{
+  font-size:clamp(36px,6vw,56px);font-weight:900;color:rgba(255,255,255,.06);letter-spacing:-2px;
+  margin-bottom:16px;
+}
+.blend-footer-logo span{color:rgba(234,88,12,.15);}
+.blend-footer-text{font-size:13px;color:#333;letter-spacing:2px;margin-bottom:8px;}
+.blend-footer-link{font-size:12px;color:rgba(234,88,12,.4);text-decoration:none;letter-spacing:1px;}
+.blend-footer-link:hover{color:#EA580C;}
 
 /* ── INTRO — MAX PRO ── */
 .intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s;}
@@ -741,6 +837,22 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
 </head>
 <body>
 
+<!-- MESH GRADIENT BG -->
+<div class="mesh-bg"><div class="mesh-blob"></div><div class="mesh-blob"></div><div class="mesh-blob"></div></div>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- BLEND HEADER -->
+<div class="blend-header">
+  <div class="blend-header-logo">SF<span>.</span></div>
+  <div class="blend-header-client" id="header-client"></div>
+</div>
+
 <!-- INTRO — MAX PRO -->
 <div class="intro" id="intro">
   <div class="intro-logo" id="intro-logo"><span>SF<span class="intro-dot">.</span></span></div>
@@ -859,7 +971,11 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
 <!-- S8: TEAM (moved to section 2) -->
 
 <!-- FOOTER -->
-<footer>POWERED BY BLEND — SOCIALFOOD</footer>
+<div class="blend-footer">
+  <div class="blend-footer-logo">Social Food<span>.</span></div>
+  <div class="blend-footer-text">POWERED BY BLEND</div>
+  <a href="https://blendsocialfood.cl" target="_blank" class="blend-footer-link">blendsocialfood.cl</a>
+</div>
 
 <!-- FLOATING APPROVAL BUTTON -->
 <button class="fab" id="fab" onclick="openApproval()">
@@ -1790,6 +1906,44 @@ function openLightbox(fileId) {
 
 // ── INIT ──
 loadAll();
+
+// ── CUSTOM CURSOR ──
+const curDot = document.getElementById('cursor-dot');
+const curRing = document.getElementById('cursor-ring');
+let curX = 0, curY = 0, ringX = 0, ringY = 0;
+document.addEventListener('mousemove', e => {
+  curX = e.clientX; curY = e.clientY;
+  curDot.style.left = curX + 'px'; curDot.style.top = curY + 'px';
+});
+function ringLoop() {
+  ringX += (curX - ringX) * 0.12;
+  ringY += (curY - ringY) * 0.12;
+  curRing.style.left = ringX + 'px'; curRing.style.top = ringY + 'px';
+  requestAnimationFrame(ringLoop);
+}
+ringLoop();
+document.addEventListener('mousedown', () => curRing.classList.add('click'));
+document.addEventListener('mouseup', () => curRing.classList.remove('click'));
+document.querySelectorAll('a,button,[onclick],.team-panel,.cflow-card,.top-post,.slider-nav,.fab').forEach(el => {
+  el.addEventListener('mouseenter', () => { curDot.classList.add('hover'); curRing.classList.add('hover'); });
+  el.addEventListener('mouseleave', () => { curDot.classList.remove('hover'); curRing.classList.remove('hover'); });
+});
+
+// ── PARTICLES ──
+const particlesEl = document.getElementById('particles');
+for (let i = 0; i < 20; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (12 + Math.random() * 18) + 's';
+  p.style.animationDelay = (Math.random() * 15) + 's';
+  p.style.width = (1.5 + Math.random() * 2) + 'px';
+  p.style.height = p.style.width;
+  particlesEl.appendChild(p);
+}
+
+// ── HEADER CLIENT NAME ──
+document.getElementById('header-client').textContent = CLIENT;
 </script>
 </body>
 </html>
