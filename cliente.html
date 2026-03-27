@@ -668,6 +668,123 @@ section{
   font-size:11px;font-weight:600;color:#fbbf24;
 }
 
+/* === TEAM ORBITAL === */
+.orbital-wrap{
+  position:relative;height:200vh;
+}
+.orbital-sticky{
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.orbital-header{
+  position:absolute;top:100px;left:60px;z-index:10;
+}
+.orbital-container{
+  position:relative;width:500px;height:500px;
+  perspective:1200px;
+}
+.orbital-ring{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  transform:rotateX(65deg) rotateZ(0deg);
+  transition:transform 0.05s linear;
+}
+.orbital-ring-visual{
+  position:absolute;inset:30px;
+  border:1px solid rgba(234,88,12,0.15);
+  border-radius:50%;
+  box-shadow:0 0 40px rgba(234,88,12,0.05), inset 0 0 40px rgba(234,88,12,0.03);
+}
+.orbital-ring-visual::after{
+  content:'';position:absolute;inset:-20px;
+  border:1px solid rgba(234,88,12,0.06);
+  border-radius:50%;
+}
+.orbital-center{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotateX(-65deg);
+  z-index:10;
+  width:80px;height:80px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:900;letter-spacing:-1px;
+  color:#fff;
+  background:radial-gradient(circle,rgba(234,88,12,0.2),rgba(234,88,12,0.05) 70%);
+  border:1px solid rgba(234,88,12,0.3);
+  border-radius:50%;
+  box-shadow:0 0 60px rgba(234,88,12,0.2),0 0 120px rgba(234,88,12,0.05);
+  text-shadow:0 0 20px rgba(234,88,12,0.5);
+}
+.orbital-center span{color:#EA580C;}
+
+.orbital-member{
+  position:absolute;top:50%;left:50%;
+  width:72px;height:72px;margin:-36px 0 0 -36px;
+  transform-style:preserve-3d;
+  transition:all 0.6s cubic-bezier(0.16,1,0.3,1);
+  cursor:pointer;z-index:5;
+}
+.orbital-member-inner{
+  width:100%;height:100%;
+  transform:rotateX(-65deg);
+  display:flex;flex-direction:column;align-items:center;
+  transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.orbital-photo{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.1);
+  background:#111 center/cover no-repeat;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.orbital-member:hover .orbital-photo{
+  border-color:rgba(234,88,12,0.6);
+  box-shadow:0 8px 40px rgba(234,88,12,0.3),0 0 60px rgba(234,88,12,0.1);
+  transform:scale(1.25);
+}
+.orbital-info{
+  margin-top:10px;text-align:center;
+  opacity:0;transform:translateY(8px);
+  transition:all 0.3s ease;
+  pointer-events:none;
+}
+.orbital-member:hover .orbital-info{
+  opacity:1;transform:translateY(0);
+}
+.orbital-name{
+  font-size:13px;font-weight:700;color:#fff;
+  white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,0.8);
+}
+.orbital-role{
+  font-size:10px;color:#EA580C;letter-spacing:1px;
+  text-transform:uppercase;margin-top:2px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.8);
+}
+
+/* Active member expanded card */
+.orbital-detail{
+  position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(170deg,rgba(18,18,18,0.9),rgba(8,8,8,0.9));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:28px 36px;
+  backdrop-filter:blur(30px);
+  opacity:0;pointer-events:none;
+  transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
+  z-index:20;white-space:nowrap;
+  box-shadow:0 20px 80px rgba(0,0,0,0.6),0 0 40px rgba(234,88,12,0.05);
+}
+.orbital-detail.show{opacity:1;pointer-events:auto;}
+.orbital-detail-name{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+.orbital-detail-role{font-size:12px;color:#EA580C;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+
+/* Particles on orbit path */
+.orbital-particle{
+  position:absolute;width:3px;height:3px;
+  background:#EA580C;border-radius:50%;
+  opacity:0;
+  box-shadow:0 0 6px rgba(234,88,12,0.4);
+}
+
 /* === RESPONSIVE === */
 @media(max-width:768px){
   body{cursor:auto;}
@@ -678,6 +795,11 @@ section{
   .ig-grid{grid-template-columns:repeat(3,1fr);}
   .nav{padding:12px 20px;}
   #sec-ig > div{grid-template-columns:1fr !important;gap:32px !important;}
+  .orbital-container{width:320px;height:320px;}
+  .orbital-header{left:24px;top:80px;}
+  .orbital-photo{width:56px;height:56px;}
+  .orbital-member{width:56px;height:56px;margin:-28px 0 0 -28px;}
+  .orbital-center{width:60px;height:60px;font-size:22px;}
 }
 </style>
 </head>
@@ -821,6 +943,26 @@ section{
   <h2 class="section-title text-reveal reveal-delay-1">Que viene</h2>
   <div id="next-items" class="reveal reveal-delay-2" style="margin-top:32px;max-width:600px;"></div>
 </section>
+
+<!-- EQUIPO -->
+<div class="orbital-wrap" id="sec-team">
+  <div class="orbital-sticky">
+    <div class="orbital-header">
+      <div class="section-label reveal" data-parallax="0.03">Equipo</div>
+      <h2 class="section-title text-reveal reveal-delay-1">Quienes mueven tu marca</h2>
+    </div>
+    <div class="orbital-container" id="orbital-container">
+      <div class="orbital-ring" id="orbital-ring">
+        <div class="orbital-ring-visual"></div>
+        <div class="orbital-center">SF<span>.</span></div>
+      </div>
+    </div>
+    <div class="orbital-detail" id="orbital-detail">
+      <div class="orbital-detail-name" id="orbital-detail-name"></div>
+      <div class="orbital-detail-role" id="orbital-detail-role"></div>
+    </div>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <div class="footer">
@@ -1637,6 +1779,133 @@ document.head.appendChild(styleEl);
 })();
 
 loadAll();
+
+// =====================================================
+// TEAM ORBITAL
+// =====================================================
+(function(){
+  const TEAM = [
+    { name:'Nico', role:'Estrategia', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM' },
+    { name:'Cris', role:'Ads & Growth', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz' },
+    { name:'Paula', role:'Gestión', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp' },
+    { name:'Juan', role:'Diseño', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J' },
+    { name:'Seba', role:'Desarrollo', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_' },
+    { name:'Pali', role:'Diseño', photo:'1Uzv82S2Pcbs2zw6oje1glRyc_oYL9mI3' },
+    { name:'Juanes', role:'Audiovisual', photo:'1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp' },
+  ];
+
+  const ring = document.getElementById('orbital-ring');
+  const detail = document.getElementById('orbital-detail');
+  const detailName = document.getElementById('orbital-detail-name');
+  const detailRole = document.getElementById('orbital-detail-role');
+  const wrap = document.getElementById('sec-team');
+
+  // Create member nodes
+  const members = TEAM.map((m, i) => {
+    const angle = (360 / TEAM.length) * i;
+    const el = document.createElement('div');
+    el.className = 'orbital-member';
+    el.dataset.angle = angle;
+    el.innerHTML = `
+      <div class="orbital-member-inner">
+        <div class="orbital-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large')"></div>
+        <div class="orbital-info">
+          <div class="orbital-name">${m.name}</div>
+          <div class="orbital-role">${m.role}</div>
+        </div>
+      </div>`;
+    // Position on orbit circle (radius ~190px)
+    const rad = (angle * Math.PI) / 180;
+    const r = 190;
+    el.style.transform = `translate(${Math.cos(rad)*r}px, ${Math.sin(rad)*r}px)`;
+
+    // Start scattered (will animate in on scroll)
+    el.style.opacity = '0';
+    const scatterX = (Math.random()-0.5)*600;
+    const scatterY = (Math.random()-0.5)*600;
+    el._scatterX = scatterX;
+    el._scatterY = scatterY;
+    el._orbitX = Math.cos(rad)*r;
+    el._orbitY = Math.sin(rad)*r;
+
+    el.addEventListener('mouseenter', () => {
+      detailName.textContent = m.name;
+      detailRole.textContent = m.role;
+      detail.classList.add('show');
+    });
+    el.addEventListener('mouseleave', () => {
+      detail.classList.remove('show');
+    });
+
+    ring.appendChild(el);
+    return el;
+  });
+
+  // Add orbital particles
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'orbital-particle';
+    const angle = (360/12)*i;
+    const rad = (angle*Math.PI)/180;
+    const r = 190 + (Math.random()-0.5)*20;
+    p.style.transform = `translate(${Math.cos(rad)*r + 250}px, ${Math.sin(rad)*r + 250}px)`;
+    p.style.width = (2 + Math.random()*2) + 'px';
+    p.style.height = p.style.width;
+    p._baseAngle = angle;
+    ring.appendChild(p);
+  }
+
+  // Scroll-driven animation
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const rect = wrap.getBoundingClientRect();
+      const wh = window.innerHeight;
+      // progress 0→1 as we scroll through the 200vh section
+      const scrollRange = wrap.offsetHeight - wh;
+      const rawProgress = -rect.top / scrollRange;
+      const progress = Math.max(0, Math.min(1, rawProgress));
+
+      // Phase 1 (0→0.3): members fly in from scattered to orbit positions
+      // Phase 2 (0.3→1): orbit rotates with scroll
+      const assembleProgress = Math.min(1, progress / 0.3);
+      const rotateProgress = Math.max(0, (progress - 0.3) / 0.7);
+
+      // Ease function
+      const ease = t => t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+      const ap = ease(assembleProgress);
+
+      // Update members
+      members.forEach(el => {
+        const ox = el._orbitX;
+        const oy = el._orbitY;
+        const sx = el._scatterX;
+        const sy = el._scatterY;
+        const x = sx + (ox - sx) * ap;
+        const y = sy + (oy - sy) * ap;
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        el.style.opacity = Math.min(1, ap * 2);
+      });
+
+      // Rotate ring with scroll (phase 2)
+      const rotAngle = rotateProgress * 360;
+      const tiltX = 65 - rotateProgress * 10; // tilt slightly less as we rotate
+      ring.style.transform = `rotateX(${tiltX}deg) rotateZ(${rotAngle}deg)`;
+
+      // Particles fade in
+      ring.querySelectorAll('.orbital-particle').forEach((p, i) => {
+        p.style.opacity = ap > 0.5 ? (0.3 + Math.sin(Date.now()/1000 + i)*0.3) : 0;
+      });
+
+      ticking = false;
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
 </script>
 </body>
 </html>
