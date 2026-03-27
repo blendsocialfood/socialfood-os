@@ -294,6 +294,45 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .btn-changes:hover{background:rgba(251,146,60,.2);transform:translateY(-1px);}
 .approval-status{padding:10px 16px;background:#0a0a0a;border-radius:10px;text-align:center;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
 
+/* ── MARQUEE DIVIDER ── */
+.marquee-divider{
+  overflow:hidden;padding:28px 0;background:#050505;
+  border-top:1px solid rgba(234,88,12,.06);
+  border-bottom:1px solid rgba(234,88,12,.06);
+  position:relative;
+}
+.marquee-divider::before,.marquee-divider::after{
+  content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none;
+}
+.marquee-divider::before{left:0;background:linear-gradient(to right,#050505,transparent);}
+.marquee-divider::after{right:0;background:linear-gradient(to left,#050505,transparent);}
+.marquee-row{
+  display:flex;white-space:nowrap;will-change:transform;
+}
+.marquee-row + .marquee-row{margin-top:12px;}
+.marquee-row-inner{
+  display:flex;gap:0;animation:marqueeScroll var(--dur, 30s) linear infinite;
+}
+.marquee-row.reverse .marquee-row-inner{
+  animation-direction:reverse;
+}
+.marquee-item{
+  font-size:clamp(18px,3vw,28px);font-weight:800;letter-spacing:-0.5px;
+  padding:0 16px;color:rgba(255,255,255,.06);
+  transition:color 0.3s ease;
+}
+.marquee-item.accent{color:rgba(234,88,12,.12);}
+.marquee-dot{
+  display:inline-flex;align-items:center;padding:0 12px;
+  color:rgba(234,88,12,.15);font-size:8px;
+}
+@keyframes marqueeScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+@media(max-width:700px){
+  .marquee-divider{padding:20px 0;}
+  .marquee-item{font-size:16px;padding:0 10px;}
+}
+
 /* ── SECTION LABELS ── */
 .sec-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#EA580C;margin-bottom:12px;}
 .sec-title{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;}
@@ -363,6 +402,9 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:11px;letter-spac
     <div class="scroll-hint"><span>↓</span> SCROLL</div>
   </section>
 </div>
+
+<!-- MARQUEE DIVIDER -->
+<div class="marquee-divider" id="marquee-divider"></div>
 
 <!-- S-TEAM: TU EQUIPO — FILMSTRIP + TALENT REVEAL -->
 <section id="team">
@@ -602,6 +644,7 @@ async function loadAll() {
   renderHero(unity, copilot);
   renderNumbers(copilot, unity);
   renderMarquee();
+  renderMarqueeDivider();
   renderInvestment(copilot);
   renderContent(unity, copilot);
   renderReviews(unity);
@@ -712,6 +755,32 @@ function renderMarquee() {
   const words = ['contenido','estrategia','engagement','alcance','conversión','creatividad','marca','crecimiento'];
   const inner = words.map(w => `<span>${w}</span>`).join('');
   document.getElementById('marquee-inner').innerHTML = inner + inner;
+}
+
+// ── MARQUEE DIVIDER ──
+function renderMarqueeDivider() {
+  const row1 = ['ESTRATEGIA','CONTENIDO','DISEÑO','ADS','CREATIVIDAD','COMMUNITY','RESULTADOS'];
+  const row2 = ['INNOVACIÓN','AUDIOVISUAL','CRECIMIENTO','MARCA','ENGAGEMENT','CONVERSIÓN','ALCANCE'];
+  const div = document.getElementById('marquee-divider');
+
+  function buildRow(words, reverse, speed) {
+    const row = document.createElement('div');
+    row.className = 'marquee-row' + (reverse ? ' reverse' : '');
+    const inner = document.createElement('div');
+    inner.className = 'marquee-row-inner';
+    inner.style.setProperty('--dur', speed);
+    // Duplicate for seamless loop
+    const items = [...words, ...words, ...words, ...words];
+    inner.innerHTML = items.map((w, i) => {
+      const isAccent = i % 3 === 0;
+      return `<span class="marquee-dot">●</span><span class="marquee-item${isAccent ? ' accent' : ''}">${w}</span>`;
+    }).join('');
+    row.appendChild(inner);
+    return row;
+  }
+
+  div.appendChild(buildRow(row1, false, '35s'));
+  div.appendChild(buildRow(row2, true, '28s'));
 }
 
 // ── S3: INVESTMENT ──
