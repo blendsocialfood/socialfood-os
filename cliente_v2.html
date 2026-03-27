@@ -521,19 +521,51 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .fab.show{display:flex;}
 
 /* ── APPROVAL MODAL — FULLSCREEN GALLERY ── */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);display:none;flex-direction:column;padding:0;}
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.95);backdrop-filter:blur(20px);display:none;flex-direction:column;padding:0;}
 .modal-overlay.open{display:flex;}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 28px;border-bottom:1px solid #1a1a1a;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 28px;border-bottom:1px solid rgba(255,255,255,.06);}
 .modal-title{font-size:20px;font-weight:800;letter-spacing:-.5px;}
 .modal-count{font-size:12px;color:#EA580C;font-weight:600;}
 .modal-close{background:none;border:1px solid #333;color:#888;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all var(--dur) var(--ease);}
 .modal-close:hover{background:#EA580C;color:#fff;border-color:#EA580C;}
-.modal-body{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px;}
-.approval-card{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:16px;overflow:hidden;transition:border var(--dur) var(--ease);}
-.approval-card:hover{border-color:#333;}
-.approval-img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;cursor:pointer;transition:transform var(--dur) var(--ease);}
-.approval-img:hover{transform:scale(1.02);}
-.approval-img-placeholder{width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#1a1a1a,#111);display:flex;align-items:center;justify-content:center;color:#333;font-size:40px;}
+.modal-body{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;}
+
+/* Slider */
+.slider-wrap{display:flex;flex-direction:column;align-items:center;width:100%;max-width:700px;padding:20px;height:100%;}
+.slider-counter{font-size:13px;color:#555;font-weight:600;letter-spacing:1px;margin-bottom:16px;}
+.slider-counter span{color:#EA580C;}
+.slider-img-wrap{
+  flex:1;width:100%;position:relative;display:flex;align-items:center;justify-content:center;
+  background:#0a0a0a;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.06);
+}
+.slider-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;}
+.slider-img-placeholder{color:#333;font-size:48px;}
+.slider-carousel-dots{
+  display:flex;gap:6px;justify-content:center;
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+}
+.slider-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all var(--dur) var(--ease);}
+.slider-dot.active{background:#EA580C;box-shadow:0 0 8px rgba(234,88,12,.4);}
+.slider-info{width:100%;padding:16px 0;text-align:center;}
+.slider-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;}
+.slider-desc{font-size:13px;color:#666;margin-bottom:6px;max-height:40px;overflow:hidden;}
+.slider-meta{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.slider-meta span{font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(234,88,12,.08);color:#EA580C;border:1px solid rgba(234,88,12,.12);}
+.slider-actions{display:flex;gap:12px;width:100%;max-width:400px;margin:0 auto;}
+
+/* Nav arrows */
+.slider-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  color:#fff;font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all var(--dur) var(--ease);z-index:3;
+}
+.slider-nav:hover{background:rgba(234,88,12,.15);border-color:rgba(234,88,12,.3);}
+.slider-nav.prev{left:16px;}
+.slider-nav.next{right:16px;}
+.slider-nav:disabled{opacity:.2;cursor:default;}
 .approval-info{padding:16px 20px;}
 .approval-title{font-size:16px;font-weight:700;margin-bottom:4px;}
 .approval-desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:12px;}
@@ -793,7 +825,11 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
     </div>
     <button class="modal-close" onclick="closeApproval()">✕</button>
   </div>
-  <div class="modal-body" id="modal-content"></div>
+  <div class="modal-body">
+    <button class="slider-nav prev" id="slider-prev" onclick="sliderNav(-1)">‹</button>
+    <div class="slider-wrap" id="slider-wrap"></div>
+    <button class="slider-nav next" id="slider-next" onclick="sliderNav(1)">›</button>
+  </div>
 </div>
 
 <script>
@@ -1500,52 +1536,104 @@ function renderApproval(unity) {
   }
 }
 
+let sliderPiezas = [];
+let sliderIdx = 0;
+let sliderCarouselIdx = 0;
+
 function openApproval() {
   const modal = document.getElementById('modal-overlay');
   modal.classList.add('open');
-  const content = document.getElementById('modal-content');
   const countEl = document.getElementById('modal-count');
 
-  const piezasToShow = pendingPiezas.length > 0 ? pendingPiezas : allPiezas.filter(p => !['draft','clickup'].includes(p.estado)).slice(0, 15);
-
-  const estadoLabels = {esperando_check_cliente:'Esperando tu aprobación',en_revision_cliente:'En revisión',aprobado_final:'Aprobado',publicado:'Publicado',en_curso:'En producción',hacer_ajuste:'En ajuste',esperando_check_interno:'En revisión interna',aprobado_idea:'Idea aprobada',aprobado_interno:'Aprobado interno'};
-  const estadoColors = {esperando_check_cliente:'#60a5fa',aprobado_final:'#4ade80',publicado:'#a78bfa',en_curso:'#fbbf24',hacer_ajuste:'#fb923c'};
+  sliderPiezas = pendingPiezas.length > 0 ? pendingPiezas : allPiezas.filter(p => !['draft','clickup'].includes(p.estado)).slice(0, 15);
+  sliderIdx = 0;
 
   if (pendingPiezas.length > 0) {
     countEl.textContent = `${pendingPiezas.length} pieza${pendingPiezas.length>1?'s':''} esperando tu aprobación`;
   } else {
-    countEl.textContent = `${piezasToShow.length} piezas este mes`;
+    countEl.textContent = `${sliderPiezas.length} piezas este mes`;
+  }
+  renderSliderPieza();
+}
+
+function renderSliderPieza() {
+  if (!sliderPiezas.length) return;
+  const p = sliderPiezas[sliderIdx];
+  const wrap = document.getElementById('slider-wrap');
+  const isPending = ['esperando_check_cliente','en_revision_cliente'].includes(p.estado);
+  const estadoLabels = {esperando_check_cliente:'Esperando tu aprobación',en_revision_cliente:'En revisión',aprobado_final:'Aprobado',publicado:'Publicado',en_curso:'En producción',hacer_ajuste:'En ajuste',esperando_check_interno:'En revisión interna'};
+  const estadoColors = {esperando_check_cliente:'#60a5fa',aprobado_final:'#4ade80',publicado:'#a78bfa',en_curso:'#fbbf24',hacer_ajuste:'#fb923c'};
+
+  // Handle carousel (folder: prefix)
+  const isCarousel = p.drive_file_id && p.drive_file_id.startsWith('folder:');
+  const folderId = isCarousel ? p.drive_file_id.replace('folder:', '') : null;
+  sliderCarouselIdx = 0;
+
+  const meta = [p.formato, p.pilar, p.fecha_publicacion].filter(Boolean).map(m => `<span>${m}</span>`).join('');
+
+  const actions = isPending
+    ? `<div class="slider-actions">
+        <button class="btn-approve" onclick="aprobar(${p.id})">✓ Aprobar</button>
+        <button class="btn-changes" onclick="pedirCambio(${p.id})">✎ Pedir cambios</button>
+      </div>
+      <div id="cambios-${p.id}" style="display:none;margin-top:12px;width:100%;max-width:400px;">
+        <textarea id="cambios-txt-${p.id}" placeholder="Describe qué cambios necesitas..." style="width:100%;min-height:60px;background:#080808;border:1px solid #222;border-radius:10px;color:#ccc;font-size:13px;padding:12px;font-family:inherit;resize:vertical;"></textarea>
+        <button onclick="enviarCambio(${p.id})" style="margin-top:8px;padding:10px 24px;background:linear-gradient(135deg,#fb923c,#EA580C);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Enviar feedback</button>
+      </div>`
+    : `<div style="font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:${estadoColors[p.estado]||'#555'}">${estadoLabels[p.estado]||p.estado}</div>`;
+
+  const imgSrc = p.drive_file_id && !isCarousel
+    ? `${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large`
+    : '';
+
+  wrap.innerHTML = `
+    <div class="slider-counter"><span>${sliderIdx + 1}</span> / ${sliderPiezas.length}</div>
+    <div class="slider-img-wrap" id="slider-img-wrap">
+      ${imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="this.outerHTML='<div class=slider-img-placeholder>📷</div>'" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>'}
+      ${isCarousel ? '<div class="slider-carousel-dots" id="slider-dots"></div>' : ''}
+    </div>
+    <div class="slider-info">
+      <div class="slider-title">${p.titulo || 'Pieza'}</div>
+      ${p.idea_final ? `<div class="slider-desc">${p.idea_final.substring(0, 120)}${p.idea_final.length > 120 ? '...' : ''}</div>` : ''}
+      ${meta ? `<div class="slider-meta">${meta}</div>` : ''}
+      ${actions}
+    </div>
+  `;
+
+  // Carousel: load folder contents
+  if (isCarousel && folderId) {
+    fetch(`${UNITY_URL}/api/drive/meta/${folderId}?token=${TOKEN}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.files && data.files.length) {
+          window._carouselFiles = data.files;
+          sliderCarouselIdx = 0;
+          loadCarouselImg(0);
+          const dots = document.getElementById('slider-dots');
+          if (dots) {
+            dots.innerHTML = data.files.map((_, i) => `<div class="slider-dot ${i===0?'active':''}" onclick="loadCarouselImg(${i})"></div>`).join('');
+          }
+        }
+      }).catch(() => {});
   }
 
-  content.innerHTML = piezasToShow.map((p, i) => {
-    const isPending = ['esperando_check_cliente','en_revision_cliente'].includes(p.estado);
-    const img = p.drive_file_id
-      ? `<img class="approval-img" src="${UNITY_URL}/api/drive/thumb/${p.drive_file_id}?token=${TOKEN}&size=large" onclick="openLightbox('${p.drive_file_id}')" onerror="this.outerHTML='<div class=approval-img-placeholder>📷</div>'">`
-      : '<div class="approval-img-placeholder">📷</div>';
+  // Update nav buttons
+  document.getElementById('slider-prev').disabled = sliderIdx === 0;
+  document.getElementById('slider-next').disabled = sliderIdx >= sliderPiezas.length - 1;
+}
 
-    const meta = [p.formato, p.pilar, p.fecha_publicacion].filter(Boolean).map(m => `<span>${m}</span>`).join('');
+function loadCarouselImg(idx) {
+  if (!window._carouselFiles) return;
+  sliderCarouselIdx = idx;
+  const file = window._carouselFiles[idx];
+  const img = document.getElementById('slider-img');
+  if (img) img.src = `${UNITY_URL}/api/drive/thumb/${file.id}?token=${TOKEN}&size=large`;
+  document.querySelectorAll('.slider-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+}
 
-    const actions = isPending
-      ? `<div class="approval-actions">
-          <button class="btn-approve" onclick="aprobar(${p.id})">✓ Aprobar</button>
-          <button class="btn-changes" onclick="pedirCambio(${p.id})">✎ Pedir cambios</button>
-        </div>
-        <div id="cambios-${p.id}" style="display:none;margin-top:10px;">
-          <textarea id="cambios-txt-${p.id}" placeholder="Describe qué cambios necesitas..." style="width:100%;min-height:60px;background:#080808;border:1px solid #222;border-radius:10px;color:#ccc;font-size:13px;padding:12px;font-family:inherit;resize:vertical;"></textarea>
-          <button onclick="enviarCambio(${p.id})" style="margin-top:6px;padding:8px 20px;background:linear-gradient(135deg,#fb923c,#EA580C);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Enviar</button>
-        </div>`
-      : `<div class="approval-status" style="color:${estadoColors[p.estado]||'#555'}">${estadoLabels[p.estado]||p.estado}</div>`;
-
-    return `<div class="approval-card" style="animation:cardIn .5s ${i*0.08}s both;">
-      ${img}
-      <div class="approval-info">
-        <div class="approval-title">${p.titulo||'Pieza'}</div>
-        ${p.idea_final ? `<div class="approval-desc">${p.idea_final.substring(0,150)}${p.idea_final.length>150?'...':''}</div>` : ''}
-        ${meta ? `<div class="approval-meta">${meta}</div>` : ''}
-        ${actions}
-      </div>
-    </div>`;
-  }).join('') || '<p style="color:#555;text-align:center;padding:40px;font-size:14px;">Sin piezas disponibles</p>';
+function sliderNav(dir) {
+  sliderIdx = Math.max(0, Math.min(sliderPiezas.length - 1, sliderIdx + dir));
+  renderSliderPieza();
 }
 
 function closeApproval() { document.getElementById('modal-overlay').classList.remove('open'); }
