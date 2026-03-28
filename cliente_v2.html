@@ -1786,7 +1786,8 @@ function renderSliderPieza() {
   const folderId = isCarousel ? p.drive_file_id.replace('folder:', '') : null;
   sliderCarouselIdx = 0;
 
-  const meta = [p.formato, p.pilar, p.fecha_publicacion].filter(Boolean).map(m => `<span>${m}</span>`).join('');
+  const tipoBadge = p.tipo_pedido === 'historias' ? 'Historia' : '';
+  const meta = [tipoBadge, p.formato, p.pilar, p.fecha_publicacion].filter(Boolean).map(m => `<span>${m}</span>`).join('');
 
   const actions = isPending
     ? `<div class="slider-actions">
