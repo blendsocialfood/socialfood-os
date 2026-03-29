@@ -492,7 +492,7 @@ const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity_cop
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism';
 const canDrop = role === 'admin' || role === 'unity';
-const canPixel = role === 'admin' || role === 'unity_prism';
+const canPixel = SF_USER.name === 'nico';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -515,7 +515,7 @@ const navHTML = `
     <div class="nav-icon"><svg width="16" height="14" viewBox="0 0 16 14"><polygon points="8,0 15,13 1,13" fill="none" stroke="#4AA8D8" stroke-width="1.5"/><line x1="0" y1="7" x2="4" y2="7" stroke="#fff" stroke-width="1" opacity="0.6"/><line x1="12" y1="5" x2="16" y2="3" stroke="#ff6b6b" stroke-width="1" opacity="0.7"/><line x1="12" y1="7" x2="16" y2="7" stroke="#ffd93d" stroke-width="1" opacity="0.7"/><line x1="12" y1="9" x2="16" y2="11" stroke="#4AA8D8" stroke-width="1" opacity="0.7"/></svg></div>
     <span class="nav-label">Prism</span>
   </a>
-  <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}">
+  <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}" ${!canPixel ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
     <div class="nav-icon">&#10022;</div>
     <span class="nav-label">Pixel</span>
   </a>
@@ -577,11 +577,11 @@ const prismCard = `
   </a>`;
 
 const pixelCard = `
-  <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="module-card card-pixel ${canPixel ? '' : 'disabled'}">
-    <div class="module-arrow">&#8599;</div>
+  <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="module-card card-pixel ${canPixel ? '' : 'disabled'}" ${!canPixel ? 'style="opacity:0.4;pointer-events:none;position:relative;"' : ''}>
+    <div class="module-arrow">${canPixel ? '&#8599;' : ''}</div>
     <div class="module-icon">&#10022;</div>
     <div class="module-label">Creatividad</div>
-    <div class="module-name">Pixel</div>
+    <div class="module-name">Pixel${!canPixel ? ' <span style="font-size:11px;color:#666;font-weight:400;">— Proximamente</span>' : ''}</div>
     <div class="module-desc">Motor de diseno para crear graficas de Instagram con brand kits y plantillas.</div>
     <div class="module-features">
       <span class="feature-tag">Brand Kits</span>
