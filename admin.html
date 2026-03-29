@@ -42,7 +42,11 @@
   }
   .top-bar-left {
     display: flex; align-items: center; gap: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .top-bar-left::-webkit-scrollbar { display: none; }
   .nav-logo {
     display: flex; align-items: center; gap: 6px;
     text-decoration: none; padding: 6px 14px;
@@ -240,6 +244,11 @@
   }
   @media (max-width: 600px) {
     .modules { grid-template-columns: 1fr; }
+    .top-bar { padding: 10px 12px; }
+    .top-bar-left { gap: 8px; }
+    .nav-logo { padding: 5px 10px; white-space: nowrap; flex-shrink: 0; }
+    .nav-label { font-size: 11px; }
+    .nav-icon { width: 26px; height: 26px; font-size: 11px; }
   }
 
   .module-card {
