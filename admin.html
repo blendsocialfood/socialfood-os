@@ -492,7 +492,7 @@ const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity_cop
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism';
 const canDrop = role === 'admin' || role === 'unity';
-const canPixel = SF_USER.name === 'nico';
+const canPixel = SF_USER.username === 'nico';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
