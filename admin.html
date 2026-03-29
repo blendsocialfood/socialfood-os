@@ -107,6 +107,11 @@
     border: 1px solid rgba(168,85,247,0.25);
     font-size: 14px;
   }
+  .nav-pixel .nav-icon {
+    background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05));
+    border: 1px solid rgba(245,158,11,0.25);
+    font-size: 14px;
+  }
   .top-bar-right {
     display: flex; align-items: center; gap: 16px;
   }
@@ -307,6 +312,11 @@
     border: 1px solid rgba(168,85,247,0.2);
     --card-glow: rgba(168,85,247,0.2);
   }
+  .card-pixel .module-icon {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+    border: 1px solid rgba(245,158,11,0.2);
+    --card-glow: rgba(245,158,11,0.2);
+  }
 
   .module-label {
     font-size: 11px; font-weight: 600;
@@ -458,6 +468,7 @@
   <div class="status-bar">
     <div class="status-item"><span class="status-dot"></span>Unity online</div>
     <div class="status-item"><span class="status-dot"></span>Ads Copilot online</div>
+    <div class="status-item"><span class="status-dot"></span>Pixel online</div>
     <div class="status-item"><span class="status-dot orange"></span>Bot Instagram activo</div>
   </div>
 
@@ -471,6 +482,7 @@ const COPILOT_URL = 'https://web-production-2131c.up.railway.app/dashboard';
 const FIRSTTOUCH_URL = 'https://blend-first-touch-production.up.railway.app';
 const PRISM_URL = 'https://blend-prism-production.up.railway.app';
 const DROP_URL = 'https://blend-drop-production.up.railway.app';
+const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
 const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
@@ -480,6 +492,7 @@ const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity_cop
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism';
 const canDrop = role === 'admin' || role === 'unity';
+const canPixel = role === 'admin' || role === 'unity_prism';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -501,6 +514,10 @@ const navHTML = `
   <a href="${canPrism ? PRISM_URL+'?token='+token : '#'}" class="nav-logo nav-prism ${canPrism ? '' : 'disabled'}">
     <div class="nav-icon"><svg width="16" height="14" viewBox="0 0 16 14"><polygon points="8,0 15,13 1,13" fill="none" stroke="#4AA8D8" stroke-width="1.5"/><line x1="0" y1="7" x2="4" y2="7" stroke="#fff" stroke-width="1" opacity="0.6"/><line x1="12" y1="5" x2="16" y2="3" stroke="#ff6b6b" stroke-width="1" opacity="0.7"/><line x1="12" y1="7" x2="16" y2="7" stroke="#ffd93d" stroke-width="1" opacity="0.7"/><line x1="12" y1="9" x2="16" y2="11" stroke="#4AA8D8" stroke-width="1" opacity="0.7"/></svg></div>
     <span class="nav-label">Prism</span>
+  </a>
+  <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}">
+    <div class="nav-icon">&#10022;</div>
+    <span class="nav-label">Pixel</span>
   </a>
   <a href="${canDrop ? DROP_URL+'?token='+token : '#'}" class="nav-logo nav-drop ${canDrop ? '' : 'disabled'}" style="${canDrop ? '' : 'display:none;'}">
     <div class="nav-icon">&#128640;</div>
@@ -559,6 +576,21 @@ const prismCard = `
     </div>
   </a>`;
 
+const pixelCard = `
+  <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="module-card card-pixel ${canPixel ? '' : 'disabled'}">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon">&#10022;</div>
+    <div class="module-label">Creatividad</div>
+    <div class="module-name">Pixel</div>
+    <div class="module-desc">Motor de diseno para crear graficas de Instagram con brand kits y plantillas.</div>
+    <div class="module-features">
+      <span class="feature-tag">Brand Kits</span>
+      <span class="feature-tag">Templates</span>
+      <span class="feature-tag">Export PNG</span>
+      <span class="feature-tag">Editor visual</span>
+    </div>
+  </a>`;
+
 const firstTouchCard = `
   <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="module-card card-firsttouch ${canFirstTouch ? '' : 'disabled'}">
     <div class="module-arrow">&#8599;</div>
@@ -588,7 +620,7 @@ const dropCard = canDrop ? `
     </div>
   </a>` : '';
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + dropCard + firstTouchCard;
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + dropCard + firstTouchCard;
 </script>
 
 </body>
