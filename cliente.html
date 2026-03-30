@@ -1286,7 +1286,7 @@ async function loadAll() {
   renderGrilla(unity);
   renderClickupProgress(unity);
   renderAds(copilot);
-  setIntroProgress(90, 'Últimos detalles');
+  setIntroProgress(90, 'Cargando imágenes');
 
   renderIG(copilot);
   renderReviews(unity);
@@ -1294,6 +1294,38 @@ async function loadAll() {
   renderNext(unity);
 
   setTimeout(initTilt, 500);
+
+  // Preload slideshow + team photos before showing page
+  const preloadUrls = [];
+  // Slideshow images
+  document.querySelectorAll('.bg-slide').forEach(el => {
+    const bg = el.style.backgroundImage;
+    const match = bg.match(/url\(['"]?(.+?)['"]?\)/);
+    if (match) preloadUrls.push(match[1]);
+  });
+  // Team photos
+  document.querySelectorAll('.orbital-photo').forEach(el => {
+    const bg = el.style.backgroundImage;
+    const match = bg.match(/url\(['"]?(.+?)['"]?\)/);
+    if (match) preloadUrls.push(match[1]);
+  });
+  // Hero avatar
+  const heroAvatar = document.querySelector('.hero-avatar');
+  if (heroAvatar) {
+    const bg = heroAvatar.style.backgroundImage;
+    const match = bg && bg.match(/url\(['"]?(.+?)['"]?\)/);
+    if (match) preloadUrls.push(match[1]);
+  }
+
+  if (preloadUrls.length > 0) {
+    setIntroProgress(95, 'Cargando fotos');
+    await Promise.all(preloadUrls.map(url => new Promise(resolve => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve; // Don't block on errors
+      img.src = url;
+    }))).catch(() => {});
+  }
 
   finishIntro();
 }
