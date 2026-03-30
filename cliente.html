@@ -1334,20 +1334,42 @@ async function loadAll() {
 // RENDER BACKGROUND SLIDESHOW
 // =====================================================
 // HD photos per client — replace URLs with Google Drive links when available
+const _drivePhoto = (id) => `${UNITY_URL}/api/drive/thumb/${id}?token=${TOKEN}&size=large`;
 const CLIENT_PHOTOS = {
   'Bangkok': [
-    'https://bangkokthai.cl/wp-content/uploads/2024/02/Bangkok-2-1024x801.png',
-    'https://i0.wp.com/experiencias.wherelunch.com/wp-content/uploads/2022/12/Bangkok-restaurante-1.jpg',
-    'https://i0.wp.com/experiencias.wherelunch.com/wp-content/uploads/2022/12/Bangkok-restaurante-2.jpg',
-    'https://i0.wp.com/experiencias.wherelunch.com/wp-content/uploads/2022/12/Bangkok-restaurante-3.jpg',
-    'https://bangkokthai.cl/wp-content/uploads/2024/02/Bangkok-2-1-1024x801.png',
+    _drivePhoto('1uJJvdGJDt9ku7aYs8EkDe2Pg-suVa23u'),
+    _drivePhoto('1BaY2hDHTZW3mn6nzEtBQlJ8NSq2fEs8W'),
+    _drivePhoto('1AUwNtjoLfrgAl-zPLw0YG4LJpzTk_zO_'),
+    _drivePhoto('1EiLgkXobw-de5Y9YM1EC-__kveCnrUkN'),
+    _drivePhoto('1B2H-oIFR5ZlNT2cjR-5KU5HQUz7GIrIL'),
   ],
-  'Mardoqueo': [
+  'Fuente Mardoqueo': [
     'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-1.jpg',
     'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-2.jpg',
     'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-3.jpg',
     'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-4.jpg',
     'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-5.jpg',
+  ],
+  'Chilenazo': [
+    _drivePhoto('11JOc9AZBUxH7vKx4zMWPrPHVKNRxVgq1'),
+    _drivePhoto('1hvrc7sdlvbA7NA1N_uqfw1V9w8WcPJGu'),
+    _drivePhoto('1JkRTJQOR8AOZDw-K9NLVF7zJoh3ZxOeV'),
+    _drivePhoto('1TFobhyorM6Q2CxxLLoFiF_ujnwHngwtd'),
+    _drivePhoto('1k1FeDQ9vEUTHJ1DGxPhWrcypgURgUPeX'),
+  ],
+  'La Buona Pizza': [
+    _drivePhoto('1D-WrnAQDHCUXr_xYBjSTb4C-sg60gcSq'),
+    _drivePhoto('1BIddhQxMf0A9hpzVmlvPRZetIMaqJQNR'),
+    _drivePhoto('1hvnT1lociFZaandXSNqvln7SSZiLVmmQ'),
+    _drivePhoto('1QKFT3i9N0TUYiPCTD63278R4j5u9tai1'),
+    _drivePhoto('1qecmVIQvDbxNbaMMqLbgiiSBVND0aRjP'),
+  ],
+  'Otto Burger': [
+    _drivePhoto('1_PZp4DM_hnBIV8eu_QfSLOJtobzPZKRy'),
+    _drivePhoto('18w2dp1AXjweEk4IaFuieLRvrW9giYpSQ'),
+    _drivePhoto('18zESQLOFXKWvBbvsmBXNlEocTxl7AyJM'),
+    _drivePhoto('1mVLddBwxl-x4qo_VUr4ATZd_5GVkFLbq'),
+    _drivePhoto('19paIxMzlk_joBYibFwI67eCqg04VlCxZ'),
   ],
 };
 
