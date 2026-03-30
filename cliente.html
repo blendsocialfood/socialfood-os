@@ -246,14 +246,6 @@ body.intro-done{overflow-y:auto;}
   background-size:cover;background-position:center;
   filter:brightness(0.3) saturate(1.4) blur(8px);
   opacity:0;
-  will-change:opacity,transform;
-}
-@keyframes bgSlide{
-  0%{opacity:0;transform:scale(1);}
-  3%{opacity:1;}
-  14%{opacity:1;transform:scale(1.06);}
-  17%{opacity:0;transform:scale(1.06);}
-  100%{opacity:0;transform:scale(1);}
 }
 .bg-overlay{
   position:fixed;inset:0;z-index:0;
@@ -1335,89 +1327,30 @@ async function loadAll() {
 // =====================================================
 // HD photos per client — replace URLs with Google Drive links when available
 const _drivePhoto = (id) => `${UNITY_URL}/api/drive/thumb/${id}?token=${TOKEN}&size=large`;
-const CLIENT_PHOTOS = {
-  'Bangkok': [
-    _drivePhoto('1uJJvdGJDt9ku7aYs8EkDe2Pg-suVa23u'),
-    _drivePhoto('1BaY2hDHTZW3mn6nzEtBQlJ8NSq2fEs8W'),
-    _drivePhoto('1AUwNtjoLfrgAl-zPLw0YG4LJpzTk_zO_'),
-    _drivePhoto('1EiLgkXobw-de5Y9YM1EC-__kveCnrUkN'),
-    _drivePhoto('1B2H-oIFR5ZlNT2cjR-5KU5HQUz7GIrIL'),
-  ],
-  'Fuente Mardoqueo': [
-    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-1.jpg',
-    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-2.jpg',
-    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-3.jpg',
-    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-4.jpg',
-    'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-5.jpg',
-  ],
-  'Chilenazo': [
-    _drivePhoto('11JOc9AZBUxH7vKx4zMWPrPHVKNRxVgq1'),
-    _drivePhoto('1hvrc7sdlvbA7NA1N_uqfw1V9w8WcPJGu'),
-    _drivePhoto('1JkRTJQOR8AOZDw-K9NLVF7zJoh3ZxOeV'),
-    _drivePhoto('1TFobhyorM6Q2CxxLLoFiF_ujnwHngwtd'),
-    _drivePhoto('1k1FeDQ9vEUTHJ1DGxPhWrcypgURgUPeX'),
-  ],
-  'La Buona Pizza': [
-    _drivePhoto('1D-WrnAQDHCUXr_xYBjSTb4C-sg60gcSq'),
-    _drivePhoto('1BIddhQxMf0A9hpzVmlvPRZetIMaqJQNR'),
-    _drivePhoto('1hvnT1lociFZaandXSNqvln7SSZiLVmmQ'),
-    _drivePhoto('1QKFT3i9N0TUYiPCTD63278R4j5u9tai1'),
-    _drivePhoto('1qecmVIQvDbxNbaMMqLbgiiSBVND0aRjP'),
-  ],
-  'Otto Burger': [
-    _drivePhoto('1_PZp4DM_hnBIV8eu_QfSLOJtobzPZKRy'),
-    _drivePhoto('18w2dp1AXjweEk4IaFuieLRvrW9giYpSQ'),
-    _drivePhoto('18zESQLOFXKWvBbvsmBXNlEocTxl7AyJM'),
-    _drivePhoto('1mVLddBwxl-x4qo_VUr4ATZd_5GVkFLbq'),
-    _drivePhoto('19paIxMzlk_joBYibFwI67eCqg04VlCxZ'),
-  ],
+const CLIENT_HERO = {
+  'Bangkok': _drivePhoto('1uJJvdGJDt9ku7aYs8EkDe2Pg-suVa23u'),
+  'Fuente Mardoqueo': 'https://santiagochile.com/wp-content/uploads/Sandwich-Bar-Fuente-Mardoqueo-Santiago-Chile-1.jpg',
+  'Chilenazo': _drivePhoto('11JOc9AZBUxH7vKx4zMWPrPHVKNRxVgq1'),
+  'La Buona Pizza': _drivePhoto('1D-WrnAQDHCUXr_xYBjSTb4C-sg60gcSq'),
+  'Otto Burger': _drivePhoto('1_PZp4DM_hnBIV8eu_QfSLOJtobzPZKRy'),
 };
 
 function renderSlideshow(copilot) {
   const container = document.getElementById('bg-slideshow');
-  let images = [];
+  let heroUrl = CLIENT_HERO[CLIENT] || '';
 
-  // 1) Use hardcoded HD photos if available for this client
-  if (CLIENT_PHOTOS[CLIENT]) {
-    images = CLIENT_PHOTOS[CLIENT];
-  }
-
-  // 2) Fallback: use IG post images
-  if (images.length === 0) {
+  // Fallback: first IG post image
+  if (!heroUrl) {
     const ig = copilot && copilot.ig;
     if (ig && ig.posts) {
-      images = ig.posts
-        .filter(p => p.media_url && p.media_type !== 'VIDEO')
-        .map(p => p.media_url)
-        .slice(0, 6);
+      const first = ig.posts.find(p => p.media_url && p.media_type !== 'VIDEO');
+      if (first) heroUrl = first.media_url;
     }
   }
 
-  if (images.length === 0) return;
+  if (!heroUrl) return;
 
-  // Limit to 6 slides max for performance
-  images = images.slice(0, 6);
-
-  const totalDuration = images.length * 8; // 8s per image
-  const style = document.createElement('style');
-  const pct1 = (3 / totalDuration * 100).toFixed(1);
-  const pct2 = (14 / totalDuration * 100).toFixed(1);
-  const pct3 = (17 / totalDuration * 100).toFixed(1);
-  style.textContent = `
-    .bg-slide.active{animation:bgSlideAuto ${totalDuration}s ease-in-out infinite;}
-    @keyframes bgSlideAuto{
-      0%{opacity:0;transform:scale(1);}
-      ${pct1}%{opacity:1;}
-      ${pct2}%{opacity:1;transform:scale(1.06);}
-      ${pct3}%{opacity:0;transform:scale(1.06);}
-      100%{opacity:0;transform:scale(1);}
-    }`;
-  document.head.appendChild(style);
-
-  container.innerHTML = images.map((url, i) => {
-    const delay = i * 8;
-    return `<div class="bg-slide active" style="background-image:url('${url}');animation-delay:${delay}s;"></div>`;
-  }).join('');
+  container.innerHTML = `<div class="bg-slide active" style="background-image:url('${heroUrl}');opacity:1;transform:scale(1.02);"></div>`;
 }
 
 // =====================================================
