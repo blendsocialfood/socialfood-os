@@ -1047,6 +1047,7 @@ heroTitle.innerHTML = words.map((w, i) => `<span style="transition-delay:${0.3 +
 const cursor = document.getElementById('cursor');
 const cursorGlow = document.getElementById('cursor-glow');
 let mx = 0, my = 0, cx = 0, cy = 0;
+let cursorRafId = null;
 
 document.addEventListener('mousemove', e => {
   mx = e.clientX; my = e.clientY;
@@ -1059,9 +1060,9 @@ function updateCursor() {
   cy += (my - cy) * 0.5;
   cursor.style.left = cx + 'px';
   cursor.style.top = cy + 'px';
-  requestAnimationFrame(updateCursor);
+  cursorRafId = requestAnimationFrame(updateCursor);
 }
-updateCursor();
+cursorRafId = requestAnimationFrame(updateCursor);
 
 // Hover states
 document.querySelectorAll('a,button,.ig-post,.kpi-card,.glass-card,.review-card,.grilla-piece').forEach(el => {
@@ -1074,6 +1075,8 @@ document.querySelectorAll('a,button,.ig-post,.kpi-card,.glass-card,.review-card,
 // =====================================================
 function initTilt() {
   document.querySelectorAll('.kpi-card,.glass-card,.review-card,.evo-card').forEach(card => {
+    if (card.dataset.tiltInit) return;
+    card.dataset.tiltInit = '1';
     card.addEventListener('mousemove', e => {
       const rect = card.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
@@ -1231,13 +1234,15 @@ initParticles();
 drawParticles();
 window.addEventListener('resize', initParticles);
 
-// Pause animations when tab not visible (fix lag)
+// Pause animations when tab not visible (fix lag + memory)
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     particlesRunning = false;
+    if (cursorRafId) { cancelAnimationFrame(cursorRafId); cursorRafId = null; }
   } else {
     particlesRunning = true;
     drawParticles();
+    if (!cursorRafId) cursorRafId = requestAnimationFrame(updateCursor);
   }
 });
 
