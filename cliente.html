@@ -1482,7 +1482,7 @@ function renderGrilla(unity) {
   }
 
   // Show pieces the client has interacted with or needs to review
-  const clientStates = ['esperando_check_cliente','en_revision_cliente','hacer_ajuste','cambios_pedidos','aprobado_final','aprobado'];
+  const clientStates = ['esperando_check_cliente','en_revision_cliente','hacer_ajuste','cambios_pedidos'];
   const reviewPiezas = grilla.piezas.filter(p => clientStates.includes(p.estado || 'draft'));
 
   if (reviewPiezas.length === 0) {
