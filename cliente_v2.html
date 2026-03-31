@@ -1762,15 +1762,22 @@ function openApproval() {
   modal.classList.add('open');
   const countEl = document.getElementById('modal-count');
 
-  sliderPiezas = pendingPiezas.length > 0 ? pendingPiezas : allPiezas.filter(p => !['draft','clickup'].includes(p.estado)).slice(0, 15);
-  sliderIdx = 0;
-
   if (pendingPiezas.length > 0) {
+    sliderPiezas = pendingPiezas;
+    sliderIdx = 0;
     countEl.textContent = `${pendingPiezas.length} pieza${pendingPiezas.length>1?'s':''} esperando tu aprobación`;
+    renderSliderPieza();
   } else {
-    countEl.textContent = `${sliderPiezas.length} piezas este mes`;
+    sliderPiezas = [];
+    countEl.textContent = '';
+    const wrap = document.getElementById('slider-wrap');
+    wrap.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:16px;">
+        <div style="font-size:64px;">✅</div>
+        <div style="font-size:24px;font-weight:700;color:#fff;">Todo aprobado</div>
+        <div style="color:#888;font-size:14px;text-align:center;max-width:300px;">No hay piezas pendientes de aprobación. Te avisaremos cuando haya contenido nuevo para revisar.</div>
+      </div>`;
   }
-  renderSliderPieza();
 }
 
 function renderSliderPieza() {
