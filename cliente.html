@@ -1481,11 +1481,9 @@ function renderGrilla(unity) {
     return 'fmt-imagen';
   }
 
-  // Only show pieces that need client review
-  const reviewPiezas = grilla.piezas.filter(p => {
-    const e = p.estado || 'draft';
-    return e === 'esperando_check_cliente' || e === 'en_revision_cliente';
-  });
+  // Show pieces the client has interacted with or needs to review
+  const clientStates = ['esperando_check_cliente','en_revision_cliente','hacer_ajuste','cambios_pedidos','aprobado_final','aprobado'];
+  const reviewPiezas = grilla.piezas.filter(p => clientStates.includes(p.estado || 'draft'));
 
   if (reviewPiezas.length === 0) {
     columns.innerHTML = `<div style="text-align:center;padding:40px 20px;">
