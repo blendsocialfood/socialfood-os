@@ -1481,8 +1481,23 @@ function renderGrilla(unity) {
     return 'fmt-imagen';
   }
 
+  // Only show pieces that need client review
+  const reviewPiezas = grilla.piezas.filter(p => {
+    const e = p.estado || 'draft';
+    return e === 'esperando_check_cliente' || e === 'en_revision_cliente';
+  });
+
+  if (reviewPiezas.length === 0) {
+    columns.innerHTML = `<div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:36px;margin-bottom:12px;">✅</div>
+      <div style="font-size:16px;font-weight:600;color:#4ade80;margin-bottom:6px;">Todo aprobado</div>
+      <div style="font-size:13px;color:#666;">No hay piezas pendientes de aprobacion. Te avisaremos cuando haya contenido nuevo para revisar.</div>
+    </div>`;
+    return;
+  }
+
   const porSemana = {};
-  grilla.piezas.forEach(p => { const s = p.semana||1; if (!porSemana[s]) porSemana[s]=[]; porSemana[s].push(p); });
+  reviewPiezas.forEach(p => { const s = p.semana||1; if (!porSemana[s]) porSemana[s]=[]; porSemana[s].push(p); });
 
   let html = '';
   const maxSem = Math.max(...Object.keys(porSemana).map(Number), 4);
