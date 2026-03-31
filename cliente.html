@@ -1727,7 +1727,24 @@ async function aprobarPieza(piezaId) {
       body: JSON.stringify({ token: TOKEN, pieza_id: piezaId, accion: 'aprobar', autor: CLIENT_NAME })
     });
     if (resp.ok) {
-      location.reload();
+      const card = document.querySelector(`[onclick*="aprobarPieza(${piezaId})"]`)?.closest('.grilla-piece');
+      if (card) {
+        card.style.transition = 'all 0.4s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          card.remove();
+          // Check if no more pieces to review
+          const remaining = document.querySelectorAll('.grilla-piece');
+          if (remaining.length === 0) {
+            document.getElementById('grilla-columns').innerHTML = `<div style="text-align:center;padding:40px 20px;">
+              <div style="font-size:36px;margin-bottom:12px;">✅</div>
+              <div style="font-size:16px;font-weight:600;color:#4ade80;margin-bottom:6px;">Todo aprobado</div>
+              <div style="font-size:13px;color:#666;">No hay piezas pendientes de aprobacion. Te avisaremos cuando haya contenido nuevo para revisar.</div>
+            </div>`;
+          }
+        }, 400);
+      }
     } else {
       alert('Error al aprobar');
     }
@@ -1749,7 +1766,20 @@ async function enviarCambios(piezaId) {
       body: JSON.stringify({ token: TOKEN, pieza_id: piezaId, accion: 'cambios', texto: texto, autor: CLIENT_NAME })
     });
     if (resp.ok) {
-      location.reload();
+      const card = document.getElementById('cambios-form-' + piezaId)?.closest('.grilla-piece');
+      if (card) {
+        // Update card to show "En ajuste" state
+        const badge = card.querySelector('.estado-badge');
+        if (badge) { badge.textContent = 'Cambios enviados'; badge.style.color = '#fb923c'; }
+        // Remove action buttons
+        const actions = card.querySelectorAll('button');
+        actions.forEach(b => b.style.display = 'none');
+        // Add confirmation
+        const conf = document.createElement('div');
+        conf.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.2);border-radius:8px;color:#fb923c;font-size:12px;text-align:center;';
+        conf.textContent = '✏️ Cambios enviados al equipo';
+        card.appendChild(conf);
+      }
     } else {
       alert('Error al enviar cambios');
     }
