@@ -1112,8 +1112,8 @@ window.addEventListener('scroll', () => {
   // PHASE 2 (50-75%): Circle fills screen, text fades, photo takes over
   // PHASE 3 (75-100%): Client name presentation over the photo
 
-  // 1. Clip-path circle: 8% → 85%
-  const circleSize = 8 + progress * 77;
+  // 1. Clip-path circle: 0% → 85%
+  const circleSize = progress * 85;
   if (heroPhoto) heroPhoto.style.clipPath = `circle(${circleSize}% at 50% 50%)`;
 
   // 2. Letter-by-letter text reveal (phase 1: 0-50%)
