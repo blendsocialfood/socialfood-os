@@ -753,10 +753,10 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 }
 .marquee-item{
   font-size:clamp(18px,3vw,28px);font-weight:800;letter-spacing:-0.5px;
-  padding:0 16px;color:rgba(255,255,255,.06);
+  padding:0 16px;color:rgba(255,255,255,.14);
   transition:color var(--dur) var(--ease);
 }
-.marquee-item.accent{color:rgba(234,88,12,.12);}
+.marquee-item.accent{color:rgba(234,88,12,.28);}
 .marquee-dot{
   display:inline-flex;align-items:center;padding:0 12px;
   color:rgba(234,88,12,.15);font-size:10px;
@@ -1919,6 +1919,7 @@ loadAll();
 const curDot = document.getElementById('cursor-dot');
 const curRing = document.getElementById('cursor-ring');
 let curX = 0, curY = 0, ringX = 0, ringY = 0;
+let ringRafId = null;
 document.addEventListener('mousemove', e => {
   curX = e.clientX; curY = e.clientY;
   curDot.style.left = curX + 'px'; curDot.style.top = curY + 'px';
@@ -1927,9 +1928,18 @@ function ringLoop() {
   ringX += (curX - ringX) * 0.12;
   ringY += (curY - ringY) * 0.12;
   curRing.style.left = ringX + 'px'; curRing.style.top = ringY + 'px';
-  requestAnimationFrame(ringLoop);
+  ringRafId = requestAnimationFrame(ringLoop);
 }
-ringLoop();
+ringRafId = requestAnimationFrame(ringLoop);
+
+// Pause animations when tab not visible (fix memory/CPU)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (ringRafId) { cancelAnimationFrame(ringRafId); ringRafId = null; }
+  } else {
+    if (!ringRafId) ringRafId = requestAnimationFrame(ringLoop);
+  }
+});
 document.addEventListener('mousedown', () => curRing.classList.add('click'));
 document.addEventListener('mouseup', () => curRing.classList.remove('click'));
 document.querySelectorAll('a,button,[onclick],.team-panel,.cflow-card,.top-post,.slider-nav,.fab').forEach(el => {
