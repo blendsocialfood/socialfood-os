@@ -1,5 +1,6 @@
 from flask import Flask, request, session, redirect, send_from_directory
 import os, hmac, hashlib, time, json, requests as http_requests
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = os.environ.get('SECRET_KEY', 'sf-os-secret-2026')
@@ -8,6 +9,11 @@ AUTH_SECRET = 'blendsf-auth-2026'
 
 UNITY_URL = 'https://positive-appreciation-production.up.railway.app'
 FIRST_TOUCH_URL = 'https://blend-first-touch-production.up.railway.app'
+COPILOT_URL = 'https://web-production-2131c.up.railway.app'
+BOT_URL = 'https://web-production-76938.up.railway.app'
+PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app'
+PRISM_URL = 'https://blend-prism-production.up.railway.app'
+DROP_URL = 'https://blend-drop-production.up.railway.app'
 
 # Fallback: if First Touch is down, use these to avoid lockout
 USERS_FALLBACK = {
@@ -131,6 +137,44 @@ def cliente():
     user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
     html = html.replace('</head>', user_script + '\n</head>')
     return html
+
+@app.route('/mission-control')
+def mission_control():
+    if 'user' not in session:
+        return redirect('/login')
+    token = generate_token(session['user'], session['role'])
+    with open('mission_control.html', 'r') as f:
+        html = f.read()
+    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token})
+    user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
+    html = html.replace('</head>', user_script + '\n</head>')
+    return html
+
+@app.route('/api/health')
+def health_check():
+    if 'user' not in session:
+        return {'error': 'unauthorized'}, 401
+    services = [
+        ('unity', UNITY_URL),
+        ('copilot', COPILOT_URL),
+        ('prism', PRISM_URL),
+        ('bot', BOT_URL),
+        ('pixel', PIXEL_URL),
+        ('firsttouch', FIRST_TOUCH_URL),
+        ('drop', DROP_URL),
+    ]
+    def check(item):
+        name, url = item
+        try:
+            start = time.time()
+            r = http_requests.get(url, timeout=5)
+            ms = int((time.time() - start) * 1000)
+            return name, {'status': 'online', 'code': r.status_code, 'ms': ms}
+        except Exception:
+            return name, {'status': 'offline', 'code': 0, 'ms': 0}
+    with ThreadPoolExecutor(max_workers=7) as pool:
+        results = dict(pool.map(check, services))
+    return results
 
 @app.route('/api/verify-token')
 def verify_token_endpoint():

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control - Social Food OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --orange: #EA580C;
+  --bg: #050505;
+  --surface: #0a0a0a;
+  --surface-2: #111111;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #f5f5f5;
+  --text-muted: #666;
+  --text-dim: #444;
+}
+body {
+  font-family:'Inter',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+
+/* === NAV BAR === */
+.top-bar {
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 28px;
+  background:rgba(5,5,5,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.top-bar-left { display:flex; align-items:center; gap:20px; overflow-x:auto; scrollbar-width:none; }
+.top-bar-left::-webkit-scrollbar { display:none; }
+.nav-logo {
+  display:flex; align-items:center; gap:6px;
+  text-decoration:none; padding:6px 14px;
+  border-radius:10px; transition:all 0.3s;
+  border:1px solid transparent;
+}
+.nav-logo.active { background:rgba(234,88,12,0.08); border-color:rgba(234,88,12,0.2); }
+.nav-logo:not(.active):not(.disabled):hover { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+.nav-logo.disabled { opacity:0.25; cursor:default; pointer-events:none; }
+.nav-logo .nav-icon {
+  width:28px; height:28px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:900; color:#fff;
+}
+.nav-logo .nav-label { font-size:12px; font-weight:600; color:#888; letter-spacing:0.3px; }
+.nav-logo.active .nav-label { color:#ddd; }
+.nav-sf .nav-icon { background:linear-gradient(145deg,#151515,#0d0d0d); border:1px solid rgba(255,255,255,0.1); font-size:11px; }
+.nav-sf .nav-dot { display:inline-block; width:4px; height:4px; background:var(--orange); border-radius:50%; }
+.nav-mc .nav-icon { background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.05)); border:1px solid rgba(34,197,94,0.25); font-size:10px; }
+.nav-unity .nav-icon { background:linear-gradient(135deg,rgba(234,88,12,0.2),rgba(234,88,12,0.05)); border:1px solid rgba(234,88,12,0.25); font-size:14px; }
+.nav-copilot .nav-icon { background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05)); border:1px solid rgba(59,130,246,0.25); font-size:14px; }
+.nav-prism .nav-icon { background:linear-gradient(135deg,rgba(28,130,180,0.2),rgba(28,130,180,0.05)); border:1px solid rgba(28,130,180,0.25); font-size:14px; }
+.nav-drop .nav-icon { background:linear-gradient(135deg,rgba(220,38,38,0.2),rgba(220,38,38,0.05)); border:1px solid rgba(220,38,38,0.25); font-size:14px; }
+.nav-firsttouch .nav-icon { background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(168,85,247,0.05)); border:1px solid rgba(168,85,247,0.25); font-size:14px; }
+.nav-pixel .nav-icon { background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.05)); border:1px solid rgba(245,158,11,0.25); font-size:14px; }
+.top-bar-right { display:flex; align-items:center; gap:16px; }
+.user-info { font-size:12px; color:#555; }
+.user-info strong { color:#999; }
+.btn-logout {
+  font-size:11px; font-weight:600; color:#444; text-decoration:none;
+  padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); transition:all 0.3s;
+}
+.btn-logout:hover { color:#f87171; border-color:rgba(248,113,113,0.2); background:rgba(248,113,113,0.05); }
+
+/* === AMBIENT === */
+.ambient { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.ambient .orb { position:absolute; border-radius:50%; filter:blur(120px); opacity:0.4; animation:float 20s ease-in-out infinite; }
+.ambient .orb-1 { width:600px; height:600px; background:radial-gradient(circle,rgba(34,197,94,0.1) 0%,transparent 70%); top:-200px; left:-100px; }
+.ambient .orb-2 { width:500px; height:500px; background:radial-gradient(circle,rgba(234,88,12,0.06) 0%,transparent 70%); bottom:-150px; right:-100px; animation-delay:-10s; }
+@keyframes float {
+  0%,100% { transform:translate(0,0) scale(1); }
+  33% { transform:translate(30px,-20px) scale(1.05); }
+  66% { transform:translate(-20px,15px) scale(0.95); }
+}
+
+/* === PAGE === */
+.mc-container {
+  position:relative; z-index:2;
+  max-width:1200px; margin:0 auto;
+  padding:80px 24px 40px; text-align:center;
+}
+.mc-header { margin-bottom:28px; }
+.mc-title {
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(14px,2.5vw,22px);
+  color:var(--orange); letter-spacing:2px;
+  margin-bottom:8px;
+  text-shadow:0 0 30px rgba(234,88,12,0.3);
+}
+.mc-subtitle { font-size:13px; color:var(--text-muted); }
+
+/* === CANVAS === */
+.canvas-wrap {
+  display:inline-block; border-radius:16px;
+  overflow:hidden; border:1px solid var(--border);
+  box-shadow:0 0 60px rgba(234,88,12,0.04), 0 20px 80px rgba(0,0,0,0.5);
+  position:relative; background:#080808;
+}
+.canvas-wrap canvas {
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  width:min(1600px, calc(100vw - 48px));
+  height:auto;
+}
+.scanlines {
+  position:absolute; inset:0; pointer-events:none; border-radius:16px;
+  background:repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+}
+.crt-glow {
+  position:absolute; inset:-2px; border-radius:18px; pointer-events:none;
+  box-shadow:inset 0 0 60px rgba(0,0,0,0.5), 0 0 20px rgba(234,88,12,0.03);
+}
+
+/* === STATUS CARDS === */
+.status-grid {
+  display:grid; grid-template-columns:repeat(7,1fr);
+  gap:10px; margin-top:20px;
+}
+@media (max-width:900px) { .status-grid { grid-template-columns:repeat(4,1fr); } }
+@media (max-width:500px) {
+  .status-grid { grid-template-columns:repeat(2,1fr); }
+  .top-bar { padding:10px 12px; }
+  .top-bar-left { gap:8px; }
+  .nav-logo { padding:5px 10px; white-space:nowrap; flex-shrink:0; }
+}
+.status-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:14px 10px; text-align:center;
+  transition:all 0.3s;
+}
+.status-card:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+.sc-dot {
+  width:6px; height:6px; border-radius:50%;
+  display:inline-block; margin-right:4px; vertical-align:middle;
+}
+.sc-dot.online { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,0.5); animation:pulse 3s ease-in-out infinite; }
+.sc-dot.offline { background:#ef4444; box-shadow:0 0 6px rgba(239,68,68,0.5); animation:pulse 1s ease-in-out infinite; }
+.sc-dot.checking { background:#555; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.sc-name { font-size:11px; font-weight:700; margin-bottom:2px; }
+.sc-role { font-size:10px; color:var(--text-dim); margin-bottom:4px; }
+.sc-ms { font-family:'Press Start 2P',monospace; font-size:8px; }
+
+.last-check { margin-top:16px; font-size:11px; color:var(--text-dim); }
+
+/* === NAV MOBILE === */
+@media (max-width:600px) {
+  .nav-label { font-size:11px; }
+  .nav-icon { width:26px; height:26px; font-size:11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left" id="nav-links"></div>
+  <div class="top-bar-right">
+    <span class="user-info" id="user-greeting"></span>
+    <a href="/logout" class="btn-logout">Salir</a>
+  </div>
+</div>
+
+<div class="ambient"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+<div class="mc-container">
+  <div class="mc-header">
+    <div class="mc-title">MISSION CONTROL</div>
+    <div class="mc-subtitle">Estado en tiempo real del ecosistema Blend</div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="scene" width="400" height="200"></canvas>
+    <div class="scanlines"></div>
+    <div class="crt-glow"></div>
+  </div>
+
+  <div class="status-grid" id="status-grid"></div>
+  <div class="last-check" id="last-check">Conectando...</div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const W = 400, H = 200;
+
+// ===================== SERVICES =====================
+const SERVICES = [
+  { id:'unity',      name:'Unity',    role:'Contenido',   color:'#EA580C', hair:'#5c2a0e', skin:'#D4A574', pants:'#2a2520', feature:'headset' },
+  { id:'copilot',    name:'Copilot',  role:'Ads',         color:'#3B82F6', hair:'#1a2d4a', skin:'#FFDBAC', pants:'#1a2028', feature:'glasses' },
+  { id:'prism',      name:'Prism',    role:'Diseno',      color:'#1C82B4', hair:'#0e3a4f', skin:'#C68642', pants:'#1a2528', feature:'beret' },
+  { id:'bot',        name:'Bot IG',   role:'DMs',         color:'#22C55E', hair:'#333',    skin:'#666',    pants:'#1a2820', feature:'robot' },
+  { id:'pixel',      name:'Pixel',    role:'Creatividad', color:'#F59E0B', hair:'#4a3208', skin:'#E0AC69', pants:'#282520', feature:'brush' },
+  { id:'firsttouch', name:'F.Touch',  role:'Ventas',      color:'#A855F7', hair:'#2d1545', skin:'#8D5524', pants:'#201a28', feature:'tie' },
+  { id:'drop',       name:'Drop',     role:'Publicar',    color:'#DC2626', hair:'#4a1010', skin:'#F1C27D', pants:'#281a1a', feature:'cap' },
+];
+
+let healthData = {};
+let tick = 0;
+
+// ===================== STAR POSITIONS (static) =====================
+const STARS = [[178,25],[193,32],[208,22],[218,38],[183,42],[202,28],[188,35],[213,30],[196,40],[225,35]];
+
+// ===================== POSITIONS =====================
+const DESK_Y = 130;
+const startX = 26;
+const spacing = 50;
+function getX(i) { return startX + i * spacing; }
+
+// ===================== DRAW BACKGROUND =====================
+function drawBackground() {
+  // Wall
+  ctx.fillStyle = '#0c0c0c';
+  ctx.fillRect(0, 0, W, 155);
+  // Wall lines
+  ctx.fillStyle = '#0e0e0e';
+  ctx.fillRect(0, 60, W, 1);
+  ctx.fillRect(0, 100, W, 1);
+
+  // Floor
+  ctx.fillStyle = '#0a0908';
+  ctx.fillRect(0, 155, W, 45);
+  // Floor tiles
+  ctx.fillStyle = '#0d0b0a';
+  for (let x = 0; x < W; x += 20) ctx.fillRect(x, 155, 1, 45);
+  ctx.fillStyle = '#080706';
+  ctx.fillRect(0, 175, W, 1);
+  ctx.fillRect(0, 195, W, 1);
+
+  // === Window (starry night) ===
+  ctx.fillStyle = '#0a1020';
+  ctx.fillRect(170, 18, 60, 38);
+  ctx.fillStyle = '#0d1428';
+  ctx.fillRect(172, 20, 56, 34);
+  // Stars
+  ctx.fillStyle = '#fff';
+  STARS.forEach(([sx, sy]) => {
+    ctx.globalAlpha = 0.2 + Math.sin(tick * 0.03 + sx) * 0.3;
+    ctx.fillRect(sx, sy, 1, 1);
+  });
+  ctx.globalAlpha = 1;
+  // Moon
+  ctx.fillStyle = '#e8e0c8';
+  ctx.fillRect(221, 24, 4, 4);
+  ctx.fillStyle = '#0d1428';
+  ctx.fillRect(223, 23, 3, 3); // crescent cutout
+  // Window frame
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(169, 17, 62, 1); ctx.fillRect(169, 56, 62, 1);
+  ctx.fillRect(169, 17, 1, 40); ctx.fillRect(230, 17, 1, 40);
+  ctx.fillRect(199, 17, 1, 40); // center divider
+
+  // === Wall poster ===
+  ctx.fillStyle = '#111';
+  ctx.fillRect(48, 28, 32, 22);
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(49, 29, 30, 20);
+  // "B" letters as orange bars
+  ctx.fillStyle = '#EA580C';
+  ctx.globalAlpha = 0.5;
+  for (let i = 0; i < 5; i++) ctx.fillRect(53 + i * 5, 35, 2, 8);
+  ctx.globalAlpha = 1;
+
+  // === Clock ===
+  ctx.fillStyle = '#111';
+  ctx.fillRect(318, 28, 16, 16);
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(319, 29, 14, 14);
+  ctx.fillStyle = '#333';
+  ctx.fillRect(326, 32, 1, 5); // hour
+  ctx.fillRect(326, 36, 4, 1); // minute
+  ctx.fillStyle = '#EA580C';
+  ctx.fillRect(326, 36, 1, 1); // center
+
+  // === Ceiling lamp ===
+  ctx.fillStyle = '#131313';
+  ctx.fillRect(196, 0, 8, 7);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(194, 7, 12, 3);
+  // Lamp glow
+  ctx.fillStyle = '#F59E0B';
+  ctx.globalAlpha = 0.04;
+  ctx.fillRect(180, 10, 40, 60);
+  ctx.globalAlpha = 0.08;
+  ctx.fillRect(190, 10, 20, 40);
+  ctx.globalAlpha = 1;
+  // Lamp bulb
+  ctx.fillStyle = '#F59E0B';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(198, 10, 4, 2);
+  ctx.globalAlpha = 1;
+
+  // === Coffee machine (left corner) ===
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(5, 140, 10, 15);
+  ctx.fillStyle = '#222';
+  ctx.fillRect(6, 141, 8, 6);
+  ctx.fillStyle = '#EA580C';
+  ctx.globalAlpha = 0.6;
+  ctx.fillRect(7, 142, 2, 1); // LED
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(8, 148, 4, 3); // cup
+  ctx.fillStyle = '#3d2b1f';
+  ctx.fillRect(9, 148, 2, 1); // coffee
+
+  // === Plant (right corner) ===
+  ctx.fillStyle = '#2d1f15';
+  ctx.fillRect(385, 145, 8, 10); // pot
+  ctx.fillStyle = '#3d2b1f';
+  ctx.fillRect(384, 144, 10, 2); // pot rim
+  ctx.fillStyle = '#1a5c1a';
+  ctx.fillRect(387, 138, 3, 7); // stem
+  ctx.fillRect(384, 134, 4, 5); // leaf L
+  ctx.fillRect(390, 132, 4, 5); // leaf R
+  ctx.fillRect(386, 130, 3, 4); // leaf top
+  ctx.fillStyle = '#22802a';
+  ctx.fillRect(385, 135, 2, 3);
+  ctx.fillRect(391, 133, 2, 3);
+}
+
+// ===================== DRAW MONITOR =====================
+function drawMonitor(x, y, color, online) {
+  // Glow
+  if (online) {
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.03;
+    ctx.fillRect(x - 4, y - 18, 20, 20);
+    ctx.globalAlpha = 1;
+  }
+  // Frame
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(x - 1, y - 15, 14, 12);
+  // Screen
+  if (online) {
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.2;
+    ctx.fillRect(x, y - 14, 12, 10);
+    ctx.globalAlpha = 0.6;
+    // Content lines
+    ctx.fillRect(x + 1, y - 13, 4, 1);
+    ctx.fillRect(x + 1, y - 11, 7, 1);
+    ctx.fillRect(x + 1, y - 9, 5, 1);
+    ctx.fillRect(x + 1, y - 7, 8, 1);
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.fillStyle = '#080808';
+    ctx.fillRect(x, y - 14, 12, 10);
+    // X on screen
+    ctx.fillStyle = '#ef4444';
+    ctx.globalAlpha = 0.4;
+    ctx.fillRect(x + 3, y - 12, 1, 1); ctx.fillRect(x + 8, y - 12, 1, 1);
+    ctx.fillRect(x + 4, y - 11, 1, 1); ctx.fillRect(x + 7, y - 11, 1, 1);
+    ctx.fillRect(x + 5, y - 10, 2, 1);
+    ctx.fillRect(x + 4, y - 9, 1, 1);  ctx.fillRect(x + 7, y - 9, 1, 1);
+    ctx.fillRect(x + 3, y - 8, 1, 1);  ctx.fillRect(x + 8, y - 8, 1, 1);
+    ctx.globalAlpha = 1;
+  }
+  // Stand
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(x + 4, y - 3, 4, 2);
+  ctx.fillRect(x + 3, y - 1, 6, 1);
+}
+
+// ===================== DRAW DESK =====================
+function drawDesk(x, y) {
+  ctx.fillStyle = '#3d2b1f';
+  ctx.fillRect(x - 8, y, 28, 3);
+  ctx.fillStyle = '#2a1f15';
+  ctx.fillRect(x - 8, y + 3, 28, 1);
+  ctx.fillRect(x - 6, y + 4, 2, 8);
+  ctx.fillRect(x + 16, y + 4, 2, 8);
+  // Keyboard
+  ctx.fillStyle = '#151515';
+  ctx.fillRect(x + 1, y, 8, 2);
+  ctx.fillStyle = '#1c1c1c';
+  ctx.fillRect(x + 2, y, 6, 1);
+}
+
+// ===================== DRAW CHAIR =====================
+function drawChair(x, y) {
+  ctx.fillStyle = '#181818';
+  ctx.fillRect(x - 1, y + 10, 10, 2);
+  ctx.fillStyle = '#141414';
+  ctx.fillRect(x - 2, y + 3, 2, 9);
+  ctx.fillStyle = '#111';
+  ctx.fillRect(x, y + 12, 1, 3);
+  ctx.fillRect(x + 7, y + 12, 1, 3);
+  ctx.fillRect(x - 1, y + 15, 2, 1);
+  ctx.fillRect(x + 7, y + 15, 2, 1);
+}
+
+// ===================== DRAW CHARACTER =====================
+function drawCharacter(x, y, svc, typing, sleeping) {
+  const { hair, skin, color, pants, feature } = svc;
+  const skinDark = shadeColor(skin, -20);
+
+  if (sleeping) {
+    // Slumped on desk
+    ctx.fillStyle = hair;
+    ctx.fillRect(x + 5, y + 4, 5, 2);
+    ctx.fillRect(x + 4, y + 6, 6, 1);
+    ctx.fillStyle = skin;
+    ctx.fillRect(x + 5, y + 7, 4, 3);
+    // Closed eyes
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x + 6, y + 8, 2, 1);
+    // Body slumped
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 1, y + 7, 4, 5);
+    ctx.fillRect(x + 1, y + 10, 8, 2);
+    // Arms draped
+    ctx.fillStyle = skin;
+    ctx.fillRect(x + 9, y + 9, 2, 1);
+    // Legs
+    ctx.fillStyle = pants;
+    ctx.fillRect(x + 2, y + 12, 2, 2);
+    ctx.fillRect(x + 6, y + 12, 2, 2);
+    return;
+  }
+
+  // === Sitting upright, facing right ===
+  // Hair
+  ctx.fillStyle = hair;
+  ctx.fillRect(x + 1, y, 6, 2);
+  ctx.fillRect(x, y + 2, 7, 1);
+  ctx.fillRect(x + 6, y + 3, 1, 2);
+
+  // Feature: cap overrides hair
+  if (feature === 'cap') {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 1, y, 9, 1);
+    ctx.fillRect(x, y - 1, 7, 1);
+  }
+  // Feature: beret
+  if (feature === 'beret') {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 1, y - 1, 8, 1);
+    ctx.fillRect(x - 2, y, 3, 1);
+  }
+
+  // Head
+  ctx.fillStyle = skin;
+  ctx.fillRect(x + 1, y + 3, 5, 4);
+
+  // Feature: robot face
+  if (feature === 'robot') {
+    ctx.fillStyle = '#555';
+    ctx.fillRect(x + 1, y + 3, 5, 4);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 2, y + 4, 1, 1);
+    ctx.fillRect(x + 4, y + 4, 1, 1);
+    // Antenna
+    ctx.fillStyle = '#444';
+    ctx.fillRect(x + 3, y - 2, 1, 2);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 2, y - 3, 3, 1);
+  } else {
+    // Eye
+    ctx.fillStyle = '#222';
+    ctx.fillRect(x + 4, y + 4, 1, 1);
+    // Mouth
+    ctx.fillStyle = skinDark;
+    ctx.fillRect(x + 4, y + 6, 1, 1);
+  }
+
+  // Feature: glasses
+  if (feature === 'glasses') {
+    ctx.fillStyle = '#888';
+    ctx.fillRect(x + 2, y + 4, 4, 1);
+  }
+  // Feature: headset
+  if (feature === 'headset') {
+    ctx.fillStyle = '#444';
+    ctx.fillRect(x - 1, y + 3, 1, 3);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x - 1, y + 5, 2, 2);
+  }
+
+  // Neck
+  ctx.fillStyle = skin;
+  ctx.fillRect(x + 2, y + 7, 3, 1);
+
+  // Body
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y + 8, 8, 4);
+
+  // Feature: tie
+  if (feature === 'tie') {
+    ctx.fillStyle = shadeColor(color, -30);
+    ctx.fillRect(x + 3, y + 8, 2, 3);
+  }
+
+  // Arms
+  ctx.fillStyle = skin;
+  if (typing) {
+    ctx.fillRect(x + 6, y + 9, 3, 1);
+    ctx.fillRect(x + 7, y + 10, 2, 1);
+  } else {
+    ctx.fillRect(x - 1, y + 9, 1, 2);
+    ctx.fillRect(x + 7, y + 9, 2, 1);
+  }
+
+  // Feature: brush in hand
+  if (feature === 'brush' && !sleeping) {
+    ctx.fillStyle = '#6b4226';
+    ctx.fillRect(x + 9, y + 8, 1, 4);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 9, y + 7, 1, 1);
+  }
+
+  // Legs
+  ctx.fillStyle = pants;
+  ctx.fillRect(x + 1, y + 12, 3, 2);
+  ctx.fillRect(x + 5, y + 12, 3, 2);
+  // Shoes
+  ctx.fillStyle = '#151515';
+  ctx.fillRect(x + 1, y + 14, 3, 1);
+  ctx.fillRect(x + 5, y + 14, 3, 1);
+}
+
+// ===================== DRAW ZZZ =====================
+function drawZzz(x, y, t) {
+  ctx.fillStyle = '#fff';
+  const drawZ = (zx, zy, s) => {
+    ctx.fillRect(zx, zy, s, 1);
+    for (let i = 1; i < s; i++) ctx.fillRect(zx + s - 1 - i, zy + i, 1, 1);
+    ctx.fillRect(zx, zy + s, s, 1);
+  };
+  const phase = (t * 0.5) % 12;
+  ctx.globalAlpha = 0.5;
+  drawZ(x + 10 + Math.sin(t * 0.8) * 1.5, y + 1 - (phase % 6), 3);
+  ctx.globalAlpha = 0.3;
+  drawZ(x + 15 + Math.sin(t * 0.6 + 2) * 1, y - 3 - (phase % 6), 2);
+  ctx.globalAlpha = 0.15;
+  drawZ(x + 18 + Math.sin(t * 0.4 + 4) * 1, y - 6 - (phase % 6), 2);
+  ctx.globalAlpha = 1;
+}
+
+// ===================== DRAW STATUS DOT =====================
+function drawStatusDot(x, y, online) {
+  const pulse = Math.sin(tick * 0.08) * 0.3;
+  if (online) {
+    ctx.fillStyle = '#22c55e';
+    ctx.globalAlpha = 0.15 + pulse * 0.1;
+    ctx.fillRect(x + 1, y - 19, 10, 5);
+    ctx.globalAlpha = 1;
+    ctx.fillRect(x + 4, y - 18, 4, 3);
+  } else {
+    ctx.fillStyle = '#ef4444';
+    ctx.globalAlpha = 0.4 + pulse;
+    ctx.fillRect(x + 4, y - 18, 4, 3);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ===================== DRAW NAME PLATE =====================
+function drawNamePlate(x, y, name, color) {
+  const w = name.length * 4 + 4;
+  const px = x + 4 - w / 2;
+  // Background
+  ctx.fillStyle = '#0a0a0a';
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(px - 1, y + 18, w + 2, 7);
+  ctx.globalAlpha = 1;
+  // Border
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(px - 1, y + 18, w + 2, 1);
+  ctx.globalAlpha = 1;
+  // Text
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.font = '4px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText(name, x + 5, y + 24);
+  ctx.textAlign = 'left';
+  ctx.globalAlpha = 1;
+}
+
+// ===================== DRAW MS BADGE =====================
+function drawMsBadge(x, y, ms, online) {
+  if (ms === null) return;
+  const text = online ? ms + 'ms' : 'OFF';
+  ctx.fillStyle = online ? '#22c55e' : '#ef4444';
+  ctx.globalAlpha = 0.6;
+  ctx.font = '3px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x + 5, y + 30);
+  ctx.textAlign = 'left';
+  ctx.globalAlpha = 1;
+}
+
+// ===================== UTILITY =====================
+function shadeColor(hex, percent) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + percent));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + percent));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + percent));
+  return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+}
+
+// ===================== MAIN RENDER =====================
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  drawBackground();
+
+  tick++;
+  const animFrame = Math.floor(tick / 30) % 2;
+
+  SERVICES.forEach((svc, i) => {
+    const x = getX(i);
+    const y = DESK_Y;
+    const h = healthData[svc.id];
+    const online = h ? h.status === 'online' : null;
+    const typing = online && animFrame === 1;
+    const sleeping = online === false;
+
+    drawChair(x, y);
+    drawDesk(x, y);
+    drawMonitor(x, y, svc.color, online !== false);
+    drawCharacter(x, y, svc, typing, sleeping);
+
+    if (online !== null) drawStatusDot(x, y, online);
+    if (sleeping) drawZzz(x, y, tick * 0.04);
+    drawNamePlate(x, y, svc.name, svc.color);
+    if (h) drawMsBadge(x, y, h.ms, online);
+  });
+
+  // Title on canvas top
+  ctx.fillStyle = '#EA580C';
+  ctx.globalAlpha = 0.12;
+  ctx.font = '6px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('BLEND SOCIAL FOOD', W / 2, 12);
+  ctx.textAlign = 'left';
+  ctx.globalAlpha = 1;
+
+  requestAnimationFrame(render);
+}
+
+// ===================== HEALTH CHECK =====================
+let lastCheckTime = null;
+
+async function checkHealth() {
+  try {
+    const r = await fetch('/api/health');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    healthData = await r.json();
+    lastCheckTime = new Date();
+    updateStatusCards();
+    document.getElementById('last-check').textContent =
+      'Ultima verificacion: ' + lastCheckTime.toLocaleTimeString('es-CL');
+  } catch (e) {
+    document.getElementById('last-check').textContent = 'Error de conexion — reintentando...';
+  }
+}
+
+function updateStatusCards() {
+  document.getElementById('status-grid').innerHTML = SERVICES.map(svc => {
+    const h = healthData[svc.id];
+    const online = h && h.status === 'online';
+    const dotClass = h ? (online ? 'online' : 'offline') : 'checking';
+    const msText = h ? (online ? h.ms + 'ms' : 'OFFLINE') : '...';
+    const msColor = h ? (online ? '#22c55e' : '#ef4444') : '#555';
+    const borderColor = h ? (online ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)') : 'var(--border)';
+    return `<div class="status-card" style="border-color:${borderColor}">
+      <div class="sc-name"><span class="sc-dot ${dotClass}"></span>${svc.name}</div>
+      <div class="sc-role">${svc.role}</div>
+      <div class="sc-ms" style="color:${msColor}">${msText}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== NAV BAR =====================
+const UNITY_URL = 'https://positive-appreciation-production.up.railway.app';
+const COPILOT_URL = 'https://web-production-2131c.up.railway.app/dashboard';
+const FIRSTTOUCH_URL = 'https://blend-first-touch-production.up.railway.app';
+const PRISM_URL = 'https://blend-prism-production.up.railway.app';
+const DROP_URL = 'https://blend-drop-production.up.railway.app';
+const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
+
+function setupNav() {
+  const role = SF_USER.role;
+  const token = SF_USER.token;
+  const canUnity = ['admin','unity','unity_copilot','unity_prism'].includes(role);
+  const canCopilot = ['admin','copilot','unity_copilot'].includes(role);
+  const canFirstTouch = role === 'admin';
+  const canPrism = ['admin','unity_prism'].includes(role);
+  const canDrop = ['admin','unity'].includes(role);
+  const canPixel = SF_USER.username === 'nico';
+
+  document.getElementById('nav-links').innerHTML = `
+    <a href="/admin" class="nav-logo nav-sf">
+      <div class="nav-icon">SF<span class="nav-dot"></span></div>
+      <span class="nav-label">Hub</span>
+    </a>
+    <a href="/mission-control" class="nav-logo nav-mc active">
+      <div class="nav-icon">MC</div>
+      <span class="nav-label">Control</span>
+    </a>
+    <a href="${canUnity ? UNITY_URL+'?token='+token : '#'}" class="nav-logo nav-unity ${canUnity ? '' : 'disabled'}">
+      <div class="nav-icon">&#9881;</div>
+      <span class="nav-label">Unity</span>
+    </a>
+    <a href="${canCopilot ? COPILOT_URL+'?token='+token : '#'}" class="nav-logo nav-copilot ${canCopilot ? '' : 'disabled'}">
+      <div class="nav-icon">&#9632;</div>
+      <span class="nav-label">Copilot</span>
+    </a>
+    <a href="${canPrism ? PRISM_URL+'?token='+token : '#'}" class="nav-logo nav-prism ${canPrism ? '' : 'disabled'}">
+      <div class="nav-icon">&#9650;</div>
+      <span class="nav-label">Prism</span>
+    </a>
+    <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}" ${!canPixel ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
+      <div class="nav-icon">&#10022;</div>
+      <span class="nav-label">Pixel</span>
+    </a>
+    <a href="${canDrop ? DROP_URL+'?token='+token : '#'}" class="nav-logo nav-drop ${canDrop ? '' : 'disabled'}" style="${canDrop ? '' : 'display:none;'}">
+      <div class="nav-icon">&#128640;</div>
+      <span class="nav-label">Drop</span>
+    </a>
+    <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="nav-logo nav-firsttouch ${canFirstTouch ? '' : 'disabled'}">
+      <div class="nav-icon">&#9830;</div>
+      <span class="nav-label">First Touch</span>
+    </a>
+  `;
+  document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
+}
+
+// ===================== INIT =====================
+setupNav();
+render();
+checkHealth();
+setInterval(checkHealth, 30000);
+</script>
+</body>
+</html>
