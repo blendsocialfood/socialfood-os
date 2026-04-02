@@ -219,115 +219,344 @@ const spacing = 50;
 function getX(i) { return startX + i * spacing; }
 
 // ===================== DRAW BACKGROUND =====================
+function drawCeilingLight(cx) {
+  ctx.fillStyle = '#121212';
+  ctx.fillRect(cx - 6, 0, 12, 4);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(cx - 8, 4, 16, 3);
+  // Glow cone
+  ctx.fillStyle = '#F5E6C8';
+  ctx.globalAlpha = 0.025;
+  ctx.fillRect(cx - 25, 7, 50, 100);
+  ctx.globalAlpha = 0.05;
+  ctx.fillRect(cx - 14, 7, 28, 60);
+  ctx.globalAlpha = 1;
+  // Bulb
+  ctx.fillStyle = '#F5E6C8';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(cx - 3, 7, 6, 2);
+  ctx.globalAlpha = 1;
+}
+
 function drawBackground() {
-  // Wall
-  ctx.fillStyle = '#0c0c0c';
-  ctx.fillRect(0, 0, W, 155);
-  // Wall lines
+  // === CEILING ===
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, W, 6);
+  // Ceiling panel seams
+  ctx.fillStyle = '#060606';
+  for (let x = 0; x < W; x += 50) ctx.fillRect(x, 0, 1, 6);
+
+  // === WALL (lighter base) ===
+  ctx.fillStyle = '#101010';
+  ctx.fillRect(0, 6, W, 147);
+
+  // Crown molding
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(0, 6, W, 2);
+
+  // Wall vertical panel lines
+  ctx.fillStyle = '#0d0d0d';
+  for (let x = 0; x < W; x += 57) ctx.fillRect(x, 8, 1, 145);
+
+  // Chair rail trim
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(0, 62, W, 2);
+
+  // Lower wall slightly different shade (wainscoting)
   ctx.fillStyle = '#0e0e0e';
-  ctx.fillRect(0, 60, W, 1);
-  ctx.fillRect(0, 100, W, 1);
+  ctx.fillRect(0, 64, W, 89);
+  // Wainscoting panel lines
+  ctx.fillStyle = '#111';
+  for (let x = 28; x < W; x += 57) {
+    ctx.fillRect(x, 66, 1, 85);
+    ctx.fillRect(x + 28, 66, 1, 85);
+  }
 
-  // Floor
-  ctx.fillStyle = '#0a0908';
-  ctx.fillRect(0, 155, W, 45);
-  // Floor tiles
-  ctx.fillStyle = '#0d0b0a';
-  for (let x = 0; x < W; x += 20) ctx.fillRect(x, 155, 1, 45);
-  ctx.fillStyle = '#080706';
-  ctx.fillRect(0, 175, W, 1);
-  ctx.fillRect(0, 195, W, 1);
+  // === BASEBOARD ===
+  ctx.fillStyle = '#181818';
+  ctx.fillRect(0, 151, W, 2);
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 153, W, 1);
 
-  // === Window (starry night) ===
-  ctx.fillStyle = '#0a1020';
-  ctx.fillRect(170, 18, 60, 38);
-  ctx.fillStyle = '#0d1428';
-  ctx.fillRect(172, 20, 56, 34);
+  // === FLOOR (warm brown, clearly visible) ===
+  ctx.fillStyle = '#1a1510';
+  ctx.fillRect(0, 154, W, 46);
+  // Checkered tiles
+  for (let fx = 0; fx < W; fx += 16) {
+    for (let fy = 154; fy < 200; fy += 16) {
+      if ((Math.floor(fx / 16) + Math.floor(fy / 16)) % 2 === 0) {
+        ctx.fillStyle = '#15110c';
+        ctx.fillRect(fx, fy, 16, 16);
+      }
+    }
+  }
+  // Tile grout
+  ctx.fillStyle = '#120e09';
+  for (let fx = 0; fx < W; fx += 16) ctx.fillRect(fx, 154, 1, 46);
+  for (let fy = 154; fy < 200; fy += 16) ctx.fillRect(0, fy, W, 1);
+
+  // === 3 CEILING LIGHTS ===
+  drawCeilingLight(80);
+  drawCeilingLight(200);
+  drawCeilingLight(320);
+
+  // === LARGE WINDOW (center) ===
+  const wx = 140, wy = 10, ww = 120, wh = 48;
+  // Window recess shadow
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(wx - 2, wy - 2, ww + 4, wh + 4);
+  // Night sky
+  ctx.fillStyle = '#0c1428';
+  ctx.fillRect(wx, wy, ww, wh);
+  // Horizon glow
+  ctx.fillStyle = '#101830';
+  ctx.fillRect(wx, wy + wh - 12, ww, 12);
+  // City silhouette
+  ctx.fillStyle = '#080f1e';
+  const buildings = [
+    [wx+5,wy+wh-8,6,8],[wx+13,wy+wh-12,4,12],[wx+19,wy+wh-6,8,6],
+    [wx+30,wy+wh-14,5,14],[wx+37,wy+wh-9,7,9],[wx+46,wy+wh-7,5,7],
+    [wx+54,wy+wh-16,4,16],[wx+60,wy+wh-10,6,10],[wx+68,wy+wh-8,8,8],
+    [wx+78,wy+wh-13,5,13],[wx+85,wy+wh-7,6,7],[wx+93,wy+wh-11,5,11],
+    [wx+100,wy+wh-6,7,6],[wx+109,wy+wh-9,5,9],
+  ];
+  buildings.forEach(([bx,by,bw,bh]) => ctx.fillRect(bx,by,bw,bh));
+  // Building windows (tiny yellow dots)
+  ctx.fillStyle = '#F5C842';
+  buildings.forEach(([bx,by,bw,bh]) => {
+    for (let wy2 = by + 2; wy2 < by + bh - 1; wy2 += 3) {
+      for (let wx2 = bx + 1; wx2 < bx + bw - 1; wx2 += 2) {
+        ctx.globalAlpha = Math.random() > 0.4 ? 0.3 : 0;
+        ctx.fillRect(wx2, wy2, 1, 1);
+      }
+    }
+  });
+  ctx.globalAlpha = 1;
   // Stars
   ctx.fillStyle = '#fff';
-  STARS.forEach(([sx, sy]) => {
-    ctx.globalAlpha = 0.2 + Math.sin(tick * 0.03 + sx) * 0.3;
+  const starPositions = [
+    [wx+10,wy+4],[wx+25,wy+8],[wx+40,wy+3],[wx+55,wy+10],[wx+70,wy+5],
+    [wx+85,wy+8],[wx+95,wy+3],[wx+105,wy+6],[wx+15,wy+15],[wx+45,wy+18],
+    [wx+75,wy+14],[wx+100,wy+16],[wx+30,wy+22],[wx+60,wy+20],[wx+90,wy+24],
+  ];
+  starPositions.forEach(([sx,sy]) => {
+    ctx.globalAlpha = 0.2 + Math.sin(tick * 0.025 + sx * 0.7) * 0.3;
     ctx.fillRect(sx, sy, 1, 1);
   });
   ctx.globalAlpha = 1;
   // Moon
   ctx.fillStyle = '#e8e0c8';
-  ctx.fillRect(221, 24, 4, 4);
-  ctx.fillStyle = '#0d1428';
-  ctx.fillRect(223, 23, 3, 3); // crescent cutout
-  // Window frame
-  ctx.fillStyle = '#161616';
-  ctx.fillRect(169, 17, 62, 1); ctx.fillRect(169, 56, 62, 1);
-  ctx.fillRect(169, 17, 1, 40); ctx.fillRect(230, 17, 1, 40);
-  ctx.fillRect(199, 17, 1, 40); // center divider
-
-  // === Wall poster ===
-  ctx.fillStyle = '#111';
-  ctx.fillRect(48, 28, 32, 22);
-  ctx.fillStyle = '#161616';
-  ctx.fillRect(49, 29, 30, 20);
-  // "B" letters as orange bars
-  ctx.fillStyle = '#EA580C';
-  ctx.globalAlpha = 0.5;
-  for (let i = 0; i < 5; i++) ctx.fillRect(53 + i * 5, 35, 2, 8);
-  ctx.globalAlpha = 1;
-
-  // === Clock ===
-  ctx.fillStyle = '#111';
-  ctx.fillRect(318, 28, 16, 16);
-  ctx.fillStyle = '#161616';
-  ctx.fillRect(319, 29, 14, 14);
-  ctx.fillStyle = '#333';
-  ctx.fillRect(326, 32, 1, 5); // hour
-  ctx.fillRect(326, 36, 4, 1); // minute
-  ctx.fillStyle = '#EA580C';
-  ctx.fillRect(326, 36, 1, 1); // center
-
-  // === Ceiling lamp ===
-  ctx.fillStyle = '#131313';
-  ctx.fillRect(196, 0, 8, 7);
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fillRect(194, 7, 12, 3);
-  // Lamp glow
-  ctx.fillStyle = '#F59E0B';
+  ctx.fillRect(wx + ww - 20, wy + 5, 6, 6);
+  ctx.fillStyle = '#0c1428';
+  ctx.fillRect(wx + ww - 18, wy + 4, 5, 5);
+  // Moon glow
+  ctx.fillStyle = '#e8e0c8';
   ctx.globalAlpha = 0.04;
-  ctx.fillRect(180, 10, 40, 60);
-  ctx.globalAlpha = 0.08;
-  ctx.fillRect(190, 10, 20, 40);
+  ctx.fillRect(wx + ww - 28, wy + 2, 16, 12);
   ctx.globalAlpha = 1;
-  // Lamp bulb
-  ctx.fillStyle = '#F59E0B';
-  ctx.globalAlpha = 0.5;
-  ctx.fillRect(198, 10, 4, 2);
+  // Window frame
+  ctx.fillStyle = '#1e1e1e';
+  ctx.fillRect(wx - 1, wy - 1, ww + 2, 1); ctx.fillRect(wx - 1, wy + wh, ww + 2, 1);
+  ctx.fillRect(wx - 1, wy - 1, 1, wh + 2); ctx.fillRect(wx + ww, wy - 1, 1, wh + 2);
+  // Window dividers (3 panes)
+  ctx.fillRect(wx + Math.floor(ww/3), wy, 1, wh);
+  ctx.fillRect(wx + Math.floor(2*ww/3), wy, 1, wh);
+  ctx.fillRect(wx, wy + Math.floor(wh/2), ww, 1);
+  // Window sill
+  ctx.fillStyle = '#1c1c1c';
+  ctx.fillRect(wx - 4, wy + wh + 1, ww + 8, 3);
+  // Window light on wall below
+  ctx.fillStyle = '#182040';
+  ctx.globalAlpha = 0.04;
+  ctx.fillRect(wx - 8, wy + wh + 4, ww + 16, 50);
   ctx.globalAlpha = 1;
 
-  // === Coffee machine (left corner) ===
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fillRect(5, 140, 10, 15);
-  ctx.fillStyle = '#222';
-  ctx.fillRect(6, 141, 8, 6);
+  // === WHITEBOARD (left of window) ===
+  ctx.fillStyle = '#202020';
+  ctx.fillRect(18, 12, 65, 44);
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(20, 14, 61, 40);
+  // Title
   ctx.fillStyle = '#EA580C';
   ctx.globalAlpha = 0.6;
-  ctx.fillRect(7, 142, 2, 1); // LED
+  ctx.fillRect(24, 18, 22, 3);
   ctx.globalAlpha = 1;
-  ctx.fillStyle = '#161616';
-  ctx.fillRect(8, 148, 4, 3); // cup
-  ctx.fillStyle = '#3d2b1f';
-  ctx.fillRect(9, 148, 2, 1); // coffee
+  // Content lines with check marks
+  const lineColors = ['#555','#555','#555','#555','#555'];
+  const lineLengths = [42, 36, 44, 32, 40];
+  for (let i = 0; i < 5; i++) {
+    ctx.fillStyle = lineColors[i];
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(24, 26 + i * 5, lineLengths[i], 1);
+    ctx.globalAlpha = 1;
+  }
+  // Checkmarks
+  ctx.fillStyle = '#22c55e';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(70, 26, 3, 1);
+  ctx.fillRect(70, 31, 3, 1);
+  ctx.fillRect(70, 36, 3, 1);
+  // Pending marks
+  ctx.fillStyle = '#F59E0B';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(70, 41, 3, 1);
+  ctx.fillRect(70, 46, 3, 1);
+  ctx.globalAlpha = 1;
+  // Whiteboard frame
+  ctx.fillStyle = '#181818';
+  ctx.fillRect(17, 11, 67, 1); ctx.fillRect(17, 57, 67, 1);
+  ctx.fillRect(17, 11, 1, 47); ctx.fillRect(83, 11, 1, 47);
+  // Marker tray
+  ctx.fillStyle = '#181818';
+  ctx.fillRect(22, 57, 55, 3);
+  ctx.fillStyle = '#EA580C'; ctx.fillRect(28, 57, 8, 2);
+  ctx.fillStyle = '#3B82F6'; ctx.fillRect(38, 57, 8, 2);
+  ctx.fillStyle = '#22C55E'; ctx.fillRect(48, 57, 8, 2);
+  ctx.fillStyle = '#F59E0B'; ctx.fillRect(58, 57, 8, 2);
 
-  // === Plant (right corner) ===
+  // === CLOCK (right of window) ===
+  ctx.fillStyle = '#1c1c1c';
+  ctx.fillRect(274, 16, 20, 20);
+  ctx.fillStyle = '#222';
+  ctx.fillRect(275, 17, 18, 18);
+  // Clock markers
+  ctx.fillStyle = '#444';
+  ctx.fillRect(284, 19, 1, 2); // 12
+  ctx.fillRect(290, 26, 2, 1); // 3
+  ctx.fillRect(284, 32, 1, 2); // 6
+  ctx.fillRect(277, 26, 2, 1); // 9
+  // Hands
+  ctx.fillStyle = '#666';
+  ctx.fillRect(284, 22, 1, 5);
+  ctx.fillRect(284, 26, 5, 1);
+  ctx.fillStyle = '#EA580C';
+  ctx.fillRect(284, 26, 1, 1);
+
+  // === SHELF WITH ITEMS (right side) ===
+  // Shelf bracket
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(300, 40, 2, 6);
+  ctx.fillRect(370, 40, 2, 6);
+  // Shelf
+  ctx.fillStyle = '#1e1e1e';
+  ctx.fillRect(298, 38, 76, 2);
+  // Books (colored spines)
+  ctx.fillStyle = '#EA580C'; ctx.fillRect(302, 26, 4, 12);
+  ctx.fillStyle = '#3B82F6'; ctx.fillRect(307, 28, 3, 10);
+  ctx.fillStyle = '#A855F7'; ctx.fillRect(311, 25, 4, 13);
+  ctx.fillStyle = '#22C55E'; ctx.fillRect(316, 29, 3, 9);
+  ctx.fillStyle = '#DC2626'; ctx.fillRect(320, 26, 4, 12);
+  ctx.fillStyle = '#F59E0B'; ctx.fillRect(325, 27, 3, 11);
+  ctx.fillStyle = '#1C82B4'; ctx.fillRect(329, 25, 4, 13);
+  // Small plant on shelf
   ctx.fillStyle = '#2d1f15';
-  ctx.fillRect(385, 145, 8, 10); // pot
+  ctx.fillRect(342, 32, 6, 6);
   ctx.fillStyle = '#3d2b1f';
-  ctx.fillRect(384, 144, 10, 2); // pot rim
-  ctx.fillStyle = '#1a5c1a';
-  ctx.fillRect(387, 138, 3, 7); // stem
-  ctx.fillRect(384, 134, 4, 5); // leaf L
-  ctx.fillRect(390, 132, 4, 5); // leaf R
-  ctx.fillRect(386, 130, 3, 4); // leaf top
+  ctx.fillRect(341, 31, 8, 2);
+  ctx.fillStyle = '#1a6b1a';
+  ctx.fillRect(344, 26, 2, 6);
+  ctx.fillRect(341, 23, 3, 4);
+  ctx.fillRect(346, 24, 3, 4);
   ctx.fillStyle = '#22802a';
-  ctx.fillRect(385, 135, 2, 3);
-  ctx.fillRect(391, 133, 2, 3);
+  ctx.fillRect(342, 24, 2, 3);
+  ctx.fillRect(347, 25, 2, 3);
+  // Trophy
+  ctx.fillStyle = '#C8A832';
+  ctx.fillRect(358, 30, 5, 8);
+  ctx.fillRect(357, 30, 7, 2);
+  ctx.fillRect(359, 27, 3, 3);
+  ctx.fillRect(358, 27, 5, 1);
+  // Frame
+  ctx.fillStyle = '#181818';
+  ctx.fillRect(366, 26, 8, 12);
+  ctx.fillStyle = '#222';
+  ctx.fillRect(367, 27, 6, 10);
+  ctx.fillStyle = '#EA580C';
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(368, 28, 4, 8);
+  ctx.globalAlpha = 1;
+
+  // === LOWER SHELF (across wall, y=80) ===
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(8, 82, 384, 2);
+  // Framed photos on lower shelf
+  const photoColors = ['#EA580C','#3B82F6','#1C82B4','#22C55E','#F59E0B','#A855F7','#DC2626'];
+  for (let i = 0; i < 7; i++) {
+    const px = 20 + i * 54;
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(px, 72, 10, 10);
+    ctx.fillStyle = '#202020';
+    ctx.fillRect(px + 1, 73, 8, 8);
+    ctx.fillStyle = photoColors[i];
+    ctx.globalAlpha = 0.2;
+    ctx.fillRect(px + 2, 74, 6, 6);
+    ctx.globalAlpha = 1;
+  }
+
+  // === POWER STRIPS (along baseboard) ===
+  ctx.fillStyle = '#141414';
+  ctx.fillRect(30, 149, 35, 2);
+  ctx.fillRect(200, 149, 35, 2);
+  ctx.fillRect(340, 149, 35, 2);
+  // Cables up to desks
+  ctx.fillStyle = '#0e0e0e';
+  ctx.fillRect(45, 140, 1, 9);
+  ctx.fillRect(215, 140, 1, 9);
+  ctx.fillRect(355, 140, 1, 9);
+
+  // === COFFEE MACHINE (left corner) ===
+  ctx.fillStyle = '#1e1e1e';
+  ctx.fillRect(3, 135, 14, 18);
+  ctx.fillStyle = '#262626';
+  ctx.fillRect(4, 136, 12, 8);
+  ctx.fillStyle = '#EA580C';
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(5, 137, 2, 1);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(6, 146, 6, 5);
+  ctx.fillStyle = '#1e1e1e';
+  ctx.fillRect(7, 146, 4, 4);
+  // Steam
+  ctx.fillStyle = '#fff';
+  ctx.globalAlpha = 0.06 + Math.sin(tick * 0.05) * 0.03;
+  ctx.fillRect(8, 143, 1, 3);
+  ctx.fillRect(10, 142, 1, 4);
+  ctx.globalAlpha = 1;
+
+  // === LARGE PLANT (right corner) ===
+  ctx.fillStyle = '#2d1f15';
+  ctx.fillRect(382, 138, 12, 15);
+  ctx.fillStyle = '#3d2b1f';
+  ctx.fillRect(381, 137, 14, 2);
+  // Trunk
+  ctx.fillStyle = '#1a6b1a';
+  ctx.fillRect(386, 125, 4, 13);
+  // Leaves (lush)
+  ctx.fillStyle = '#1a5c1a';
+  ctx.fillRect(380, 118, 6, 8);
+  ctx.fillRect(388, 116, 6, 8);
+  ctx.fillRect(383, 114, 5, 6);
+  ctx.fillRect(389, 112, 5, 6);
+  ctx.fillRect(385, 110, 6, 5);
+  ctx.fillStyle = '#22802a';
+  ctx.fillRect(381, 119, 4, 5);
+  ctx.fillRect(389, 117, 4, 5);
+  ctx.fillRect(384, 115, 3, 4);
+  ctx.fillRect(390, 113, 3, 4);
+  ctx.fillRect(386, 111, 4, 3);
+
+  // === SUBTLE FLOOR REFLECTION from monitors ===
+  SERVICES.forEach((svc, i) => {
+    const x = getX(i);
+    const h = healthData[svc.id];
+    if (h && h.status === 'online') {
+      ctx.fillStyle = svc.color;
+      ctx.globalAlpha = 0.015;
+      ctx.fillRect(x - 5, 154, 22, 10);
+      ctx.globalAlpha = 1;
+    }
+  });
 }
 
 // ===================== DRAW MONITOR =====================
