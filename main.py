@@ -167,7 +167,7 @@ def health_check():
         name, url = item
         try:
             start = time.time()
-            r = http_requests.get(url, timeout=5)
+            r = http_requests.get(url, timeout=10, allow_redirects=False)
             ms = int((time.time() - start) * 1000)
             return name, {'status': 'online', 'code': r.status_code, 'ms': ms}
         except Exception:
