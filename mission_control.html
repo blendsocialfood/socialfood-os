@@ -220,7 +220,7 @@ function getX(i) { return startX + i * spacing; }
 
 // ===================== CHARACTER MOVEMENT =====================
 const WALK_Y = 138;
-const WALK_SPEED = 0.5;
+const WALK_SPEED = 0.8;
 const DESTINATIONS = [
   { x: 8 },   // coffee machine
   { x: 50 },  // whiteboard
@@ -232,7 +232,7 @@ const charStates = SERVICES.map((svc, i) => ({
   x: getX(i),
   homeX: getX(i),
   destX: 0,
-  timer: 400 + Math.floor(Math.random() * 800),
+  timer: 60 + Math.floor(Math.random() * 180),
   standTimer: 0,
   facing: 1,              // 1=right, -1=left
   walkFrame: 0,
@@ -274,7 +274,7 @@ function updateCharStates() {
       if (Math.abs(cs.x - cs.destX) < WALK_SPEED + 0.1) {
         cs.x = cs.destX;
         cs.state = 'standing';
-        cs.standTimer = 120 + Math.floor(Math.random() * 300);
+        cs.standTimer = 60 + Math.floor(Math.random() * 120);
       } else {
         cs.x += cs.facing * WALK_SPEED;
       }
@@ -290,7 +290,7 @@ function updateCharStates() {
       if (Math.abs(cs.x - cs.homeX) < WALK_SPEED + 0.1) {
         cs.x = cs.homeX;
         cs.state = 'sitting';
-        cs.timer = 400 + Math.floor(Math.random() * 800);
+        cs.timer = 60 + Math.floor(Math.random() * 180);
       } else {
         cs.x += cs.facing * WALK_SPEED;
       }
