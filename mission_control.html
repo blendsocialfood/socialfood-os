@@ -227,6 +227,84 @@ const DESTINATIONS = [
   { x: 385 }, // plant
 ];
 
+// ===================== PAULA (Among Us rosado) =====================
+const PAULA_COLOR = '#FF6B9D';
+const PAULA_VISOR = '#6BD8FF';
+const PAULA_BACKPACK = '#E0558A';
+const paulaState = {
+  x: 200,
+  destX: 50,
+  facing: -1,
+  walkFrame: 0,
+  state: 'walking_to',   // walking_to | standing | walking_to (loops)
+  standTimer: 0,
+};
+
+function updatePaula() {
+  const ps = paulaState;
+  if (ps.state === 'walking_to') {
+    ps.walkFrame = Math.floor(tick / 8) % 2;
+    if (Math.abs(ps.x - ps.destX) < WALK_SPEED + 0.1) {
+      ps.x = ps.destX;
+      ps.state = 'standing';
+      ps.standTimer = 80 + Math.floor(Math.random() * 150);
+    } else {
+      ps.x += (ps.destX > ps.x ? 1 : -1) * WALK_SPEED;
+      ps.facing = ps.destX > ps.x ? 1 : -1;
+    }
+  } else if (ps.state === 'standing') {
+    ps.standTimer--;
+    if (ps.standTimer <= 0) {
+      // Pick new destination (services desks + fixed spots)
+      const dests = [...DESTINATIONS.map(d => d.x)];
+      SERVICES.forEach((_, i) => dests.push(getX(i)));
+      let newDest;
+      do { newDest = dests[Math.floor(Math.random() * dests.length)]; }
+      while (Math.abs(newDest - ps.x) < 20);
+      ps.destX = newDest;
+      ps.facing = ps.destX > ps.x ? 1 : -1;
+      ps.state = 'walking_to';
+    }
+  }
+}
+
+function drawAmongUs(x, y, facing, frame) {
+  const f = facing > 0; // true=right
+  // Body (bean shape)
+  ctx.fillStyle = PAULA_COLOR;
+  // Top round
+  ctx.fillRect(x + 1, y, 4, 1);
+  ctx.fillRect(x, y + 1, 6, 1);
+  // Main body
+  ctx.fillRect(x, y + 2, 6, 6);
+  // Backpack
+  ctx.fillStyle = PAULA_BACKPACK;
+  ctx.fillRect(x + (f ? -1 : 6), y + 3, 1, 4);
+  ctx.fillRect(x + (f ? -2 : 7), y + 4, 1, 2);
+  // Visor
+  ctx.fillStyle = PAULA_VISOR;
+  ctx.fillRect(x + (f ? 3 : 1), y + 2, 3, 2);
+  // Visor shine
+  ctx.fillStyle = '#fff';
+  ctx.globalAlpha = 0.6;
+  ctx.fillRect(x + (f ? 4 : 1), y + 2, 1, 1);
+  ctx.globalAlpha = 1;
+  // Legs (walking)
+  ctx.fillStyle = PAULA_COLOR;
+  if (frame === 0) {
+    ctx.fillRect(x, y + 8, 2, 2);
+    ctx.fillRect(x + 4, y + 8, 2, 1);
+  } else {
+    ctx.fillRect(x, y + 8, 2, 1);
+    ctx.fillRect(x + 4, y + 8, 2, 2);
+  }
+  // Shadow
+  ctx.fillStyle = '#000';
+  ctx.globalAlpha = 0.1;
+  ctx.fillRect(x - 1, y + 10, 8, 1);
+  ctx.globalAlpha = 1;
+}
+
 const charStates = SERVICES.map((svc, i) => ({
   state: 'sitting',       // sitting | walking_to | standing | walking_back
   x: getX(i),
@@ -1007,6 +1085,10 @@ function render() {
       drawWalkingCharacter(Math.round(cs.x), WALK_Y, svc, cs.facing, cs.walkFrame);
     }
   });
+
+  // Paula (Among Us rosado)
+  drawAmongUs(Math.round(paulaState.x), WALK_Y + 4, paulaState.facing, paulaState.walkFrame);
+  updatePaula();
 
   // Update movement
   updateCharStates();
