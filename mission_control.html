@@ -218,6 +218,86 @@ const startX = 26;
 const spacing = 50;
 function getX(i) { return startX + i * spacing; }
 
+// ===================== CHARACTER MOVEMENT =====================
+const WALK_Y = 138;
+const WALK_SPEED = 0.5;
+const DESTINATIONS = [
+  { x: 8 },   // coffee machine
+  { x: 50 },  // whiteboard
+  { x: 385 }, // plant
+];
+
+const charStates = SERVICES.map((svc, i) => ({
+  state: 'sitting',       // sitting | walking_to | standing | walking_back
+  x: getX(i),
+  homeX: getX(i),
+  destX: 0,
+  timer: 400 + Math.floor(Math.random() * 800),
+  standTimer: 0,
+  facing: 1,              // 1=right, -1=left
+  walkFrame: 0,
+}));
+
+function updateCharStates() {
+  SERVICES.forEach((svc, i) => {
+    const cs = charStates[i];
+    const h = healthData[svc.id];
+    const online = h ? h.status === 'online' : null;
+
+    // Offline = always sitting (sleeping)
+    if (online === false) {
+      cs.state = 'sitting';
+      cs.x = cs.homeX;
+      return;
+    }
+    // No data yet = stay sitting
+    if (online === null) return;
+
+    if (cs.state === 'sitting') {
+      cs.timer--;
+      if (cs.timer <= 0) {
+        // Pick a destination
+        const dests = DESTINATIONS.map(d => d.x);
+        // Can also visit other online characters' desks
+        SERVICES.forEach((other, j) => {
+          if (j !== i) {
+            const oh = healthData[other.id];
+            if (oh && oh.status === 'online') dests.push(getX(j));
+          }
+        });
+        cs.destX = dests[Math.floor(Math.random() * dests.length)];
+        cs.state = 'walking_to';
+        cs.facing = cs.destX > cs.x ? 1 : -1;
+      }
+    } else if (cs.state === 'walking_to') {
+      cs.walkFrame = Math.floor(tick / 8) % 2;
+      if (Math.abs(cs.x - cs.destX) < WALK_SPEED + 0.1) {
+        cs.x = cs.destX;
+        cs.state = 'standing';
+        cs.standTimer = 120 + Math.floor(Math.random() * 300);
+      } else {
+        cs.x += cs.facing * WALK_SPEED;
+      }
+    } else if (cs.state === 'standing') {
+      cs.standTimer--;
+      if (cs.standTimer <= 0) {
+        cs.destX = cs.homeX;
+        cs.state = 'walking_back';
+        cs.facing = cs.destX > cs.x ? 1 : -1;
+      }
+    } else if (cs.state === 'walking_back') {
+      cs.walkFrame = Math.floor(tick / 8) % 2;
+      if (Math.abs(cs.x - cs.homeX) < WALK_SPEED + 0.1) {
+        cs.x = cs.homeX;
+        cs.state = 'sitting';
+        cs.timer = 400 + Math.floor(Math.random() * 800);
+      } else {
+        cs.x += cs.facing * WALK_SPEED;
+      }
+    }
+  });
+}
+
 // ===================== DRAW BACKGROUND =====================
 function drawCeilingLight(cx) {
   ctx.fillStyle = '#3a3e4a';
@@ -693,6 +773,119 @@ function drawCharacter(x, y, svc, typing, sleeping) {
   ctx.fillRect(x + 5, y + 14, 3, 1);
 }
 
+// ===================== DRAW WALKING CHARACTER =====================
+function drawWalkingCharacter(x, y, svc, facing, frame) {
+  const { hair, skin, color, pants, feature } = svc;
+  const skinDark = shadeColor(skin, -20);
+  const f = facing > 0; // true=right, false=left
+
+  // Hair
+  ctx.fillStyle = hair;
+  ctx.fillRect(x + 1, y, 6, 2);
+  ctx.fillRect(x, y + 2, 7, 1);
+  ctx.fillRect(x + (f ? 6 : 0), y + 3, 1, 2);
+
+  // Cap
+  if (feature === 'cap') {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 1, y, 9, 1);
+    ctx.fillRect(x, y - 1, 7, 1);
+  }
+  // Beret
+  if (feature === 'beret') {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 1, y - 1, 8, 1);
+    ctx.fillRect(x - 2, y, 3, 1);
+  }
+
+  // Head
+  ctx.fillStyle = skin;
+  ctx.fillRect(x + 1, y + 3, 5, 4);
+
+  // Robot face
+  if (feature === 'robot') {
+    ctx.fillStyle = '#555';
+    ctx.fillRect(x + 1, y + 3, 5, 4);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 2, y + 4, 1, 1);
+    ctx.fillRect(x + 4, y + 4, 1, 1);
+    ctx.fillStyle = '#444';
+    ctx.fillRect(x + 3, y - 2, 1, 2);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 2, y - 3, 3, 1);
+  } else {
+    // Eye (faces direction)
+    ctx.fillStyle = '#222';
+    ctx.fillRect(x + (f ? 4 : 2), y + 4, 1, 1);
+    ctx.fillStyle = skinDark;
+    ctx.fillRect(x + (f ? 4 : 2), y + 6, 1, 1);
+  }
+
+  // Glasses
+  if (feature === 'glasses') {
+    ctx.fillStyle = '#888';
+    ctx.fillRect(x + 2, y + 4, 4, 1);
+  }
+  // Headset
+  if (feature === 'headset') {
+    ctx.fillStyle = '#444';
+    ctx.fillRect(x + (f ? -1 : 7), y + 3, 1, 3);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x + (f ? -1 : 6), y + 5, 2, 2);
+  }
+
+  // Neck
+  ctx.fillStyle = skin;
+  ctx.fillRect(x + 2, y + 7, 3, 1);
+
+  // Body
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y + 8, 8, 4);
+
+  // Tie
+  if (feature === 'tie') {
+    ctx.fillStyle = shadeColor(color, -30);
+    ctx.fillRect(x + 3, y + 8, 2, 3);
+  }
+  // Brush in hand
+  if (feature === 'brush') {
+    ctx.fillStyle = '#6b4226';
+    ctx.fillRect(x + (f ? 8 : -1), y + 8, 1, 4);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + (f ? 8 : -1), y + 7, 1, 1);
+  }
+
+  // Arms swinging
+  ctx.fillStyle = skin;
+  if (frame === 0) {
+    ctx.fillRect(x - 1, y + 8, 1, 3);
+    ctx.fillRect(x + 8, y + 9, 1, 3);
+  } else {
+    ctx.fillRect(x - 1, y + 9, 1, 3);
+    ctx.fillRect(x + 8, y + 8, 1, 3);
+  }
+
+  // Legs walking
+  ctx.fillStyle = pants;
+  if (frame === 0) {
+    ctx.fillRect(x + 1, y + 12, 2, 3);
+    ctx.fillRect(x + 5, y + 12, 2, 2);
+  } else {
+    ctx.fillRect(x + 1, y + 12, 2, 2);
+    ctx.fillRect(x + 5, y + 12, 2, 3);
+  }
+
+  // Shoes
+  ctx.fillStyle = '#222';
+  if (frame === 0) {
+    ctx.fillRect(x + (f ? 0 : 1), y + 15, 3, 1);
+    ctx.fillRect(x + 5, y + 14, 2, 1);
+  } else {
+    ctx.fillRect(x + 1, y + 14, 2, 1);
+    ctx.fillRect(x + (f ? 5 : 4), y + 15, 3, 1);
+  }
+}
+
 // ===================== DRAW ZZZ =====================
 function drawZzz(x, y, t) {
   ctx.fillStyle = '#fff';
@@ -782,24 +975,41 @@ function render() {
   tick++;
   const animFrame = Math.floor(tick / 30) % 2;
 
+  // Pass 1: furniture + sitting/sleeping characters
   SERVICES.forEach((svc, i) => {
     const x = getX(i);
     const y = DESK_Y;
     const h = healthData[svc.id];
     const online = h ? h.status === 'online' : null;
-    const typing = online && animFrame === 1;
-    const sleeping = online === false;
+    const cs = charStates[i];
 
     drawChair(x, y);
     drawDesk(x, y);
     drawMonitor(x, y, svc.color, online !== false);
-    drawCharacter(x, y, svc, typing, sleeping);
+
+    // Only draw character at desk if sitting
+    if (cs.state === 'sitting') {
+      const typing = online && animFrame === 1;
+      const sleeping = online === false;
+      drawCharacter(x, y, svc, typing, sleeping);
+      if (sleeping) drawZzz(x, y, tick * 0.04);
+    }
 
     if (online !== null) drawStatusDot(x, y, online);
-    if (sleeping) drawZzz(x, y, tick * 0.04);
     drawNamePlate(x, y, svc.name, svc.color);
     if (h) drawMsBadge(x, y, h.ms, online);
   });
+
+  // Pass 2: walking characters (drawn on top of furniture)
+  SERVICES.forEach((svc, i) => {
+    const cs = charStates[i];
+    if (cs.state !== 'sitting') {
+      drawWalkingCharacter(Math.round(cs.x), WALK_Y, svc, cs.facing, cs.walkFrame);
+    }
+  });
+
+  // Update movement
+  updateCharStates();
 
   // Title on canvas top
   ctx.fillStyle = '#EA580C';
