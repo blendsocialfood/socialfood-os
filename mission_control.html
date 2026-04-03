@@ -1087,7 +1087,17 @@ function render() {
   });
 
   // Paula (Among Us rosado)
-  drawAmongUs(Math.round(paulaState.x), WALK_Y + 4, paulaState.facing, paulaState.walkFrame);
+  const px = Math.round(paulaState.x);
+  const py = WALK_Y + 4;
+  drawAmongUs(px, py, paulaState.facing, paulaState.walkFrame);
+  // Name tag follows Paula
+  ctx.fillStyle = PAULA_COLOR;
+  ctx.globalAlpha = 0.9;
+  ctx.font = '4px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('Paula', px + 3, py + 14);
+  ctx.textAlign = 'left';
+  ctx.globalAlpha = 1;
   updatePaula();
 
   // Update movement
