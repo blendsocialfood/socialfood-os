@@ -1021,15 +1021,29 @@ CLIENT.split('').forEach((ch, i) => {
 let introReady = false;
 let introMinTimeDone = false;
 let introImageDone = false;
-let introPendingImages = 0;
 
-function introImageLoaded() {
-  introPendingImages--;
-  if (introPendingImages <= 0) {
-    setLoaderProgress(95);
-    introImageDone = true;
-    tryCloseIntro();
+function preloadImage(url) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve; // no bloquear si falla
+    img.src = url;
+  });
+}
+
+function waitForImages(urls) {
+  const timeout = new Promise(resolve => setTimeout(resolve, 12000));
+  return Promise.race([Promise.all(urls.map(preloadImage)), timeout]);
+}
+
+function onImagesReady(hp, imgUrl) {
+  if (imgUrl) {
+    hp.style.backgroundImage = `url(${imgUrl})`;
+    hp.classList.add('loaded');
   }
+  setLoaderProgress(95);
+  introImageDone = true;
+  tryCloseIntro();
 }
 const introBar = document.getElementById('intro-bar');
 const introPct = document.getElementById('intro-pct');
@@ -1240,21 +1254,20 @@ function renderHero(unity, copilot) {
     const photo = ig.posts.find(p => p.media_type !== 'VIDEO');
     if (photo) imgUrl = photo.media_url;
   }
-  if (imgUrl) {
-    setLoaderProgress(80);
-    introPendingImages++;
-    const img = new Image();
-    img.onload = () => {
-      hp.style.backgroundImage = `url(${imgUrl})`;
-      hp.classList.add('loaded');
-      introImageLoaded();
-    };
-    img.onerror = () => introImageLoaded();
-    img.src = imgUrl;
-    setTimeout(() => { if (!introImageDone) { introPendingImages = 1; introImageLoaded(); } }, 8000);
-  } else {
-    setLoaderProgress(95);
-    introImageDone = true; tryCloseIntro();
+  setLoaderProgress(80);
+  // Recolectar URLs de equipo y esperar todo junto
+  const teamPhotos = [
+    '1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp','1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J',
+    '1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_','1W4Nf7YIEMfzmH7EGcNmiXLczqc5inx6R',
+    '1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp','1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz',
+    '11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM'
+  ].map(id => `${UNITY_URL}/api/drive/thumb/${id}?token=${TOKEN}&size=large`);
+
+  const allUrls = imgUrl ? [imgUrl, ...teamPhotos] : teamPhotos;
+  waitForImages(allUrls).then(() => onImagesReady(hp, imgUrl));
+
+  if (!imgUrl) {
+    // Sin hero, igual esperar fotos equipo
   }
 
   // Letter-by-letter text
@@ -1714,17 +1727,6 @@ function renderTeam() {
   ];
 
   const strip = document.getElementById('team-strip');
-
-  // Preload main profile photos — bloquea el intro hasta que carguen
-  team.forEach(m => {
-    introPendingImages++;
-    const img = new Image();
-    img.onload = () => introImageLoaded();
-    img.onerror = () => introImageLoaded();
-    img.src = `${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large`;
-  });
-  // Timeout máximo total: 10s
-  setTimeout(() => { if (!introImageDone) { introPendingImages = 1; introImageLoaded(); } }, 10000);
 
   // Preload talent photos so they appear instantly on hover
   team.forEach(m => {
