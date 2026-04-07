@@ -110,13 +110,37 @@ body.ready .blend-header{opacity:1;}
 .blend-footer-link:hover{color:#EA580C;}
 
 /* ── INTRO — MAX PRO ── */
-.intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s;}
-.intro.out{opacity:0;pointer-events:none;}
+.intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease,transform .6s ease;}
+.intro.out{opacity:0;pointer-events:none;transform:scale(1.04);}
 .intro::after{
   content:'';position:absolute;inset:-50%;z-index:0;pointer-events:none;
   background:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E");
   opacity:.03;animation:grain 6s steps(8) infinite;
 }
+/* scanline sweep */
+.intro::before{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.018) 2px,rgba(255,255,255,.018) 4px);
+  animation:scanMove 8s linear infinite;
+}
+@keyframes scanMove{0%{background-position:0 0}100%{background-position:0 100px}}
+/* hot scanline */
+.intro-scanline{
+  position:absolute;left:0;right:0;height:2px;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(234,88,12,.5),transparent);
+  opacity:0;animation:hotScan 2.4s ease-in-out 0.6s 2;
+}
+@keyframes hotScan{
+  0%{top:-2px;opacity:0}10%{opacity:1}90%{opacity:.6}100%{top:100%;opacity:0}
+}
+/* cinematic bars */
+.intro-bar-top,.intro-bar-bot{
+  position:absolute;left:0;right:0;height:60px;z-index:3;
+  background:#000;transition:height .5s cubic-bezier(.76,0,.24,1);pointer-events:none;
+}
+.intro-bar-top{top:0;}
+.intro-bar-bot{bottom:0;}
+.intro.out .intro-bar-top,.intro.out .intro-bar-bot{height:0;}
 .intro>*{position:relative;z-index:1;}
 .intro-logo{
   width:72px;height:72px;
@@ -126,20 +150,47 @@ body.ready .blend-header{opacity:1;}
   margin-bottom:28px;opacity:0;transform:scale(0) rotate(-15deg);
   animation:popIn .5s cubic-bezier(.34,1.56,.64,1) .3s forwards;
 }
-.intro-logo.loading{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) .3s forwards, logoPulse 2s ease-in-out 1s infinite;}
+.intro-logo.loading{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) .3s forwards, logoPulse 1.8s ease-in-out 1s infinite;}
 @keyframes logoPulse{
   0%,100%{box-shadow:0 0 20px rgba(234,88,12,.05);}
-  50%{box-shadow:0 0 40px rgba(234,88,12,.2), 0 0 80px rgba(234,88,12,.05);}
+  50%{box-shadow:0 0 50px rgba(234,88,12,.35),0 0 100px rgba(234,88,12,.08);}
 }
 .intro-logo span{font-size:30px;font-weight:900;color:#fff;letter-spacing:-1px;}
 .intro-dot{display:inline-block;width:8px;height:8px;background:#EA580C;border-radius:50%;margin-left:1px;opacity:0;animation:dotFlash .3s ease-out .8s forwards;}
-.intro-name{font-size:clamp(26px,5vw,44px);font-weight:800;color:#fff;letter-spacing:-1.5px;text-align:center;}
+.intro-name{font-size:clamp(26px,5vw,44px);font-weight:800;color:#fff;letter-spacing:-1.5px;text-align:center;position:relative;}
+/* glitch layers */
+.intro-name::before,.intro-name::after{
+  content:attr(data-text);position:absolute;left:0;right:0;top:0;
+  font-size:inherit;font-weight:inherit;letter-spacing:inherit;text-align:inherit;
+  pointer-events:none;
+}
+.intro-name::before{
+  color:#EA580C;clip-path:inset(0 0 60% 0);
+  animation:glitchTop 4s steps(1) 1.2s infinite;opacity:0;
+}
+.intro-name::after{
+  color:#00bcd4;clip-path:inset(60% 0 0 0);
+  animation:glitchBot 4s steps(1) 1.6s infinite;opacity:0;
+}
+@keyframes glitchTop{
+  0%,94%,100%{opacity:0;transform:none}
+  95%{opacity:.8;transform:translate(-3px,0) skewX(-2deg)}
+  97%{opacity:.6;transform:translate(2px,0)}
+  99%{opacity:0}
+}
+@keyframes glitchBot{
+  0%,92%,100%{opacity:0;transform:none}
+  93%{opacity:.7;transform:translate(3px,0) skewX(2deg)}
+  96%{opacity:.5;transform:translate(-2px,0)}
+  98%{opacity:0}
+}
 .intro-letter{display:inline-block;opacity:0;filter:blur(14px);transform:translateY(10px);animation:letterIn .5s cubic-bezier(.16,1,.3,1) forwards;}
 @keyframes letterIn{0%{opacity:0;filter:blur(14px);transform:translateY(10px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}}
 .intro-sub{font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#EA580C;margin-top:14px;opacity:0;animation:fadeUp .5s ease-out 1.8s forwards;}
 @keyframes popIn{0%{opacity:0;transform:scale(0) rotate(-15deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 @keyframes dotFlash{0%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.6)}100%{opacity:1;transform:scale(1)}}
 @keyframes fadeUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:.8;transform:translateY(0)}}
+@keyframes flashOut{0%{opacity:.7}100%{opacity:0}}
 
 .intro-bottom{
   position:absolute;bottom:0;left:0;right:0;z-index:1;
@@ -152,18 +203,28 @@ body.ready .blend-header{opacity:1;}
   color:rgba(255,255,255,.08);line-height:1;
   transition:color 0.3s ease;
 }
-.intro-pct.done{color:rgba(234,88,12,.3);}
+.intro-pct.done{color:rgba(234,88,12,.4);}
 .intro-status{
   font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;
   color:#444;text-align:right;line-height:1.6;
   transition:color 0.3s ease;
 }
 .intro-bar{
-  position:absolute;bottom:0;left:0;height:2px;z-index:2;
-  background:linear-gradient(90deg,#EA580C,#ff8c42);
+  position:absolute;bottom:0;left:0;height:3px;z-index:4;
+  background:linear-gradient(90deg,#EA580C,#ff8c42,#EA580C);
+  background-size:200% 100%;
   width:0;transition:width 0.5s var(--ease);
+  box-shadow:0 0 10px rgba(234,88,12,.6),0 0 20px rgba(234,88,12,.2);
+  animation:barShimmer 2s linear infinite;
 }
-.intro-bar.done{height:3px;background:#EA580C;}
+@keyframes barShimmer{0%{background-position:0 0}100%{background-position:200% 0}}
+.intro-bar.done{height:3px;box-shadow:0 0 16px rgba(234,88,12,.9),0 0 40px rgba(234,88,12,.3);}
+/* flash on close */
+.intro-flash{
+  position:absolute;inset:0;z-index:10;pointer-events:none;
+  background:#fff;opacity:0;
+}
+.intro.closing .intro-flash{animation:flashOut .4s ease-out forwards;}
 
 /* ── SCROLL PROGRESS ── */
 .scroll-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#EA580C,#ff8c42);z-index:100;width:0;transition:width .15s linear,background var(--dur) var(--ease);mix-blend-mode:screen;}
@@ -179,6 +240,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 
 /* ── S1 HERO — CLIP-PATH CIRCLE REVEAL ── */
 #hero-wrap{height:400vh;position:relative;}
+@media(max-width:768px),(hover:none){#hero-wrap{height:180vh;}}
 #hero{position:sticky;top:0;height:100vh;overflow:hidden;min-height:unset;scroll-snap-align:none;padding:0;display:flex;align-items:center;justify-content:center;background:#030303;}
 #hero::after{
   content:'';position:absolute;inset:-50%;z-index:4;pointer-events:none;
@@ -856,6 +918,10 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
 
 <!-- INTRO — MAX PRO -->
 <div class="intro" id="intro">
+  <div class="intro-bar-top"></div>
+  <div class="intro-bar-bot"></div>
+  <div class="intro-scanline"></div>
+  <div class="intro-flash"></div>
   <div class="intro-logo" id="intro-logo"><span>SF<span class="intro-dot">.</span></span></div>
   <div class="intro-name" id="intro-client-name"></div>
   <div class="intro-sub">PREPARANDO TU ECOSISTEMA</div>
@@ -1011,6 +1077,7 @@ let UNITY_CLIENT_ID = null;
 
 // ── INTRO — letter by letter ──
 const introNameEl = document.getElementById('intro-client-name');
+introNameEl.setAttribute('data-text', CLIENT);
 CLIENT.split('').forEach((ch, i) => {
   const span = document.createElement('span');
   span.textContent = ch === ' ' ? '\u00A0' : ch;
@@ -1098,10 +1165,13 @@ function closeIntro() {
   setTimeout(() => {
     const intro = document.getElementById('intro');
     if (!intro) return;
-    intro.classList.add('out');
-    document.body.classList.add('ready');
-    setTimeout(() => intro.remove(), 800);
-  }, 600);
+    intro.classList.add('closing');
+    setTimeout(() => {
+      intro.classList.add('out');
+      document.body.classList.add('ready');
+      setTimeout(() => intro.remove(), 700);
+    }, 180);
+  }, 500);
 }
 
 function tryCloseIntro() {
