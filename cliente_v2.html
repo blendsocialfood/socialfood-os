@@ -8,7 +8,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;scroll-snap-type:y proximity;}
-body{font-family:'Poppins',sans-serif;background:#030303;color:#f5f5f5;overflow-x:hidden;overflow-y:hidden;cursor:none;}
+body{font-family:'Poppins',sans-serif;background:#030303;color:#f5f5f5;overflow-x:hidden;cursor:none;}
+@media(hover:none),(pointer:coarse){body,a,button,.team-panel,.cflow-card,.top-post,.slider-nav,.fab,.modal-close{cursor:auto!important;}.cursor-dot,.cursor-ring{display:none!important;}}
 body.ready{overflow-y:auto;}
 :root{--ease:cubic-bezier(0.65, 0.05, 0, 1);--dur:0.75s;}
 a,button,.team-panel,.cflow-card,.top-post,.slider-nav,.fab,.modal-close{cursor:none;}
@@ -897,7 +898,7 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
   <div class="team-header">
     <div class="sec-label rv">TU EQUIPO</div>
     <div class="sec-title rv rv-d1" style="margin-bottom:0;">Quiénes mueven tu marca</div>
-    <div class="team-subtitle rv rv-d2">Pasa el mouse para descubrir quién es quién</div>
+    <div class="team-subtitle rv rv-d2" id="team-hint">Pasa el mouse para descubrir quién es quién</div>
   </div>
   <div class="team-strip" id="team-strip"></div>
 </section>
@@ -1940,19 +1941,27 @@ loadAll();
 // ── CUSTOM CURSOR ──
 const curDot = document.getElementById('cursor-dot');
 const curRing = document.getElementById('cursor-ring');
+const isTouchDevice = window.matchMedia('(hover:none),(pointer:coarse)').matches;
+
+// Ajustar hint de equipo según dispositivo
+const teamHint = document.getElementById('team-hint');
+if (teamHint && isTouchDevice) teamHint.textContent = 'Toca para descubrir quién es quién';
+
 let curX = 0, curY = 0, ringX = 0, ringY = 0;
 let ringRafId = null;
-document.addEventListener('mousemove', e => {
-  curX = e.clientX; curY = e.clientY;
-  curDot.style.left = curX + 'px'; curDot.style.top = curY + 'px';
-});
-function ringLoop() {
-  ringX += (curX - ringX) * 0.12;
-  ringY += (curY - ringY) * 0.12;
-  curRing.style.left = ringX + 'px'; curRing.style.top = ringY + 'px';
+if (!isTouchDevice) {
+  document.addEventListener('mousemove', e => {
+    curX = e.clientX; curY = e.clientY;
+    curDot.style.left = curX + 'px'; curDot.style.top = curY + 'px';
+  });
+  function ringLoop() {
+    ringX += (curX - ringX) * 0.12;
+    ringY += (curY - ringY) * 0.12;
+    curRing.style.left = ringX + 'px'; curRing.style.top = ringY + 'px';
+    ringRafId = requestAnimationFrame(ringLoop);
+  }
   ringRafId = requestAnimationFrame(ringLoop);
 }
-ringRafId = requestAnimationFrame(ringLoop);
 
 // Pause animations when tab not visible (fix memory/CPU)
 document.addEventListener('visibilitychange', () => {
