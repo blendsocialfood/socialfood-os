@@ -1021,6 +1021,16 @@ CLIENT.split('').forEach((ch, i) => {
 let introReady = false;
 let introMinTimeDone = false;
 let introImageDone = false;
+let introPendingImages = 0;
+
+function introImageLoaded() {
+  introPendingImages--;
+  if (introPendingImages <= 0) {
+    setLoaderProgress(95);
+    introImageDone = true;
+    tryCloseIntro();
+  }
+}
 const introBar = document.getElementById('intro-bar');
 const introPct = document.getElementById('intro-pct');
 const introStatus = document.getElementById('intro-status');
@@ -1232,17 +1242,16 @@ function renderHero(unity, copilot) {
   }
   if (imgUrl) {
     setLoaderProgress(80);
+    introPendingImages++;
     const img = new Image();
     img.onload = () => {
       hp.style.backgroundImage = `url(${imgUrl})`;
       hp.classList.add('loaded');
-      setLoaderProgress(95);
-      introImageDone = true;
-      tryCloseIntro();
+      introImageLoaded();
     };
-    img.onerror = () => { setLoaderProgress(95); introImageDone = true; tryCloseIntro(); };
+    img.onerror = () => introImageLoaded();
     img.src = imgUrl;
-    setTimeout(() => { setLoaderProgress(95); introImageDone = true; tryCloseIntro(); }, 8000);
+    setTimeout(() => { if (!introImageDone) { introPendingImages = 1; introImageLoaded(); } }, 8000);
   } else {
     setLoaderProgress(95);
     introImageDone = true; tryCloseIntro();
@@ -1705,6 +1714,17 @@ function renderTeam() {
   ];
 
   const strip = document.getElementById('team-strip');
+
+  // Preload main profile photos — bloquea el intro hasta que carguen
+  team.forEach(m => {
+    introPendingImages++;
+    const img = new Image();
+    img.onload = () => introImageLoaded();
+    img.onerror = () => introImageLoaded();
+    img.src = `${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large`;
+  });
+  // Timeout máximo total: 10s
+  setTimeout(() => { if (!introImageDone) { introPendingImages = 1; introImageLoaded(); } }, 10000);
 
   // Preload talent photos so they appear instantly on hover
   team.forEach(m => {
