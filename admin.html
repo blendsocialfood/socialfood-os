@@ -495,6 +495,7 @@ const FIRSTTOUCH_URL = 'https://blend-first-touch-production.up.railway.app';
 const PRISM_URL = 'https://blend-prism-production.up.railway.app';
 const DROP_URL = 'https://blend-drop-production.up.railway.app';
 const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
+const FINANCE_URL = 'https://blend-finance-production.up.railway.app';
 const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
@@ -505,6 +506,7 @@ const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism' || role === 'unity_copilot_prism';
 const canDrop = role === 'admin' || role === 'unity';
 const canPixel = SF_USER.username === 'nico';
+const canFinance = role === 'admin';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -539,6 +541,10 @@ const navHTML = `
     <div class="nav-icon">&#9830;</div>
     <span class="nav-label">First Touch</span>
   </a>
+  ${canFinance ? `<a href="${FINANCE_URL+'?token='+token}" class="nav-logo" style="color:#EA580C">
+    <div class="nav-icon">&#9672;</div>
+    <span class="nav-label">Finance</span>
+  </a>` : ''}
 `;
 document.getElementById('nav-links').innerHTML = navHTML;
 
@@ -632,7 +638,22 @@ const dropCard = canDrop ? `
     </div>
   </a>` : '';
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + dropCard + firstTouchCard;
+const financeCard = canFinance ? `
+  <a href="${FINANCE_URL+'?token='+token}" class="module-card" style="border-color:rgba(234,88,12,0.3);">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon">&#9672;</div>
+    <div class="module-label">Finanzas</div>
+    <div class="module-name">Blend Finance</div>
+    <div class="module-desc">Gestión financiera integral: flujo de caja, clientes, equipo y Victoria CFO IA.</div>
+    <div class="module-features">
+      <span class="feature-tag">Cash Flow</span>
+      <span class="feature-tag">MRR</span>
+      <span class="feature-tag">Victoria IA</span>
+      <span class="feature-tag">Alertas</span>
+    </div>
+  </a>` : '';
+
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + dropCard + firstTouchCard + financeCard;
 </script>
 
 </body>
