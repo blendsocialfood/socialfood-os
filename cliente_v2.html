@@ -1923,7 +1923,7 @@ function renderSliderPieza() {
   wrap.innerHTML = `
     <div class="slider-counter"><span>${sliderIdx + 1}</span> / ${sliderPiezas.length}</div>
     <div class="slider-img-wrap" id="slider-img-wrap">
-      ${imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="this.outerHTML='<div class=slider-img-placeholder>📷</div>'" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>'}
+      ${imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="onSliderThumbError(this,'${p.drive_file_id}')" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>'}
       ${isCarousel ? '<div class="slider-carousel-dots" id="slider-dots"></div>' : ''}
     </div>
     <div class="slider-info">
@@ -2000,6 +2000,17 @@ async function enviarCambio(pid) {
     if (r.ok) location.reload();
     else alert('Error al enviar');
   } catch(e) { alert('Error de conexión'); }
+}
+
+// ── VIDEO THUMB PLACEHOLDER ──
+function onSliderThumbError(img, fileId) {
+  const ph = document.createElement('div');
+  ph.className = img.className;
+  ph.id = img.id || '';
+  ph.style.cssText = 'width:100%;height:100%;min-height:260px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;flex-direction:column;gap:10px;';
+  ph.innerHTML = '<div style="font-size:52px;color:#444;line-height:1;">▶</div><div style="color:#555;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Video</div>';
+  ph.onclick = () => openLightbox(fileId);
+  if (img.parentElement) img.parentElement.replaceChild(ph, img);
 }
 
 // ── LIGHTBOX ──
