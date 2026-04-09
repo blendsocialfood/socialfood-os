@@ -504,7 +504,7 @@ const canUnity = role === 'admin' || role === 'unity' || role === 'unity_copilot
 const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity_copilot' || role === 'unity_copilot_prism';
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism' || role === 'unity_copilot_prism';
-const canDrop = role === 'admin' || role === 'unity';
+const canDrop = role === 'admin' || role === 'unity' || SF_USER.username === 'paula';
 const canPixel = SF_USER.username === 'nico';
 const canFinance = role === 'admin';
 
