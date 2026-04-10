@@ -779,6 +779,10 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 }
 .slider-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all var(--dur) var(--ease);}
 .slider-dot.active{background:#EA580C;box-shadow:0 0 8px rgba(234,88,12,.4);}
+.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:none;color:#fff;font-size:20px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s;}
+.carousel-arrow:hover{background:rgba(234,88,12,.7);}
+.carousel-arrow.prev{left:10px;}
+.carousel-arrow.next{right:10px;}
 .slider-info{width:100%;padding:16px 0;text-align:center;}
 .slider-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;}
 .slider-desc{font-size:13px;color:#666;margin-bottom:6px;max-height:40px;overflow:hidden;}
@@ -1926,7 +1930,10 @@ function renderSliderPieza() {
       ${isCarousel
         ? `<img class="slider-img" id="slider-img" src="" style="display:none;" onclick="openCarouselLightbox()">`
         : (imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="onSliderThumbError(this,'${p.drive_file_id}')" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>')}
-      ${isCarousel ? '<div class="slider-carousel-dots" id="slider-dots"></div>' : ''}
+      ${isCarousel ? `
+        <button class="carousel-arrow prev" onclick="carouselNav(-1)">&#8249;</button>
+        <button class="carousel-arrow next" onclick="carouselNav(1)">&#8250;</button>
+        <div class="slider-carousel-dots" id="slider-dots"></div>` : ''}
     </div>
     <div class="slider-info">
       <div class="slider-title">${p.titulo || 'Pieza'}</div>
@@ -1968,6 +1975,12 @@ function loadCarouselImg(idx) {
     img.src = `${UNITY_URL}/api/drive/thumb/${file.id}?token=${TOKEN}&size=large`;
   }
   document.querySelectorAll('.slider-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+}
+
+function carouselNav(dir) {
+  if (!window._carouselFiles) return;
+  const next = Math.max(0, Math.min(window._carouselFiles.length - 1, sliderCarouselIdx + dir));
+  loadCarouselImg(next);
 }
 
 function openCarouselLightbox() {
