@@ -1923,7 +1923,9 @@ function renderSliderPieza() {
   wrap.innerHTML = `
     <div class="slider-counter"><span>${sliderIdx + 1}</span> / ${sliderPiezas.length}</div>
     <div class="slider-img-wrap" id="slider-img-wrap">
-      ${imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="onSliderThumbError(this,'${p.drive_file_id}')" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>'}
+      ${isCarousel
+        ? `<img class="slider-img" id="slider-img" src="" style="display:none;" onclick="openCarouselLightbox()">`
+        : (imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="onSliderThumbError(this,'${p.drive_file_id}')" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>')}
       ${isCarousel ? '<div class="slider-carousel-dots" id="slider-dots"></div>' : ''}
     </div>
     <div class="slider-info">
@@ -1961,8 +1963,17 @@ function loadCarouselImg(idx) {
   sliderCarouselIdx = idx;
   const file = window._carouselFiles[idx];
   const img = document.getElementById('slider-img');
-  if (img) img.src = `${UNITY_URL}/api/drive/thumb/${file.id}?token=${TOKEN}&size=large`;
+  if (img) {
+    img.style.display = '';
+    img.src = `${UNITY_URL}/api/drive/thumb/${file.id}?token=${TOKEN}&size=large`;
+  }
   document.querySelectorAll('.slider-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+}
+
+function openCarouselLightbox() {
+  if (!window._carouselFiles || !window._carouselFiles[sliderCarouselIdx]) return;
+  const fileId = window._carouselFiles[sliderCarouselIdx].id;
+  openLightbox(fileId);
 }
 
 function sliderNav(dir) {
