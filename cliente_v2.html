@@ -2003,7 +2003,7 @@ async function aprobar(pid) {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ token: TOKEN, pieza_id: pid, accion: 'aprobar', autor: CLIENT_NAME })
     });
-    if (r.ok) location.reload();
+    if (r.ok) afterFeedback(pid);
     else alert('Error al aprobar');
   } catch(e) { alert('Error de conexión'); }
 }
@@ -2021,9 +2021,29 @@ async function enviarCambio(pid) {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ token: TOKEN, pieza_id: pid, accion: 'cambios', texto: texto, autor: CLIENT_NAME })
     });
-    if (r.ok) location.reload();
+    if (r.ok) afterFeedback(pid);
     else alert('Error al enviar');
   } catch(e) { alert('Error de conexión'); }
+}
+
+function afterFeedback(pid) {
+  // Sacar la pieza del slider sin recargar la página
+  sliderPiezas = sliderPiezas.filter(p => p.id !== pid);
+  pendingPiezas = pendingPiezas.filter(p => p.id !== pid);
+  // Actualizar badge
+  const badge = document.getElementById('fab-badge');
+  if (pendingPiezas.length > 0) {
+    badge.textContent = pendingPiezas.length;
+  } else {
+    badge.style.display = 'none';
+  }
+  // Mostrar siguiente o mensaje de "todo aprobado"
+  if (sliderPiezas.length > 0) {
+    sliderIdx = Math.min(sliderIdx, sliderPiezas.length - 1);
+    renderSliderPieza();
+  } else {
+    openApproval(); // muestra "Todo aprobado"
+  }
 }
 
 // ── VIDEO THUMB PLACEHOLDER ──
