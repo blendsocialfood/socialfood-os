@@ -20,6 +20,7 @@ body::after{
   background:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
   opacity:.12;animation:noiseShift 4s steps(6) infinite;
 }
+@keyframes spin{to{transform:rotate(360deg);}}
 @keyframes noiseShift{
   0%{transform:translate(0,0)}16%{transform:translate(-2%,-1%)}33%{transform:translate(1%,2%)}
   50%{transform:translate(-1%,-2%)}66%{transform:translate(2%,1%)}83%{transform:translate(-1%,1%)}100%{transform:translate(0,0)}
@@ -668,8 +669,10 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
   position:absolute;inset:0;
   background:#111 center/cover no-repeat;
   filter:grayscale(1) brightness(.5);
-  transition:filter var(--dur) var(--ease), transform var(--dur) var(--ease);
+  opacity:0;
+  transition:filter var(--dur) var(--ease), transform var(--dur) var(--ease), opacity 0.5s ease;
 }
+.team-panel-photo.img-ready{opacity:1;}
 .team-panel:hover .team-panel-photo{
   filter:grayscale(0) brightness(.85);
   transform:scale(1.05);
@@ -1071,6 +1074,9 @@ footer{text-align:center;padding:40px 24px;color:#333;font-size:13px;letter-spac
   <a href="https://blendsocialfood.cl" target="_blank" class="blend-footer-link">blendsocialfood.cl</a>
 </div>
 
+<!-- LOGOUT -->
+<a href="/logout" style="position:fixed;top:16px;right:16px;z-index:200;font-size:11px;color:#333;text-decoration:none;padding:6px 12px;border:1px solid #1a1a1a;border-radius:8px;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='#888';this.style.borderColor='#333';" onmouseout="this.style.color='#333';this.style.borderColor='#1a1a1a';">Salir</a>
+
 <!-- FLOATING APPROVAL BUTTON -->
 <button class="fab" id="fab" onclick="openApproval()">
   <span>📩 Piezas pendientes</span>
@@ -1325,6 +1331,7 @@ async function loadAll() {
   renderUpcoming(unity);
   renderTeam();
   renderApproval(unity);
+  dataLoaded = true;
 
   setTimeout(() => { initReveals(); observeCounters(); }, 100);
 }
@@ -1833,10 +1840,11 @@ function renderTeam() {
     const talentHtml = m.talent ? `<div class="team-panel-talent">${m.talent}</div>` : '';
     const tPos = m.talentPos || 'center';
     const talentPhotoHtml = m.talentPhoto ? `<div class="team-panel-talent-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.talentPhoto}?token=${TOKEN}&size=large');background-position:${tPos}"></div>` : '';
+    const photoUrl = `${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large`;
     panel.innerHTML = `
       <div class="team-panel-line"></div>
       <div class="team-panel-index">0${i + 1}</div>
-      <div class="team-panel-photo" style="background-image:url('${UNITY_URL}/api/drive/thumb/${m.photo}?token=${TOKEN}&size=large');background-position:${m.pos}"></div>
+      <div class="team-panel-photo" id="tp-${i}" style="background-image:url('${photoUrl}');background-position:${m.pos}"></div>
       ${talentPhotoHtml}
       <div class="team-panel-gradient"></div>
       <div class="team-panel-info">
@@ -1845,10 +1853,15 @@ function renderTeam() {
         ${talentHtml}
       </div>`;
     strip.appendChild(panel);
+    // Fade in photo cuando cargue
+    const chk = new Image();
+    chk.onload = () => { const el = document.getElementById(`tp-${i}`); if (el) el.classList.add('img-ready'); };
+    chk.src = photoUrl;
   });
 }
 
 // ── APPROVAL SYSTEM ──
+let dataLoaded = false;
 let pendingPiezas = [];
 let allPiezas = [];
 function renderApproval(unity) {
@@ -1874,6 +1887,16 @@ function openApproval() {
   const modal = document.getElementById('modal-overlay');
   modal.classList.add('open');
   const countEl = document.getElementById('modal-count');
+
+  if (!dataLoaded) {
+    countEl.textContent = '';
+    document.getElementById('slider-wrap').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:16px;">
+        <div style="width:40px;height:40px;border:3px solid #333;border-top-color:#EA580C;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <div style="color:#555;font-size:13px;">Cargando piezas...</div>
+      </div>`;
+    return;
+  }
 
   if (pendingPiezas.length > 0) {
     sliderPiezas = pendingPiezas;
