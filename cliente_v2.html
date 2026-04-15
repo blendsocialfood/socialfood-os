@@ -1347,22 +1347,15 @@ function renderHero(unity, copilot) {
   // Background — preload then show
   let imgUrl = '';
   if (heroId) {
-    imgUrl = `${UNITY_URL}/api/drive/file/${heroId}?token=${TOKEN}`;
+    imgUrl = `${UNITY_URL}/api/drive/thumb/${heroId}?token=${TOKEN}&size=large`;
   } else if (ig && ig.posts && ig.posts.length) {
     const photo = ig.posts.find(p => p.media_type !== 'VIDEO');
     if (photo) imgUrl = photo.media_url;
   }
   setLoaderProgress(80);
-  // Recolectar URLs de equipo y esperar todo junto
-  const teamPhotos = [
-    '1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp','1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J',
-    '1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_','1W4Nf7YIEMfzmH7EGcNmiXLczqc5inx6R',
-    '1b89o7ixG5gx2d-TxV_8Dr21dKWMhw-Wp','1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz',
-    '11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM'
-  ].map(id => `${UNITY_URL}/api/drive/thumb/${id}?token=${TOKEN}&size=large`);
-
-  const allUrls = imgUrl ? [imgUrl, ...teamPhotos] : teamPhotos;
-  waitForImages(allUrls).then(() => onImagesReady(hp, imgUrl));
+  // Solo esperar hero — fotos de equipo tienen fade-in propio, no bloquean intro
+  const heroUrls = imgUrl ? [imgUrl] : [];
+  waitForImages(heroUrls).then(() => onImagesReady(hp, imgUrl));
 
   if (!imgUrl) {
     // Sin hero, igual esperar fotos equipo
