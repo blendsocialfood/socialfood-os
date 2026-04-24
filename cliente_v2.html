@@ -774,8 +774,13 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
   flex:1;width:100%;position:relative;display:flex;align-items:center;justify-content:center;
   background:#0a0a0a;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.06);
 }
-.slider-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;}
+.slider-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;opacity:0;transition:opacity .25s ease;}
+.slider-img.loaded{opacity:1;}
 .slider-img-placeholder{color:#333;font-size:48px;}
+.slider-loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0a0a0a;z-index:2;pointer-events:none;transition:opacity .2s ease;}
+.slider-loader.hidden{opacity:0;}
+.slider-loader-spin{width:36px;height:36px;border:3px solid #222;border-top-color:#EA580C;border-radius:50%;animation:spin .8s linear infinite;}
+.slider-loader-text{color:#555;font-size:12px;letter-spacing:.5px;}
 .slider-carousel-dots{
   display:flex;gap:6px;justify-content:center;
   position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
@@ -1943,9 +1948,10 @@ function renderSliderPieza() {
   wrap.innerHTML = `
     <div class="slider-counter"><span>${sliderIdx + 1}</span> / ${sliderPiezas.length}</div>
     <div class="slider-img-wrap" id="slider-img-wrap">
+      ${(isCarousel || imgSrc) ? `<div class="slider-loader" id="slider-loader"><div class="slider-loader-spin"></div><div class="slider-loader-text">Cargando…</div></div>` : ''}
       ${isCarousel
-        ? `<img class="slider-img" id="slider-img" src="" style="display:none;" onclick="openCarouselLightbox()">`
-        : (imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onerror="onSliderThumbError(this,'${p.drive_file_id}')" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>')}
+        ? `<img class="slider-img" id="slider-img" src="" style="display:none;" onload="onSliderImgLoad()" onerror="document.getElementById('slider-loader')?.classList.add('hidden')" onclick="openCarouselLightbox()">`
+        : (imgSrc ? `<img class="slider-img" id="slider-img" src="${imgSrc}" onload="onSliderImgLoad()" onerror="onSliderThumbError(this,'${p.drive_file_id}')" onclick="openLightbox('${p.drive_file_id}')">` : '<div class="slider-img-placeholder">📷</div>')}
       ${isCarousel ? `
         <button class="carousel-arrow prev" onclick="carouselNav(-1)">&#8249;</button>
         <button class="carousel-arrow next" onclick="carouselNav(1)">&#8250;</button>
@@ -1981,12 +1987,26 @@ function renderSliderPieza() {
   document.getElementById('slider-next').disabled = sliderIdx >= sliderPiezas.length - 1;
 }
 
+function onSliderImgLoad() {
+  const img = document.getElementById('slider-img');
+  const loader = document.getElementById('slider-loader');
+  if (img) img.classList.add('loaded');
+  if (loader) loader.classList.add('hidden');
+}
+function showSliderLoader() {
+  const img = document.getElementById('slider-img');
+  const loader = document.getElementById('slider-loader');
+  if (img) img.classList.remove('loaded');
+  if (loader) loader.classList.remove('hidden');
+}
+
 function loadCarouselImg(idx) {
   if (!window._carouselFiles) return;
   sliderCarouselIdx = idx;
   const file = window._carouselFiles[idx];
   const img = document.getElementById('slider-img');
   if (img) {
+    showSliderLoader();
     img.style.display = '';
     img.src = `${UNITY_URL}/api/drive/thumb/${file.id}?token=${TOKEN}&size=large`;
   }
@@ -2064,10 +2084,12 @@ function afterFeedback(pid) {
 
 // ── VIDEO THUMB PLACEHOLDER ──
 function onSliderThumbError(img, fileId) {
+  const loader = document.getElementById('slider-loader');
+  if (loader) loader.classList.add('hidden');
   const ph = document.createElement('div');
   ph.className = img.className;
   ph.id = img.id || '';
-  ph.style.cssText = 'width:100%;height:100%;min-height:260px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;flex-direction:column;gap:10px;';
+  ph.style.cssText = 'width:100%;height:100%;min-height:260px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;flex-direction:column;gap:10px;opacity:1;';
   ph.innerHTML = '<div style="font-size:52px;color:#444;line-height:1;">▶</div><div style="color:#555;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Video</div>';
   ph.onclick = () => openLightbox(fileId);
   if (img.parentElement) img.parentElement.replaceChild(ph, img);
