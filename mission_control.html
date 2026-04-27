@@ -1164,7 +1164,8 @@ function setupNav() {
   const canFirstTouch = role === 'admin';
   const canPrism = ['admin','unity_prism'].includes(role);
   const canDrop = ['admin','unity'].includes(role);
-  const canPixel = SF_USER.username === 'nico';
+  const PIXEL_USERS = new Set(['nico', 'cris', 'paula', 'juan', 'seba', 'vale']);
+  const canPixel = PIXEL_USERS.has(SF_USER.username);
 
   document.getElementById('nav-links').innerHTML = `
     <a href="/admin" class="nav-logo nav-sf">
