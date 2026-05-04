@@ -505,8 +505,7 @@ const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity_cop
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism' || role === 'unity_copilot_prism';
 const canDrop = role === 'admin' || role === 'unity' || SF_USER.username === 'paula';
-const PIXEL_USERS = new Set(['nico', 'cris', 'paula', 'juan', 'seba', 'vale']);
-const canPixel = PIXEL_USERS.has(SF_USER.username);
+const canPixel = role && role !== 'cliente';
 const canFinance = role === 'admin';
 
 // Greeting
