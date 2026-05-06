@@ -496,16 +496,19 @@ const PRISM_URL = 'https://blend-prism-production.up.railway.app';
 const DROP_URL = 'https://blend-drop-production.up.railway.app';
 const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
 const FINANCE_URL = 'https://blend-finance-production.up.railway.app';
+const FROG_URL = 'https://blend-frog-production.up.railway.app';
 const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
 const token = SF_USER.token;
+const frogToken = SF_USER.frog_token;
 const canUnity = role === 'admin' || role === 'unity' || role === 'unity_copilot' || role === 'unity_prism' || role === 'unity_copilot_prism';
 const canCopilot = role === 'admin' || role === 'copilot' || role === 'unity_copilot' || role === 'unity_copilot_prism';
 const canFirstTouch = role === 'admin';
 const canPrism = role === 'admin' || role === 'unity_prism' || role === 'unity_copilot_prism';
 const canDrop = role === 'admin' || role === 'unity' || SF_USER.username === 'paula';
 const canPixel = role && role !== 'cliente';
+const canFrog = role && role !== 'cliente';
 const canFinance = role === 'admin';
 
 // Greeting
@@ -532,6 +535,10 @@ const navHTML = `
   <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}" ${!canPixel ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
     <div class="nav-icon">&#10022;</div>
     <span class="nav-label">Pixel</span>
+  </a>
+  <a href="${canFrog ? FROG_URL+'/sso?t='+frogToken : '#'}" target="_blank" class="nav-logo nav-frog ${canFrog ? '' : 'disabled'}" ${!canFrog ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
+    <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 64 64"><path fill="#22C55E" d="M 32 8 C 23 8, 16 13, 14 22 C 9 23, 5 28, 5 35 C 5 47, 16 56, 32 56 C 48 56, 59 47, 59 35 C 59 28, 55 23, 50 22 C 48 13, 41 8, 32 8 Z"/><circle cx="20" cy="20" r="7" fill="#fff"/><circle cx="21" cy="21" r="3.5" fill="#0a0a0a"/><circle cx="44" cy="20" r="7" fill="#fff"/><circle cx="43" cy="21" r="3.5" fill="#0a0a0a"/></svg></div>
+    <span class="nav-label">Frog</span>
   </a>
   <a href="${canDrop ? DROP_URL+'?token='+token : '#'}" class="nav-logo nav-drop ${canDrop ? '' : 'disabled'}" style="${canDrop ? '' : 'display:none;'}">
     <div class="nav-icon">&#128640;</div>
@@ -609,6 +616,32 @@ const pixelCard = `
     </div>
   </a>`;
 
+const frogCard = `
+  <a href="${canFrog ? FROG_URL+'/sso?t='+frogToken : '#'}" target="_blank" class="module-card card-frog ${canFrog ? '' : 'disabled'}" ${!canFrog ? 'style="opacity:0.4;pointer-events:none;position:relative;"' : ''} style="--card-accent:#22C55E;">
+    <div class="module-arrow">${canFrog ? '&#8599;' : ''}</div>
+    <div class="module-icon" style="font-size:28px;">
+      <svg width="32" height="32" viewBox="0 0 64 64" style="vertical-align:middle;">
+        <defs>
+          <linearGradient id="frogIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4ADE80"/><stop offset="55%" stop-color="#22C55E"/><stop offset="100%" stop-color="#10B981"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#frogIconGrad)" d="M 32 8 C 23 8, 16 13, 14 22 C 9 23, 5 28, 5 35 C 5 47, 16 56, 32 56 C 48 56, 59 47, 59 35 C 59 28, 55 23, 50 22 C 48 13, 41 8, 32 8 Z"/>
+        <circle cx="20" cy="20" r="7.5" fill="#fff"/><circle cx="21" cy="21" r="4" fill="#0a0a0a"/><circle cx="22.5" cy="19.5" r="1.4" fill="#fff"/>
+        <circle cx="44" cy="20" r="7.5" fill="#fff"/><circle cx="43" cy="21" r="4" fill="#0a0a0a"/><circle cx="44.5" cy="19.5" r="1.4" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="module-label">Análisis IG</div>
+    <div class="module-name">Blend Frog</div>
+    <div class="module-desc">Rating sintetico 0-100 + 5 sub-scores + paleta + recomendaciones para perfiles de Instagram.</div>
+    <div class="module-features">
+      <span class="feature-tag">9 perfiles trackeados</span>
+      <span class="feature-tag">On-demand</span>
+      <span class="feature-tag">Gemini Vision</span>
+      <span class="feature-tag">Alertas</span>
+    </div>
+  </a>`;
+
 const firstTouchCard = `
   <a href="${canFirstTouch ? FIRSTTOUCH_URL+'?token='+token : '#'}" class="module-card card-firsttouch ${canFirstTouch ? '' : 'disabled'}">
     <div class="module-arrow">&#8599;</div>
@@ -653,7 +686,7 @@ const financeCard = canFinance ? `
     </div>
   </a>` : '';
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + dropCard + firstTouchCard + financeCard;
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard;
 </script>
 
 </body>

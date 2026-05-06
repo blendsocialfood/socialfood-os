@@ -27,6 +27,13 @@ def generate_token(username, role):
     sig = hmac.new(AUTH_SECRET.encode(), msg.encode(), hashlib.sha256).hexdigest()[:16]
     return f"{username}:{role}:{ts}:{sig}"
 
+
+def generate_frog_token():
+    """Token compatible con Frog /sso?t=<ts>.<sha256(secret,ts)> max 60s."""
+    ts = str(int(time.time()))
+    sig = hmac.new(AUTH_SECRET.encode(), ts.encode(), hashlib.sha256).hexdigest()
+    return f"{ts}.{sig}"
+
 def verify_token(token, max_age=300):
     try:
         parts = token.split(':')
@@ -117,9 +124,10 @@ def admin():
     if 'user' not in session:
         return redirect('/login')
     token = generate_token(session['user'], session['role'])
+    frog_token = generate_frog_token()
     with open('admin.html', 'r') as f:
         html = f.read()
-    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token})
+    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token, "frog_token": frog_token})
     user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
     html = html.replace('</head>', user_script + '\n</head>')
     return html
@@ -143,9 +151,10 @@ def mission_control():
     if 'user' not in session:
         return redirect('/login')
     token = generate_token(session['user'], session['role'])
+    frog_token = generate_frog_token()
     with open('mission_control.html', 'r') as f:
         html = f.read()
-    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token})
+    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token, "frog_token": frog_token})
     user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
     html = html.replace('</head>', user_script + '\n</head>')
     return html

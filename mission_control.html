@@ -1155,16 +1155,19 @@ const FIRSTTOUCH_URL = 'https://blend-first-touch-production.up.railway.app';
 const PRISM_URL = 'https://blend-prism-production.up.railway.app';
 const DROP_URL = 'https://blend-drop-production.up.railway.app';
 const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
+const FROG_URL = 'https://blend-frog-production.up.railway.app';
 
 function setupNav() {
   const role = SF_USER.role;
   const token = SF_USER.token;
+  const frogToken = SF_USER.frog_token;
   const canUnity = ['admin','unity','unity_copilot','unity_prism'].includes(role);
   const canCopilot = ['admin','copilot','unity_copilot'].includes(role);
   const canFirstTouch = role === 'admin';
   const canPrism = ['admin','unity_prism'].includes(role);
   const canDrop = ['admin','unity'].includes(role);
   const canPixel = role && role !== 'cliente';
+  const canFrog = role && role !== 'cliente';
 
   document.getElementById('nav-links').innerHTML = `
     <a href="/admin" class="nav-logo nav-sf">
@@ -1190,6 +1193,10 @@ function setupNav() {
     <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}" ${!canPixel ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
       <div class="nav-icon">&#10022;</div>
       <span class="nav-label">Pixel</span>
+    </a>
+    <a href="${canFrog ? FROG_URL+'/sso?t='+frogToken : '#'}" target="_blank" class="nav-logo nav-frog ${canFrog ? '' : 'disabled'}" ${!canFrog ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
+      <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 64 64"><path fill="#22C55E" d="M 32 8 C 23 8, 16 13, 14 22 C 9 23, 5 28, 5 35 C 5 47, 16 56, 32 56 C 48 56, 59 47, 59 35 C 59 28, 55 23, 50 22 C 48 13, 41 8, 32 8 Z"/><circle cx="20" cy="20" r="7" fill="#fff"/><circle cx="21" cy="21" r="3.5" fill="#0a0a0a"/><circle cx="44" cy="20" r="7" fill="#fff"/><circle cx="43" cy="21" r="3.5" fill="#0a0a0a"/></svg></div>
+      <span class="nav-label">Frog</span>
     </a>
     <a href="${canDrop ? DROP_URL+'?token='+token : '#'}" class="nav-logo nav-drop ${canDrop ? '' : 'disabled'}" style="${canDrop ? '' : 'display:none;'}">
       <div class="nav-icon">&#128640;</div>
