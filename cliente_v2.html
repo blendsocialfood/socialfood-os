@@ -1256,7 +1256,7 @@ body.ready #portal-hub:not(.hidden){display:flex;}
         <div class="cv-kicker">Blend Covers</div>
         <div class="cv-title" id="cov-restname">Reservas atribuibles</div>
       </div>
-      <div class="cv-hint">Hero metric: la <b style="color:#EA580C;">reserva atribuida</b>. Abrí cada pieza para ver sus reservas.</div>
+      <div class="cv-hint">Las <b style="color:#EA580C;">reservas atribuidas</b> a tu contenido. Abre cada pieza para ver el detalle.</div>
     </div>
 
     <!-- HERO + EMBUDO -->
@@ -1296,7 +1296,7 @@ async function loadCovers() {
     }
     renderCovers(await r.json());
   } catch(e) {
-    document.getElementById('cov-funnel').innerHTML = '<div class="err">Backend Covers no disponible. ¿Está corriendo blend-reservas en :8011?</div>';
+    document.getElementById('cov-funnel').innerHTML = '<div class="err">No pudimos cargar tus reservas ahora. Inténtalo de nuevo en unos minutos.</div>';
   }
 }
 
