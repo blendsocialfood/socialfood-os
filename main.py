@@ -14,6 +14,8 @@ BOT_URL = 'https://web-production-76938.up.railway.app'
 PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app'
 PRISM_URL = 'https://blend-prism-production.up.railway.app'
 DROP_URL = 'https://blend-drop-production.up.railway.app'
+# Blend Covers backend (local en dev; Railway en prod). Override por env COVERS_URL.
+COVERS_URL = os.environ.get('COVERS_URL', 'http://localhost:8011')
 
 # Fallback: if First Touch is down, use these to avoid lockout
 USERS_FALLBACK = {
@@ -185,6 +187,39 @@ def health_check():
         results = dict(pool.map(check, services))
     return results
 
+# Dev-only: login mock como cliente para probar el portal sin Unity.
+# Activado solo si SFOS_DEV=1.
+@app.route('/dev-login-cliente/<slug>')
+def dev_login_cliente(slug):
+    if os.environ.get('SFOS_DEV') != '1':
+        return {'error': 'dev mode off'}, 403
+    session['user'] = slug
+    session['role'] = 'cliente'
+    session['name'] = 'Restaurante Demo'
+    session['client_name'] = 'Restaurante Demo'
+    return redirect('/cliente')
+
+
+# Dev-only: sirve cliente_v2.html con SF_USER mock SIN requerir sesión (para tests/captura).
+@app.route('/dev-cliente/<slug>')
+def dev_cliente(slug):
+    if os.environ.get('SFOS_DEV') != '1':
+        return {'error': 'dev mode off'}, 403
+    token = generate_token(slug, 'cliente')
+    with open('cliente_v2.html', 'r') as f:
+        html = f.read()
+    sf_user = json.dumps({"username": slug, "name": "Restaurante Demo",
+                          "role": "cliente", "token": token, "client_name": "Restaurante Demo"})
+    user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
+    html = html.replace('</head>', user_script + '\n</head>')
+    # Setear sesion temporal para que el proxy /api/covers/data autorice las llamadas del JS.
+    session['user'] = slug
+    session['role'] = 'cliente'
+    session['name'] = 'Restaurante Demo'
+    session['client_name'] = 'Restaurante Demo'
+    return html
+
+
 @app.route('/api/verify-token')
 def verify_token_endpoint():
     token = request.args.get('token', '')
@@ -192,6 +227,47 @@ def verify_token_endpoint():
     if result:
         return result
     return {'error': 'invalid token'}, 401
+
+
+# ===== Blend Covers — proxy autenticado por sesión Flask =====
+# El JS del portal pega aquí; nosotros llamamos al backend de Covers con AUTH_SECRET.
+@app.route('/api/covers/data')
+def covers_data_proxy():
+    if 'user' not in session:
+        return {'error': 'unauthorized'}, 401
+    # El cliente del portal usa su username como slug en Covers.
+    cliente = request.args.get('cliente') or session.get('user', '')
+    if not cliente:
+        return {'error': 'sin cliente'}, 400
+    try:
+        r = http_requests.get(
+            f'{COVERS_URL}/api/covers/data',
+            params={'cliente': cliente,
+                    'desde': request.args.get('desde', ''),
+                    'hasta': request.args.get('hasta', '')},
+            headers={'Authorization': f'Bearer {AUTH_SECRET}'},
+            timeout=8,
+        )
+        return (r.text, r.status_code, {'Content-Type': r.headers.get('Content-Type', 'application/json')})
+    except Exception as e:
+        return {'error': f'backend covers no disponible: {e}'}, 502
+
+
+@app.route('/api/covers/sentada', methods=['POST'])
+def covers_sentada_proxy():
+    if 'user' not in session:
+        return {'error': 'unauthorized'}, 401
+    body = request.get_json(silent=True) or {}
+    try:
+        r = http_requests.post(
+            f'{COVERS_URL}/api/covers/sentada',
+            json=body,
+            headers={'Authorization': f'Bearer {AUTH_SECRET}', 'Content-Type': 'application/json'},
+            timeout=8,
+        )
+        return (r.text, r.status_code, {'Content-Type': r.headers.get('Content-Type', 'application/json')})
+    except Exception as e:
+        return {'error': f'backend covers no disponible: {e}'}, 502
 
 def login_page(error=''):
     error_html = f'<div class="error">{error}</div>' if error else ''
