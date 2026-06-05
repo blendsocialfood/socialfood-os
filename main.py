@@ -99,6 +99,7 @@ def login():
                 session['role'] = 'cliente'
                 session['name'] = data['name']
                 session['client_name'] = data['client_name']
+                session['covers_slug'] = data.get('covers_slug') or ''
                 return redirect('/cliente')
         except Exception:
             pass
@@ -217,6 +218,7 @@ def dev_cliente(slug):
     session['role'] = 'cliente'
     session['name'] = 'Restaurante Demo'
     session['client_name'] = 'Restaurante Demo'
+    session['covers_slug'] = slug
     return html
 
 
@@ -235,8 +237,9 @@ def verify_token_endpoint():
 def covers_data_proxy():
     if 'user' not in session:
         return {'error': 'unauthorized'}, 401
-    # El cliente del portal usa su username como slug en Covers.
-    cliente = request.args.get('cliente') or session.get('user', '')
+    # El restaurante se identifica por su covers_slug (de Unity), no por el usuario
+    # de login. Server-side: el dueño solo ve SU restaurante (se ignora el ?cliente= del JS).
+    cliente = session.get('covers_slug') or session.get('user', '')
     if not cliente:
         return {'error': 'sin cliente'}, 400
     try:
