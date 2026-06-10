@@ -1416,11 +1416,23 @@ function pzRow(p) {
 function reservasDe(slug) {
   const rs = (COVDATA._byPieza && COVDATA._byPieza[slug]) || [];
   if (!rs.length) return '<div class="pz-empty">Sin reservas por esta pieza todavía.</div>';
-  return rs.map(r => '<div class="rv">'
-    + '<div><div class="rv-nm">' + escapeHtml(r.nombre) + ' · ' + r.personas + 'p</div>'
-    + '<div class="rv-meta">' + escapeHtml(r.email) + (r.telefono ? ' · ' + escapeHtml(r.telefono) : '') + '</div></div>'
-    + '<div class="rv-dt">' + escapeHtml(r.fecha) + '<br>' + escapeHtml(r.hora) + '</div>'
-    + '</div>').join('');
+  // Mapa id→label de las preguntas extra del form (para mostrar las respuestas)
+  const QL = {};
+  ((COVDATA.cliente && COVDATA.cliente.preguntas) || []).forEach(q => { QL[q.id] = q.label; });
+  return rs.map(r => {
+    let resp = '';
+    try {
+      const obj = r.respuestas ? JSON.parse(r.respuestas) : null;
+      if (obj) resp = Object.keys(obj).map(k =>
+        '<div class="rv-meta" style="color:#8a8a8a;">' + escapeHtml(QL[k] || k) + ': ' + escapeHtml(obj[k]) + '</div>').join('');
+    } catch(e) {}
+    return '<div class="rv">'
+      + '<div><div class="rv-nm">' + escapeHtml(r.nombre) + ' · ' + r.personas + 'p</div>'
+      + '<div class="rv-meta">' + escapeHtml(r.email) + (r.telefono ? ' · ' + escapeHtml(r.telefono) : '') + '</div>'
+      + resp + '</div>'
+      + '<div class="rv-dt">' + escapeHtml(r.fecha) + '<br>' + escapeHtml(r.hora) + '</div>'
+      + '</div>';
+  }).join('');
 }
 
 function togglePieza(id) { document.getElementById(id).classList.toggle('open'); }
