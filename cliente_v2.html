@@ -1163,7 +1163,14 @@ body.ready #portal-hub:not(.hidden){display:flex;}
   #view-covers{background:#030303;color:#f5f5f5;font-family:'Poppins',-apple-system,sans-serif;min-height:100vh;padding:80px 24px 80px;}
   #view-covers .cw{max-width:1080px;margin:0 auto;}
   #view-covers .cv-head{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #1C1C1C;padding-bottom:18px;margin-bottom:40px;gap:24px;flex-wrap:wrap;}
-  #view-covers .cv-kicker{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#EA580C;margin-bottom:10px;}
+  #view-covers .cv-kicker{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#E55420;margin-bottom:10px;}
+  #view-covers .cov-period{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+  #view-covers .pchip{font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#999;background:#141414;border:1px solid #242424;border-radius:8px;padding:8px 14px;cursor:pointer;transition:all .15s;}
+  #view-covers .pchip:hover{border-color:#555;color:#ddd;}
+  #view-covers .pchip.on{background:#1a0800;color:#E55420;border-color:#E55420;}
+  #view-covers .pdate{font-family:'Poppins',sans-serif;font-size:12px;color:#ddd;background:#141414;border:1px solid #242424;border-radius:8px;padding:7px 9px;color-scheme:dark;}
+  #view-covers .hero-metric .valor{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(17px,2.4vw,22px);letter-spacing:-.5px;color:#E55420;margin:2px 0 8px;}
+  #view-covers .hero-metric .valor small{display:block;font-size:11px;font-weight:500;letter-spacing:0;color:#777;margin-top:2px;}
   #view-covers .cv-title{font-family:'Poppins';font-weight:900;font-size:clamp(36px,5vw,52px);line-height:1;letter-spacing:-2px;color:#f5f5f5;}
   #view-covers .cv-hint{font-size:12px;font-weight:400;color:#6B6B6B;max-width:280px;line-height:1.5;}
   #view-covers .cv-hint b{color:#EA580C;font-weight:700;}
@@ -1259,11 +1266,26 @@ body.ready #portal-hub:not(.hidden){display:flex;}
       <div class="cv-hint">Las <b style="color:#EA580C;">reservas atribuidas</b> a tu contenido. Abre cada pieza para ver el detalle.</div>
     </div>
 
+    <!-- PERÍODO -->
+    <div class="cov-period" id="cov-period">
+      <button class="pchip" data-p="7d" onclick="setPeriodo('7d',this)">Últimos 7 días</button>
+      <button class="pchip" data-p="semana" onclick="setPeriodo('semana',this)">Esta semana</button>
+      <button class="pchip" data-p="mes" onclick="setPeriodo('mes',this)">Este mes</button>
+      <button class="pchip on" data-p="todo" onclick="setPeriodo('todo',this)">Todo</button>
+      <button class="pchip" data-p="custom" onclick="setPeriodo('custom',this)">Personalizado</button>
+      <span id="cov-custom" style="display:none;align-items:center;gap:6px;">
+        <input type="date" id="cov-desde" class="pdate" onchange="aplicarCustom()">
+        <span style="color:#666;font-size:12px;">→</span>
+        <input type="date" id="cov-hasta" class="pdate" onchange="aplicarCustom()">
+      </span>
+    </div>
+
     <!-- HERO + EMBUDO -->
     <div class="hero-grid sec">
       <div class="hero-metric">
         <div class="label">Reservas este período</div>
         <div class="num" id="cov-hero-num"><em>0</em></div>
+        <div class="valor" id="cov-valor" style="display:none;"></div>
         <div class="sub">Reservas atribuidas a una pieza de contenido. El "se sentó" llega en una 2ª etapa.</div>
       </div>
       <div class="funnel" id="cov-funnel"><div class="sk"></div></div>
@@ -1285,9 +1307,33 @@ body.ready #portal-hub:not(.hidden){display:flex;}
 <script>
 // ===== Blend Covers — lógica del dashboard =====
 let COVDATA = null;
+let COVRANGO = {desde:'', hasta:''};   // período activo (vacío = todo)
+
+function _fmtFecha(d){ return d.toISOString().slice(0,10); }
+function setPeriodo(p, btn){
+  document.querySelectorAll('#cov-period .pchip').forEach(b=>b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  const custom = document.getElementById('cov-custom');
+  custom.style.display = (p==='custom') ? 'inline-flex' : 'none';
+  const hoy = new Date();
+  if (p==='7d'){ const d=new Date(hoy); d.setDate(d.getDate()-6); COVRANGO={desde:_fmtFecha(d),hasta:_fmtFecha(hoy)}; }
+  else if (p==='semana'){ const d=new Date(hoy); const dow=(d.getDay()+6)%7; d.setDate(d.getDate()-dow); COVRANGO={desde:_fmtFecha(d),hasta:_fmtFecha(hoy)}; }
+  else if (p==='mes'){ const d=new Date(hoy.getFullYear(),hoy.getMonth(),1); COVRANGO={desde:_fmtFecha(d),hasta:_fmtFecha(hoy)}; }
+  else if (p==='todo'){ COVRANGO={desde:'',hasta:''}; }
+  else if (p==='custom'){ return; }   // espera a que elijan fechas
+  loadCovers();
+}
+function aplicarCustom(){
+  const de = document.getElementById('cov-desde').value, ha = document.getElementById('cov-hasta').value;
+  if (de && ha){ COVRANGO={desde:de,hasta:ha}; loadCovers(); }
+}
+
 async function loadCovers() {
   try {
-    const r = await fetch('/api/covers/data?cliente=' + encodeURIComponent(SF_USER.username), {credentials:'same-origin'});
+    const qs = new URLSearchParams({cliente: SF_USER.username});
+    if (COVRANGO.desde) qs.set('desde', COVRANGO.desde);
+    if (COVRANGO.hasta) qs.set('hasta', COVRANGO.hasta);
+    const r = await fetch('/api/covers/data?' + qs.toString(), {credentials:'same-origin'});
     if (!r.ok) {
       const txt = await r.text();
       document.getElementById('cov-funnel').innerHTML = '<div class="err">No pude cargar Covers: ' + txt + '</div>';
@@ -1306,6 +1352,14 @@ function renderCovers(d) {
   const t = d.totales || {};
   // Hero = reservas atribuidas (la sentada vuelve en la 2ª etapa)
   document.getElementById('cov-hero-num').innerHTML = '<em>' + (t.reservas || 0) + '</em>';
+  // Valor estimado generado = reservas × ticket promedio (si el local lo configuró)
+  const v = document.getElementById('cov-valor');
+  if (t.valor_estimado > 0) {
+    v.innerHTML = '≈ $' + t.valor_estimado.toLocaleString('es-CL') +
+      ' <small>valor estimado generado · ' + (t.reservas||0) + ' reservas × $' +
+      (t.ticket_promedio||0).toLocaleString('es-CL') + ' ticket promedio</small>';
+    v.style.display = 'block';
+  } else { v.style.display = 'none'; }
   // Embudo: clics -> reservas
   const max = Math.max(t.clics || 0, 1);
   const wR = (t.reservas || 0) / max * 100;
