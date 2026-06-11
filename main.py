@@ -256,6 +256,81 @@ def covers_data_proxy():
         return {'error': f'backend covers no disponible: {e}'}, 502
 
 
+# ===== Covers — entrada STAFF (hub admin → lista de clientes → panel del cliente) =====
+def _is_staff():
+    return 'user' in session and session.get('role') != 'cliente'
+
+
+@app.route('/admin/covers')
+def admin_covers_lista():
+    if not _is_staff():
+        return redirect('/login')
+    from html import escape as _esc
+    try:
+        r = http_requests.get(f'{COVERS_URL}/api/covers/clientes',
+                              headers={'Authorization': f'Bearer {AUTH_SECRET}'}, timeout=8)
+        clientes = r.json() if r.status_code == 200 else []
+    except Exception:
+        clientes = []
+    filas = ''.join(
+        f"<a class='cl' href='/admin/covers/{_esc(c['slug'])}?initial=covers'>"
+        f"<span class='nm'>{_esc(c['nombre'])}</span>"
+        f"<span class='rv'>{c['reservas']} reserva{'s' if c['reservas'] != 1 else ''}</span>"
+        f"<span class='go'>→</span></a>"
+        for c in clientes
+    ) or "<p style='color:#777;font-size:14px;'>No hay clientes en Covers todavía.</p>"
+    return f'''<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Covers — Clientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  body{{margin:0;background:#0B0B0B;color:#F5EFE6;font-family:'Poppins',sans-serif;min-height:100vh;padding:48px 24px;}}
+  .wrap{{max-width:640px;margin:0 auto;}}
+  .kicker{{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#E55420;margin-bottom:10px;}}
+  h1{{font-weight:900;letter-spacing:-2px;font-size:clamp(34px,6vw,52px);margin:0 0 6px;}}
+  .sub{{color:#9A9A9A;font-size:13px;margin-bottom:34px;}}
+  .cl{{display:flex;align-items:center;gap:14px;padding:18px 4px;border-bottom:1px solid #242424;text-decoration:none;color:#F5EFE6;transition:background .15s;}}
+  .cl:hover{{background:#141414;}}
+  .nm{{flex:1;font-weight:700;font-size:16px;}}
+  .rv{{color:#9A9A9A;font-size:12px;font-feature-settings:'tnum';}}
+  .go{{color:#E55420;font-weight:900;}}
+  .back{{display:inline-block;margin-bottom:26px;color:#9A9A9A;text-decoration:none;font-size:13px;}}
+  .back:hover{{color:#F5EFE6;}}
+</style></head><body><div class="wrap">
+  <a class="back" href="/admin">← Volver al hub</a>
+  <div class="kicker">Blend Covers</div>
+  <h1>Clientes</h1>
+  <div class="sub">Entra al panel de reservas de cualquier restaurante (vista del dueño).</div>
+  {filas}
+</div></body></html>'''
+
+
+@app.route('/admin/covers/<slug>')
+def admin_covers_panel(slug):
+    if not _is_staff():
+        return redirect('/login')
+    # Nombre real del cliente (para el header del panel)
+    nombre = slug
+    try:
+        r = http_requests.get(f'{COVERS_URL}/api/covers/clientes',
+                              headers={'Authorization': f'Bearer {AUTH_SECRET}'}, timeout=8)
+        for c in (r.json() if r.status_code == 200 else []):
+            if c.get('slug') == slug:
+                nombre = c.get('nombre') or slug
+                break
+    except Exception:
+        pass
+    # El proxy /api/covers/data usa session['covers_slug'] → el staff "mira como" este restaurante.
+    session['covers_slug'] = slug
+    token = generate_token(session['user'], session['role'])
+    with open('cliente_v2.html', 'r') as f:
+        html = f.read()
+    sf_user = json.dumps({"username": session['user'], "name": nombre,
+                          "role": "cliente", "token": token, "client_name": nombre})
+    user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
+    return html.replace('</head>', user_script + '\n</head>')
+
+
 @app.route('/api/covers/sentada', methods=['POST'])
 def covers_sentada_proxy():
     if 'user' not in session:

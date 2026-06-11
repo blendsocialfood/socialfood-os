@@ -515,6 +515,7 @@ const canDrop = role === 'admin' || role === 'unity' || SF_USER.username === 'pa
 const canPixel = role && role !== 'cliente';
 const canFrog = role && role !== 'cliente';
 const canFinance = role === 'admin';
+const canCovers = role && role !== 'cliente';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -691,7 +692,22 @@ const financeCard = canFinance ? `
     </div>
   </a>` : '';
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard;
+const coversCard = `
+  <a href="${canCovers ? '/admin/covers' : '#'}" class="module-card card-covers ${canCovers ? '' : 'disabled'}" style="--card-accent:#E55420;">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon" style="font-size:26px;">&#127919;</div>
+    <div class="module-label">Reservas</div>
+    <div class="module-name">Covers</div>
+    <div class="module-desc">Reservas atribuibles por restaurante: panel del dueño, piezas y valor generado.</div>
+    <div class="module-features">
+      <span class="feature-tag">Por cliente</span>
+      <span class="feature-tag">Reservas</span>
+      <span class="feature-tag">Atribución</span>
+      <span class="feature-tag">Valor generado</span>
+    </div>
+  </a>`;
+
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard + coversCard;
 </script>
 
 </body>
