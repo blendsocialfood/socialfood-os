@@ -1233,9 +1233,11 @@ body.ready #portal-hub:not(.hidden){display:flex;}
   #view-covers .cov-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
   #view-covers .cov-search{background:#141414;border:1px solid #1C1C1C;border-radius:9px;padding:9px 14px;font-size:13px;color:#f5f5f5;font-family:inherit;width:240px;max-width:100%;outline:none;}
   #view-covers .cov-search:focus{border-color:#EA580C;}
-  #view-covers .sub-h{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;margin:0 0 4px;}
+  #view-covers .sub-h{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;margin:0 0 4px;text-align:left;}
+  #view-covers .sec-collapse{text-align:left;}
+  #view-covers .pz-empty{text-align:left;}
   #view-covers .pz{border-bottom:1px solid #141414;}
-  #view-covers .pz-head{display:grid;grid-template-columns:1fr 60px 76px 100px 18px;gap:18px;align-items:center;padding:15px 2px;cursor:pointer;}
+  #view-covers .pz-head{display:grid;grid-template-columns:1fr 60px 76px 100px 18px;gap:18px;align-items:center;padding:15px 2px;cursor:pointer;text-align:left;}
   #view-covers .pz-head:hover{background:rgba(234,88,12,.04);}
   #view-covers .pz-cols{display:grid;grid-template-columns:1fr 60px 76px 100px 18px;gap:18px;padding:10px 2px 8px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a4a;border-bottom:1px solid #1a1a1a;}
   #view-covers .pz-cols span{text-align:right;}
@@ -1250,7 +1252,8 @@ body.ready #portal-hub:not(.hidden){display:flex;}
   #view-covers .pz.open .pz-caret{transform:rotate(90deg);color:#EA580C;}
   #view-covers .pz-reservas{display:none;padding:2px 0 18px;}
   #view-covers .pz.open .pz-reservas{display:block;}
-  #view-covers .rv{display:grid;grid-template-columns:1fr auto;gap:14px;padding:11px 14px;border-left:2px solid #1C1C1C;margin:6px 0;background:#0d0d0d;border-radius:0 8px 8px 0;align-items:center;}
+  /* OJO: .rv global del portal es una animación scroll-reveal (opacity:0) — resetearla aquí */
+  #view-covers .rv{display:grid;grid-template-columns:1fr auto;gap:14px;padding:11px 14px;border-left:2px solid #1C1C1C;margin:6px 0;background:#0d0d0d;border-radius:0 8px 8px 0;align-items:center;opacity:1;clip-path:none;transform:none;transition:none;text-align:left;}
   #view-covers .rv .rv-nm{font-weight:700;color:#f5f5f5;font-size:13px;}
   #view-covers .rv .rv-meta{font-size:11px;color:#6B6B6B;margin-top:3px;}
   #view-covers .rv .rv-dt{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:#9A9A9A;text-align:right;font-feature-settings:'tnum';line-height:1.45;}
