@@ -1235,14 +1235,17 @@ body.ready #portal-hub:not(.hidden){display:flex;}
   #view-covers .cov-search:focus{border-color:#EA580C;}
   #view-covers .sub-h{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;margin:0 0 4px;}
   #view-covers .pz{border-bottom:1px solid #141414;}
-  #view-covers .pz-head{display:grid;grid-template-columns:1fr auto auto 18px;gap:20px;align-items:center;padding:16px 2px;cursor:pointer;}
+  #view-covers .pz-head{display:grid;grid-template-columns:1fr 60px 76px 100px 18px;gap:18px;align-items:center;padding:15px 2px;cursor:pointer;}
   #view-covers .pz-head:hover{background:rgba(234,88,12,.04);}
+  #view-covers .pz-cols{display:grid;grid-template-columns:1fr 60px 76px 100px 18px;gap:18px;padding:10px 2px 8px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a4a;border-bottom:1px solid #1a1a1a;}
+  #view-covers .pz-cols span{text-align:right;}
+  #view-covers .pz-cols span:first-child{text-align:left;}
   #view-covers .pz-name{font-family:'Poppins';font-weight:700;color:#f5f5f5;font-size:14px;letter-spacing:-.2px;}
-  #view-covers .pz-slug{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;color:#4a4a4a;margin-top:3px;}
-  #view-covers .pz-metric{text-align:right;font-feature-settings:'tnum';min-width:54px;}
-  #view-covers .pz-metric .v{font-family:'Poppins';font-weight:700;color:#f5f5f5;font-size:16px;}
+  #view-covers .pz-sub{font-size:11px;color:#4a4a4a;margin-top:3px;}
+  #view-covers .pz-metric{text-align:right;font-feature-settings:'tnum';}
+  #view-covers .pz-metric .v{font-family:'Poppins';font-weight:700;color:#f5f5f5;font-size:15px;}
+  #view-covers .pz-metric .v.val{color:#E55420;}
   #view-covers .pz-metric .v.dim{color:#3a3a3a;font-weight:400;}
-  #view-covers .pz-metric .k{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#4a4a4a;margin-top:2px;}
   #view-covers .pz-caret{color:#4a4a4a;transition:transform .2s;font-size:11px;text-align:center;}
   #view-covers .pz.open .pz-caret{transform:rotate(90deg);color:#EA580C;}
   #view-covers .pz-reservas{display:none;padding:2px 0 18px;}
@@ -1298,6 +1301,7 @@ body.ready #portal-hub:not(.hidden){display:flex;}
         <input id="cov-search" class="cov-search" type="search" placeholder="Buscar pieza por nombre…" oninput="filtrarPiezas()">
       </div>
       <div class="sub-h">Activas</div>
+      <div class="pz-cols"><span>Pieza</span><span>Clics</span><span>Reservas</span><span>Valor</span><span></span></div>
       <div id="cov-activas"><div class="sk"></div></div>
       <div id="cov-inactivas-wrap"></div>
     </div>
@@ -1401,12 +1405,18 @@ function renderPiezas() {
 function pzRow(p) {
   const slug = p.slug || '';
   const id = 'pz-' + (slug || 'general');
+  // Valor generado por la pieza (reservas × ticket promedio) + última reserva
+  const ticket = ((COVDATA && COVDATA.totales) || {}).ticket_promedio || 0;
+  const valor = (p.reservas || 0) * ticket;
+  const rs = (COVDATA && COVDATA._byPieza && COVDATA._byPieza[slug]) || [];
+  const ult = rs.length ? 'Última reserva: ' + ((rs[0].creado || '').slice(0, 10) || rs[0].fecha) : 'Sin reservas aún';
   return '<div class="pz" id="' + id + '">'
     + '<div class="pz-head" onclick="togglePieza(\'' + id + '\')">'
     + '<div><div class="pz-name">' + escapeHtml(p.nombre || slug || 'General') + '</div>'
-    + (slug ? '<div class="pz-slug">' + escapeHtml(slug) + '</div>' : '') + '</div>'
-    + '<div class="pz-metric"><div class="v ' + (p.clicks?'':'dim') + '">' + p.clicks + '</div><div class="k">clics</div></div>'
-    + '<div class="pz-metric"><div class="v ' + (p.reservas?'':'dim') + '">' + p.reservas + '</div><div class="k">reservas</div></div>'
+    + '<div class="pz-sub">' + ult + '</div></div>'
+    + '<div class="pz-metric"><div class="v ' + (p.clicks?'':'dim') + '">' + p.clicks + '</div></div>'
+    + '<div class="pz-metric"><div class="v ' + (p.reservas?'':'dim') + '">' + p.reservas + '</div></div>'
+    + '<div class="pz-metric"><div class="v val ' + (valor?'':'dim') + '">' + (valor ? '$' + valor.toLocaleString('es-CL') : '—') + '</div></div>'
     + '<div class="pz-caret">▶</div>'
     + '</div>'
     + '<div class="pz-reservas">' + reservasDe(slug) + '</div>'
