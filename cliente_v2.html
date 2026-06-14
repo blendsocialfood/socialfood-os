@@ -1026,8 +1026,7 @@ body.ready #portal-hub:not(.hidden){display:flex;}
       </div>
       <div class="hub-card-go">Revisar →</div>
     </div>
-    <div class="hub-card" onclick="showView('covers')">
-      <span class="hub-soon">Pronto</span>
+    <div class="hub-card" onclick="(function(){var s=(window.SF_USER&&SF_USER.covers_slug)||'';if(!s){alert('Covers aún no está activo para tu local.');return;}window.open('https://'+s+'.blendsocialfood.cl/dashboard','_blank');})()">
       <div class="hub-card-icon">🍽️</div>
       <div>
         <div class="hub-card-name">Covers</div>

@@ -144,7 +144,7 @@ def cliente():
     token = generate_token(session['user'], session['role'])
     with open('cliente_v2.html', 'r') as f:
         html = f.read()
-    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token, "client_name": session.get("client_name", "")})
+    sf_user = json.dumps({"username": session["user"], "name": session["name"], "role": session["role"], "token": token, "client_name": session.get("client_name", ""), "covers_slug": session.get("covers_slug", "")})
     user_script = f"<script>\nconst SF_USER = {sf_user};\n</script>"
     html = html.replace('</head>', user_script + '\n</head>')
     return html
