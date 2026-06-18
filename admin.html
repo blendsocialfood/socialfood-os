@@ -517,6 +517,7 @@ const DROP_URL = 'https://blend-drop-production.up.railway.app';
 const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
 const FINANCE_URL = 'https://blend-finance-production.up.railway.app';
 const FROG_URL = 'https://blend-frog-production.up.railway.app';
+const BRANDBOOK_URL = 'https://brandbooks.blendsocialfood.cl';
 const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
@@ -531,6 +532,7 @@ const canPixel = role && role !== 'cliente';
 const canFrog = role && role !== 'cliente';
 const canFinance = role === 'admin';
 const canCovers = role && role !== 'cliente';
+const canBrandbook = role && role !== 'cliente';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -556,6 +558,10 @@ const navHTML = `
   <a href="${canCovers ? '/admin/covers' : '#'}" class="nav-logo nav-covers ${canCovers ? '' : 'disabled'}">
     <div class="nav-icon">&#127919;</div>
     <span class="nav-label">Covers</span>
+  </a>
+  <a href="${canBrandbook ? BRANDBOOK_URL+'?token='+token : '#'}" class="nav-logo nav-brandbook ${canBrandbook ? '' : 'disabled'}">
+    <div class="nav-icon">&#128214;</div>
+    <span class="nav-label">Brandbooks</span>
   </a>
   <a href="${canPixel ? PIXEL_URL+'?token='+token : '#'}" class="nav-logo nav-pixel ${canPixel ? '' : 'disabled'}" ${!canPixel ? 'style="opacity:0.35;pointer-events:none;"' : ''}>
     <div class="nav-icon">&#10022;</div>
@@ -726,7 +732,22 @@ const coversCard = `
     </div>
   </a>`;
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard + coversCard;
+const brandbookCard = `
+  <a href="${canBrandbook ? BRANDBOOK_URL+'?token='+token : '#'}" class="module-card card-brandbook ${canBrandbook ? '' : 'disabled'}" style="--card-accent:#E55420;">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon" style="font-size:26px;">&#128214;</div>
+    <div class="module-label">Marca</div>
+    <div class="module-name">Brandbooks</div>
+    <div class="module-desc">Genera el brandbook a medida de cada cliente en el onboarding: sube su material y la IA arma el sistema, el copy y el PDF.</div>
+    <div class="module-features">
+      <span class="feature-tag">Por cliente</span>
+      <span class="feature-tag">Logo + fonts</span>
+      <span class="feature-tag">Copy IA</span>
+      <span class="feature-tag">PDF</span>
+    </div>
+  </a>`;
+
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard + coversCard + brandbookCard;
 </script>
 
 </body>
