@@ -994,6 +994,7 @@ body.ready #portal-hub:not(.hidden){display:flex;}
 .view-back:hover{color:#fff;border-color:#333;}
 #fab{display:none!important;}
 #view-covers{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px;background:#030303;}
+#view-covers:not(.show){display:none;} /* el ID le ganaba a .portal-view{display:none} y quedaba visible al final del overview */
 .covers-icon{font-size:56px;margin-bottom:8px;}
 .covers-title{font-size:clamp(28px,6vw,44px);font-weight:800;letter-spacing:-1px;color:#fff;}
 .covers-dot{color:#EA580C;}
