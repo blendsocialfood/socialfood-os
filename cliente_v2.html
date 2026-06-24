@@ -1085,7 +1085,7 @@ body.ready #portal-hub:not(.hidden){display:flex;}
 <!-- S2: NUMBERS — PREMIUM DASHBOARD -->
 <section id="numbers">
   <div class="container">
-    <div class="sec-label rv">ESTE MES</div>
+    <div class="sec-label rv">TU INSTAGRAM</div>
     <div class="num-hero rv rv-d1">
       <div class="num-main counter" id="num-main" data-target="0">0</div>
       <div class="num-growth" id="num-growth"></div>
@@ -1773,13 +1773,12 @@ function renderHero(unity, copilot) {
     // Sin hero, igual esperar fotos equipo
   }
 
-  // Letter-by-letter text
-  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const mesLabel = meses[new Date().getMonth()];
-  const phrase = `${mesLabel} fue un gran mes para ${CLIENT}`;
-  const accentWord = CLIENT.toLowerCase();
+  // Letter-by-letter text — promesa de marca fija (sin tiempo verbal que se desfase con la fecha)
+  const phrase = `${CLIENT}: tus números y tu marca, en buenas manos`;
+  const nameWords = new Set(CLIENT.toLowerCase().split(/\s+/).filter(Boolean));
   heroRevealText.innerHTML = phrase.split(' ').map(w => {
-    const isAccent = w.toLowerCase() === accentWord || w.toLowerCase() === CLIENT.split(' ')[0].toLowerCase();
+    const clean = w.toLowerCase().replace(/[^0-9a-záéíóúñü]/gi, ''); // ignora ":" u otra puntuación pegada
+    const isAccent = nameWords.has(clean);
     const letters = w.split('').map(l => `<span class="letter">${l}</span>`).join('');
     return `<span class="word ${isAccent ? 'accent' : ''}">${letters}</span>`;
   }).join(' ');
@@ -1824,12 +1823,13 @@ function renderNumbers(copilot, unity) {
   mainEl.dataset.target = followers;
   mainEl.textContent = '0';
 
-  // Growth badge
+  // Badge: interacciones (likes + comentarios) de las últimas publicaciones — dato en vivo, sin serie temporal
+  const igPosts = ig && ig.posts ? ig.posts : [];
+  const totalInteractions = igPosts.reduce((s, p) => s + (p.like_count || 0) + (p.comments_count || 0), 0);
   const growthEl = document.getElementById('num-growth');
-  if (pctGrowth !== 0) {
-    const isPos = pctGrowth > 0;
-    growthEl.className = 'num-growth' + (isPos ? '' : ' negative');
-    growthEl.innerHTML = `${isPos ? '↑' : '↓'} ${isPos ? '+' : ''}${pctGrowth}%`;
+  if (totalInteractions > 0) {
+    growthEl.className = 'num-growth';
+    growthEl.innerHTML = `💬 ${totalInteractions.toLocaleString('es-CL')} interacciones`;
   } else if (meses > 0) {
     growthEl.innerHTML = `${meses} ${meses === 1 ? 'mes' : 'meses'} juntos`;
     growthEl.style.color = '#888';
@@ -1865,7 +1865,7 @@ function renderNumbers(copilot, unity) {
       <div class="num-card-icon">🎨</div>
       <div class="num-card-label">Contenido</div>
       <div class="num-card-val counter" data-target="${totalPiezas}">0</div>
-      <div class="num-card-sub">piezas creadas este mes</div>
+      <div class="num-card-sub">piezas de contenido este mes</div>
       <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${piezasBarPct}%"></div></div>
     </div>
   `;
@@ -1933,31 +1933,26 @@ function renderNumbers(copilot, unity) {
     });
   }
 
-  // Growth sparkline
-  if (growth && followersStart > 0 && daysTracked > 1) {
+  // Interacciones por publicación — datos REALES de los últimos posts (likes + comentarios)
+  const interByPost = igPosts.map(p => (p.like_count || 0) + (p.comments_count || 0)).reverse(); // antiguo → reciente
+  if (interByPost.length > 1) {
     const sparkEl = document.getElementById('num-spark');
     sparkEl.style.display = 'block';
-    // Generate synthetic sparkline points (we don't have daily data, simulate trend)
-    const points = [];
-    const steps = 8;
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const val = followersStart + (followersEnd - followersStart) * (t * t * (3 - 2 * t)); // smooth ease
-      const noise = (Math.random() - 0.5) * growthAbs * 0.15;
-      points.push(Math.round(val + (i > 0 && i < steps ? noise : 0)));
-    }
-    const min = Math.min(...points) * 0.998;
-    const max = Math.max(...points) * 1.002;
+    const n = interByPost.length;
+    const avgInter = Math.round(interByPost.reduce((a, b) => a + b, 0) / n);
+    const min = Math.min(...interByPost);
+    const max = Math.max(...interByPost);
+    const range = (max - min) || 1;
     const w = 100, h = 60;
-    const coords = points.map((v, i) => `${(i / steps) * w},${h - ((v - min) / (max - min)) * (h - 8) - 4}`);
+    const coords = interByPost.map((v, i) => `${(i / (n - 1)) * w},${h - ((v - min) / range) * (h - 8) - 4}`);
     const polyline = coords.join(' ');
     const areaCoords = `0,${h} ${polyline} ${w},${h}`;
     const last = coords[coords.length - 1];
 
     sparkEl.innerHTML = `
       <div class="num-spark-header">
-        <div class="num-spark-title">Crecimiento de seguidores</div>
-        <div class="num-spark-delta">${pctGrowth > 0 ? '+' : ''}${growthAbs.toLocaleString('es-CL')} (${pctGrowth > 0 ? '+' : ''}${pctGrowth}%)</div>
+        <div class="num-spark-title">Interacciones por publicación</div>
+        <div class="num-spark-delta">ø ${avgInter.toLocaleString('es-CL')} por publicación</div>
       </div>
       <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
         <defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
