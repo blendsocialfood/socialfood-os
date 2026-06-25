@@ -1746,6 +1746,11 @@ async function loadAll() {
   renderApproval(unity);
   dataLoaded = true;
 
+  // Si el cliente abrió Review antes de que cargaran los datos, el modal quedó
+  // mostrando "Cargando piezas..." — refrescarlo ahora con las piezas reales.
+  const _ov = document.getElementById('modal-overlay');
+  if (_ov && _ov.classList.contains('open')) openApproval();
+
   setTimeout(() => { initReveals(); observeCounters(); }, 100);
 }
 
