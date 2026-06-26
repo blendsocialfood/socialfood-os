@@ -523,6 +523,7 @@ const PIXEL_URL = 'https://heroic-enjoyment-production-4350.up.railway.app';
 const FINANCE_URL = 'https://blend-finance-production.up.railway.app';
 const FROG_URL = 'https://blend-frog-production.up.railway.app';
 const BRANDBOOK_URL = 'https://brandbooks.blendsocialfood.cl';
+const KPI_URL = 'https://blend-kpi-production.up.railway.app';
 const OS_URL = window.location.origin;
 
 const role = SF_USER.role;
@@ -538,6 +539,7 @@ const canFrog = role && role !== 'cliente';
 const canFinance = role === 'admin';
 const canCovers = role && role !== 'cliente';
 const canBrandbook = role && role !== 'cliente';
+const canKpi = role && role !== 'cliente';
 
 // Greeting
 document.getElementById('user-greeting').innerHTML = `Hola, <strong>${SF_USER.name}</strong>`;
@@ -563,6 +565,10 @@ const navHTML = `
   <a href="${canCovers ? '/admin/covers' : '#'}" class="nav-logo nav-covers ${canCovers ? '' : 'disabled'}">
     <div class="nav-icon">&#127919;</div>
     <span class="nav-label">Covers</span>
+  </a>
+  <a href="${canKpi ? KPI_URL+'?token='+token : '#'}" class="nav-logo nav-kpi ${canKpi ? '' : 'disabled'}">
+    <div class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#5a544c" stroke-width="3"/><path d="M12 3 a9 9 0 0 1 8.5 6" fill="none" stroke="#E55420" stroke-width="3" stroke-linecap="round"/></svg></div>
+    <span class="nav-label">KPI</span>
   </a>
   <a href="${canBrandbook ? BRANDBOOK_URL+'?token='+token : '#'}" class="nav-logo nav-brandbook ${canBrandbook ? '' : 'disabled'}">
     <div class="nav-icon">&#128214;</div>
@@ -752,7 +758,22 @@ const brandbookCard = `
     </div>
   </a>`;
 
-document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard + coversCard + brandbookCard;
+const kpiCard = `
+  <a href="${canKpi ? KPI_URL+'?token='+token : '#'}" class="module-card card-kpi ${canKpi ? '' : 'disabled'}" style="--card-accent:#E55420;">
+    <div class="module-arrow">&#8599;</div>
+    <div class="module-icon"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#3a3631" stroke-width="3"/><path d="M12 3 a9 9 0 0 1 8.5 6" fill="none" stroke="#E55420" stroke-width="3" stroke-linecap="round"/></svg></div>
+    <div class="module-label">Indicadores</div>
+    <div class="module-name">KPI</div>
+    <div class="module-desc">Score macro por cliente: resultado, margen de contenido (en vivo de Unity) y engagement, de un vistazo.</div>
+    <div class="module-features">
+      <span class="feature-tag">Score</span>
+      <span class="feature-tag">Embudo</span>
+      <span class="feature-tag">Por cliente</span>
+      <span class="feature-tag">Reunión</span>
+    </div>
+  </a>`;
+
+document.getElementById('modules').innerHTML = unityCard + copilotCard + prismCard + pixelCard + frogCard + dropCard + firstTouchCard + financeCard + coversCard + kpiCard + brandbookCard;
 </script>
 
 </body>
