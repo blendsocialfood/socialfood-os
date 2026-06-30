@@ -1817,10 +1817,12 @@ function renderNumbers(copilot, unity) {
   const daysTracked = growth ? (growth.days_tracked || 0) : 0;
 
   let meses = 0;
+  let dias = 0;
   if (client && client.fecha_inicio) {
     const inicio = new Date(client.fecha_inicio);
     const now = new Date();
     meses = Math.max(1, (now.getFullYear() - inicio.getFullYear()) * 12 + (now.getMonth() - inicio.getMonth()));
+    dias = Math.max(1, Math.floor((now - inicio) / 86400000)); // exacto, sin redondear por mes
   }
   const pctGrowth = followersStart > 0 ? Math.round(((followers - followersStart) / followersStart) * 100) : 0;
 
@@ -1845,42 +1847,33 @@ function renderNumbers(copilot, unity) {
 
   document.getElementById('num-main-sub').textContent = 'seguidores en Instagram';
 
-  // 3 Metric Cards — atmospheric
-  const engBarPct = Math.min(engagement * 20, 100);
-  const likesBarPct = Math.min((avgLikes / Math.max(followers * 0.05, 1)) * 100, 100);
-  const piezasTarget = client && client.graficas ? client.graficas : 12;
-  const piezasBarPct = Math.min((totalPiezas / piezasTarget) * 100, 100);
+  // 3 Metric Cards — números reales, sin barras inventadas
+  const totalLikes = igPosts.reduce((s, p) => s + (p.like_count || 0), 0);
+  const nPosts = igPosts.length;
 
+  // Card "Juntos" solo si el cliente tiene fecha de inicio cargada (si no, dias=0 → se omite)
+  const juntosCard = dias > 0 ? `
+    <div class="num-card">
+      <div class="num-card-icon">🤝</div>
+      <div class="num-card-label">Juntos</div>
+      <div class="num-card-val counter" data-target="${dias}">0</div>
+      <div class="num-card-sub">${dias === 1 ? 'día' : 'días'} con Blend</div>
+    </div>` : '';
   const cards = document.getElementById('num-cards');
   cards.innerHTML = `
     <div class="num-card">
-      <div class="num-card-icon">📊</div>
-      <div class="num-card-label">Engagement</div>
-      <div class="num-card-val counter" data-target="${engagement}" data-suffix="%" data-decimals="2">0%</div>
-      <div class="num-card-sub">tasa de interacción</div>
-      <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${engBarPct}%"></div></div>
-    </div>
-    <div class="num-card">
       <div class="num-card-icon">❤️</div>
-      <div class="num-card-label">Likes promedio</div>
-      <div class="num-card-val counter" data-target="${avgLikes}">0</div>
-      <div class="num-card-sub">por publicación</div>
-      <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${likesBarPct}%"></div></div>
+      <div class="num-card-label">Likes</div>
+      <div class="num-card-val counter" data-target="${totalLikes}">0</div>
+      <div class="num-card-sub">en los últimos ${nPosts} posts</div>
     </div>
     <div class="num-card">
       <div class="num-card-icon">🎨</div>
       <div class="num-card-label">Contenido</div>
       <div class="num-card-val counter" data-target="${totalPiezas}">0</div>
       <div class="num-card-sub">piezas de contenido este mes</div>
-      <div class="num-card-bar"><div class="num-card-bar-fill" data-width="${piezasBarPct}%"></div></div>
-    </div>
+    </div>${juntosCard}
   `;
-  // Animate bars on scroll
-  setTimeout(() => {
-    cards.querySelectorAll('.num-card-bar-fill').forEach(bar => {
-      bar.style.width = bar.dataset.width;
-    });
-  }, 800);
 
   // ADS section — Funnel visualization
   if (ads && (ads.reach || ads.spend)) {
@@ -2221,14 +2214,14 @@ function renderUpcoming(unity) {
 // ── TEAM — FILMSTRIP + TALENT REVEAL ──
 function renderTeam() {
   const team = [
-    { name:'Paula', role:'Coordinadora & Community', photo:'1dvcPUXwRoNq7KejapKnVjqUVwD4Po2Tp', pos:'center 8%', talent:'Actriz', talentPhoto:'1bLN7dEIamHSboBIWWGeW3zbbz16C-sX-', talentPos:'center 25%' },
+    { name:'Paula', role:'Coordinadora & Community', photo:'/team-paula.jpg', pos:'center 8%', talent:'Actriz', talentPhoto:'/team-paula-talent.jpg', talentPos:'center 25%' },
     { name:'Vale', role:'Audience Insights & Engagement', photo:'/team-vale.jpg', pos:'center 12%', talent:'Cheerleader', talentPhoto:'/team-vale-talent.jpg', talentPos:'center 22%' },
-    { name:'Juan', role:'Senior Designer', photo:'1F0ZnPXYxBKP97lHVFKjOJ88J5ltMdW1J', pos:'center 15%', talent:'Ilustrador', talentPhoto:'1L1Q8t82jKqlzF6VhN4mTvM3AczetCY2N', talentPos:'center 35%' },
-    { name:'Seba', role:'Especialista Ads', photo:'1xLMLhgXQUXj3HLuw5kRt-9n4IKCOn3w_', pos:'center 20%', talent:'DJ', talentPhoto:'1PAHTAcPB9N8rWmmjuhTdelzC9biQfzLm', talentPos:'center 40%' },
+    { name:'Juan', role:'Senior Designer', photo:'/team-juan.jpg', pos:'center 15%', talent:'Ilustrador', talentPhoto:'/team-juan-talent.jpg', talentPos:'center 35%' },
+    { name:'Seba', role:'Especialista Ads', photo:'/team-seba.jpg', pos:'center 20%', talent:'DJ', talentPhoto:'/team-seba-talent.jpg', talentPos:'center 40%' },
     { name:'Basti', role:'Audiovisual', photo:'/team-basti.jpg', pos:'center 18%', talent:'En vivo', talentPhoto:'/team-basti-talent.jpg', talentPos:'center 28%' },
     { name:'Enrique', role:'Diseñador', photo:'/team-enrique.jpg', pos:'center 8%', talent:'Profesor de modelación 3D', talentPhoto:'/team-enrique-talent.jpg', talentPos:'center 48%' },
-    { name:'Cris', role:'Co-Fundador & Operaciones', photo:'1g9NEXkUZrCeFIFer5wfjtqAWpHJXg1lz', pos:'center 20%', talent:'Arquero', talentPhoto:'1au6T4yYu4v85SQB8Q1RmV9U9FuJSWEse', talentPos:'center 40%' },
-    { name:'Nico', role:'Co-Fundador & Innovación', photo:'11hpIaMysvSiZV-ctr2IzV9h-MM9ZJoDM', pos:'center 18%', talent:'Downhill rider', talentPhoto:'1G9quOUhKG_L1rgAsnTVFnHC7IJUuq8Jh', talentPos:'center 62%' },
+    { name:'Cris', role:'Co-Fundador & Operaciones', photo:'/team-cris.jpg', pos:'center 20%', talent:'Arquero', talentPhoto:'/team-cris-talent.jpg', talentPos:'center 40%' },
+    { name:'Nico', role:'Co-Fundador & Innovación', photo:'/team-nico.jpg', pos:'center 18%', talent:'Downhill rider', talentPhoto:'/team-nico-talent.jpg', talentPos:'center 62%' },
   ];
 
   const strip = document.getElementById('team-strip');
