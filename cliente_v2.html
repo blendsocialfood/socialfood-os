@@ -2228,16 +2228,29 @@ function setupCflowNav() {
 function renderReviews(unity) {
   const reviews = unity && unity.reviews;
   const google = reviews && reviews.google;
-  if (google && google.rating) {
-    document.getElementById('rating-big').textContent = google.rating;
-    document.getElementById('rating-stars').textContent = '★'.repeat(Math.round(google.rating)) + '☆'.repeat(5 - Math.round(google.rating));
-    document.getElementById('rating-count').textContent = `Google Reviews · ${google.total || 0} reseñas`;
-  }
-
-  let allRevs = [];
-  if (google && google.reviews) allRevs.push(...google.reviews.filter(r => (r.rating||0) >= 4));
   const ta = reviews && reviews.tripadvisor;
-  if (ta && ta.reviews) allRevs.push(...ta.reviews.filter(r => (r.rating||0) >= 4));
+  const sec = document.getElementById('reviews-sec');
+
+  // Reseñas usables: nota >= 4 y con texto real (descarta basura scrapeada sin rating)
+  let allRevs = [];
+  if (google && Array.isArray(google.reviews)) allRevs.push(...google.reviews.filter(r => (r.rating||0) >= 4 && (r.text||'').trim()));
+  if (ta && Array.isArray(ta.reviews)) allRevs.push(...ta.reviews.filter(r => (r.rating||0) >= 4 && (r.text||'').trim()));
+  const hasRating = !!(google && google.rating);
+
+  // Sin nota ni reseñas reales → ocultar toda la sección (nada de "—" ni "sin reseñas")
+  if (!hasRating && !allRevs.length) { if (sec) sec.style.display = 'none'; return; }
+  if (sec) sec.style.display = '';
+
+  const big = document.getElementById('rating-big');
+  const stars = document.getElementById('rating-stars');
+  const count = document.getElementById('rating-count');
+  if (hasRating) {
+    big.textContent = google.rating;
+    stars.textContent = '★'.repeat(Math.round(google.rating)) + '☆'.repeat(5 - Math.round(google.rating));
+    count.textContent = `Google Reviews · ${google.total || 0} reseñas`;
+  } else {
+    big.textContent = ''; stars.textContent = ''; count.textContent = '';  // sin el "—" blanco
+  }
 
   document.getElementById('review-cards').innerHTML = allRevs.slice(0, 4).map(r => {
     const src = r.source === 'google' ? 'Google' : r.source === 'tripadvisor' ? 'TripAdvisor' : 'IG';
@@ -2247,7 +2260,7 @@ function renderReviews(unity) {
         <div class="review-text">"${(r.text||'').substring(0,200)}${(r.text||'').length>200?'...':''}"</div>
         <div class="review-author">${r.author||'Anónimo'} · ${'★'.repeat(Math.round(r.rating||0))}</div>
       </div>`;
-  }).join('') || '<p style="color:#555;font-size:13px;">Sin reseñas disponibles</p>';
+  }).join('');
 }
 
 // ── S6: GROWTH (merged into numbers section) ──
