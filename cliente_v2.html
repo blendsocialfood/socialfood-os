@@ -1719,35 +1719,43 @@ function observeCounters() {
 
 // ── DATA LOADING ──
 async function loadAll() {
-  // Stage 2: fetching data (30-60%)
   setLoaderProgress(40);
   const params = `token=${TOKEN}&client=${encodeURIComponent(CLIENT)}`;
-  const [unityRes, copilotRes] = await Promise.allSettled([
-    fetch(`${UNITY_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
-    fetch(`${COPILOT_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null),
-  ]);
-  setLoaderProgress(60);
-  const unity = unityRes.status === 'fulfilled' ? unityRes.value : null;
-  const copilot = copilotRes.status === 'fulfilled' ? copilotRes.value : null;
+  // Unity es lento (~12s: ClickUp + reseñas externas) y bloquearía toda la pantalla
+  // si esperáramos a las dos juntas. Disparamos en paralelo y renderizamos por etapas:
+  // primero lo de Copilot (rápido: hero, números, ads), y Unity rellena después.
+  const unityP = fetch(`${UNITY_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null);
+  const copilotP = fetch(`${COPILOT_URL}/api/client-portal?${params}`).then(r => r.json()).catch(() => null);
 
-  if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
-
-  // Stage 3: rendering + hero image (60-90%)
-  setLoaderProgress(70);
-  renderHero(unity, copilot);
-  renderNumbers(copilot, unity);
+  // Etapa 0 — inmediato (sin datos)
+  renderTeam();
   renderMarquee();
   renderMarqueeDivider();
-  // renderInvestment removed — funnel covers this
-  renderContent(unity, copilot);
-  renderReviews(unity);
-  renderUpcoming(unity);
-  renderTeam();
-  renderApproval(unity);
+
+  // Etapa 1 — Copilot (~3s): hero, números/ads, contenido
+  const copilot = await copilotP;
+  setLoaderProgress(70);
+  try {
+    renderHero(null, copilot);
+    renderNumbers(copilot, null);
+    renderContent(null, copilot);
+  } catch (e) { console.error('render Copilot:', e); }
+  setTimeout(() => { initReveals(); observeCounters(); }, 100);
+
+  // Etapa 2 — Unity (~12s): completa con datos del cliente (grilla, reseñas, próximos)
+  const unity = await unityP;
+  if (unity && unity.client) UNITY_CLIENT_ID = unity.client.id;
+  try {
+    renderHero(unity, copilot);
+    renderNumbers(copilot, unity);
+    renderContent(unity, copilot);
+    renderReviews(unity);
+    renderUpcoming(unity);
+    renderApproval(unity);
+  } catch (e) { console.error('render Unity:', e); }
   dataLoaded = true;
 
-  // Si el cliente abrió Review antes de que cargaran los datos, el modal quedó
-  // mostrando "Cargando piezas..." — refrescarlo ahora con las piezas reales.
+  // Si el cliente abrió Review antes de que cargara, refrescar el modal con las piezas reales.
   const _ov = document.getElementById('modal-overlay');
   if (_ov && _ov.classList.contains('open')) openApproval();
 
@@ -1881,6 +1889,7 @@ function renderNumbers(copilot, unity) {
     adsEl.style.display = 'block';
     const fmtK = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : n.toString();
     const fmtCLP = n => '$' + Math.round(n).toLocaleString('es-CL');
+    const fmtMoney2 = n => '$' + (n||0).toLocaleString('es-CL', {minimumFractionDigits: 2, maximumFractionDigits: 2}); // con decimales (CPM, costo por mil)
     const reach = ads.reach || 0;
     const impr = ads.impressions || 0;
     const clicks = ads.clicks || 0;
@@ -1894,7 +1903,7 @@ function renderNumbers(copilot, unity) {
 
     const steps = [
       { val: fmtCLP(spend), label: 'Invertido', desc: ads.period || 'últimos 7 días', raw: spend },
-      { val: fmtK(reach), label: 'Personas alcanzadas', desc: 'vieron tu marca', raw: reach, conv: `$${costPerReach.toFixed(0)} por persona alcanzada` },
+      { val: fmtK(reach), label: 'Personas alcanzadas', desc: 'vieron tu marca', raw: reach, conv: `${fmtMoney2(costPerReach*1000)} por cada mil personas` },
       { val: fmtK(impr), label: 'Impresiones totales', desc: 'veces que apareció tu marca', raw: impr },
       { val: fmtK(clicks), label: 'Clicks en tu anuncio', desc: 'interactuaron con tu contenido', raw: clicks, conv: `${clickRate.toFixed(1)}% de quienes te vieron` },
     ];
@@ -1917,7 +1926,7 @@ function renderNumbers(copilot, unity) {
     funnelHTML += '</div>';
     funnelHTML += `<div class="num-funnel-final">
       <div class="num-funnel-final-item"><div class="num-funnel-final-label">CTR</div><div class="num-funnel-final-val">${(ads.ctr || 0).toFixed(2)}%</div></div>
-      <div class="num-funnel-final-item"><div class="num-funnel-final-label">CPM</div><div class="num-funnel-final-val">${fmtCLP(ads.cpm || 0)}</div></div>
+      <div class="num-funnel-final-item"><div class="num-funnel-final-label">CPM</div><div class="num-funnel-final-val">${fmtMoney2(ads.cpm || 0)}</div></div>
       ${ads.leads ? '<div class="num-funnel-final-item"><div class="num-funnel-final-label">Leads</div><div class="num-funnel-final-val">' + ads.leads + '</div></div>' : ''}
     </div>`;
     adsEl.innerHTML = funnelHTML;
