@@ -600,6 +600,28 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
   cursor:pointer;transition:all var(--dur) var(--ease);
 }
 .cflow-dot.active{background:#EA580C;width:20px;border-radius:3px;}
+/* Flechas de navegación */
+.cflow-wrap{position:relative;}
+.cflow-nav{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:30;
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(20,16,12,.65);border:1px solid rgba(234,88,12,.35);
+  color:#fff;font-size:26px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);transition:all var(--dur) var(--ease);
+}
+.cflow-nav:hover{background:rgba(234,88,12,.25);border-color:#EA580C;transform:translateY(-50%) scale(1.08);}
+.cflow-prev{left:8px;}
+.cflow-next{right:8px;}
+/* Fondo de marca para cards sin imagen (en vez de negro) */
+.cflow-fallback{
+  position:absolute;inset:0;z-index:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:linear-gradient(150deg,#2a1206,#0f0805);
+}
+.cflow-card.has-img .cflow-fallback{display:none;}
+.cflow-fallback-fmt{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#EA580C;}
+.cflow-fallback-brand{font-size:13px;font-weight:800;color:#fff;opacity:.8;}
 
 @media(max-width:700px){
   .cflow-scene{height:300px;}
@@ -1112,9 +1134,13 @@ body.ready #portal-hub:not(.hidden){display:flex;}
     <div class="sec-sub rv rv-d1">Contenido creado y publicado para tu marca</div>
   </div>
   <div class="container rv rv-d2">
-    <div class="cflow-scene" id="cflow-scene">
-      <div class="cflow-track" id="cflow-track"></div>
-      <div class="cflow-reflection"></div>
+    <div class="cflow-wrap">
+      <button class="cflow-nav cflow-prev" id="cflow-prev" aria-label="Anterior">‹</button>
+      <div class="cflow-scene" id="cflow-scene">
+        <div class="cflow-track" id="cflow-track"></div>
+        <div class="cflow-reflection"></div>
+      </div>
+      <button class="cflow-nav cflow-next" id="cflow-next" aria-label="Siguiente">›</button>
     </div>
     <div class="cflow-dots" id="cflow-dots"></div>
   </div>
@@ -2102,13 +2128,20 @@ function renderContent(unity, copilot) {
   cflowItems = cflowItems.slice(0, 11);
   cflowIdx = Math.floor(cflowItems.length / 2);
 
-  // Create cards
+  // Create cards — precarga + fondo de marca si la imagen no carga (sin título interno)
   track.innerHTML = '';
   cflowItems.forEach((item, i) => {
     const card = document.createElement('div');
     card.className = 'cflow-card';
-    card.style.backgroundImage = `url('${item.url}')`;
-    card.innerHTML = `<div class="cflow-info"><div class="cflow-info-title">${item.title}</div>${item.meta ? `<div class="cflow-info-meta">${item.meta}</div>` : ''}</div>`;
+    card.style.backgroundImage = 'linear-gradient(150deg,#2a1206,#0f0805)';
+    card.style.backgroundSize = 'cover';
+    card.style.backgroundPosition = 'center';
+    card.innerHTML = `
+      <div class="cflow-fallback"><span class="cflow-fallback-fmt">${item.meta || 'Contenido'}</span><span class="cflow-fallback-brand">Social Food<span style="color:#EA580C">.</span></span></div>
+      <div class="cflow-info">${item.meta ? `<div class="cflow-info-meta">${item.meta}</div>` : ''}</div>`;
+    const pre = new Image();
+    pre.onload = () => { card.style.backgroundImage = `url('${item.url}')`; card.classList.add('has-img'); };
+    pre.src = item.url;
     card.addEventListener('click', () => {
       if (i === cflowIdx) {
         if (item.fileId) openLightbox(item.fileId);
@@ -2126,27 +2159,7 @@ function renderContent(unity, copilot) {
 
   layoutCflow();
 
-  // Drag / swipe
-  const scene = document.getElementById('cflow-scene');
-  let dragX = 0, dragging = false;
-  scene.addEventListener('mousedown', e => { dragX = e.clientX; dragging = true; });
-  scene.addEventListener('mousemove', e => { if (!dragging) return; });
-  scene.addEventListener('mouseup', e => {
-    if (!dragging) return; dragging = false;
-    const dx = e.clientX - dragX;
-    if (Math.abs(dx) > 40) {
-      cflowIdx = Math.max(0, Math.min(cflowItems.length - 1, cflowIdx + (dx < 0 ? 1 : -1)));
-      layoutCflow();
-    }
-  });
-  scene.addEventListener('mouseleave', () => { dragging = false; });
-
-  // Keyboard
-  document.addEventListener('keydown', e => {
-    if (!document.getElementById('cflow-scene')) return;
-    if (e.key === 'ArrowRight') { cflowIdx = Math.min(cflowItems.length - 1, cflowIdx + 1); layoutCflow(); }
-    if (e.key === 'ArrowLeft') { cflowIdx = Math.max(0, cflowIdx - 1); layoutCflow(); }
-  });
+  setupCflowNav();
 }
 
 function layoutCflow() {
@@ -2166,6 +2179,42 @@ function layoutCflow() {
     card.classList.toggle('active', offset === 0);
   });
   dots.forEach((d, i) => d.classList.toggle('active', i === cflowIdx));
+}
+
+let _cflowNavReady = false;
+function setupCflowNav() {
+  if (_cflowNavReady) return;  // montar listeners una sola vez (renderContent corre varias veces)
+  _cflowNavReady = true;
+  const scene = document.getElementById('cflow-scene');
+  if (!scene) return;
+  const move = (n) => { cflowIdx = Math.max(0, Math.min(cflowItems.length - 1, cflowIdx + n)); layoutCflow(); };
+  document.getElementById('cflow-prev')?.addEventListener('click', () => move(-1));
+  document.getElementById('cflow-next')?.addEventListener('click', () => move(1));
+  // Arrastre/swipe en vivo: mueve cards mientras arrastras (mouse + touch)
+  let anchorX = 0, dragging = false;
+  const onStart = (x) => { anchorX = x; dragging = true; };
+  const onMove = (x) => { if (!dragging) return; const d = x - anchorX; if (Math.abs(d) > 60) { move(d < 0 ? 1 : -1); anchorX = x; } };
+  const onEnd = () => { dragging = false; };
+  scene.addEventListener('mousedown', e => { e.preventDefault(); onStart(e.clientX); });
+  window.addEventListener('mousemove', e => onMove(e.clientX));
+  window.addEventListener('mouseup', onEnd);
+  scene.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
+  scene.addEventListener('touchmove', e => onMove(e.touches[0].clientX), { passive: true });
+  scene.addEventListener('touchend', onEnd);
+  // Rueda horizontal (trackpad) — sin atrapar el scroll vertical de la página
+  let wheelLock = false;
+  scene.addEventListener('wheel', e => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    if (wheelLock) return;
+    if (Math.abs(e.deltaX) > 6) { move(e.deltaX > 0 ? 1 : -1); wheelLock = true; setTimeout(() => { wheelLock = false; }, 220); }
+  }, { passive: false });
+  // Teclado
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('cflow-scene')) return;
+    if (e.key === 'ArrowRight') move(1);
+    if (e.key === 'ArrowLeft') move(-1);
+  });
 }
 
 // ── S5: REVIEWS ──
